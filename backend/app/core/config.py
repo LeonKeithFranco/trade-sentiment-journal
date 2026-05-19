@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -30,5 +30,5 @@ class _Settings(BaseSettings):
         case_sensitive=False,
     )
 
-    db: _DbSettings
-    app: _AppSettings
+    db: _DbSettings = Field(default_factory=_DbSettings)
+    app: _AppSettings = Field(default_factory=_AppSettings)
