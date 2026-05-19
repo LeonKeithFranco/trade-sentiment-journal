@@ -4,5 +4,8 @@ version = "0.1.0"
 description = "Backend workspace for the project."
 requires-python = ">=3.12"
 dependencies = [
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
     "fastapi[standard]>=0.136.1",
+    "sqlalchemy>=2.0.49",
 ]
