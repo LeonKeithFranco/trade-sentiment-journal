@@ -1,6 +1,6 @@
 [project]
 name = "frontend"
 version = "0.1.0"
-description = "Frontend worksapce for the project."
+description = "Frontend workspace for the project."
 requires-python = ">=3.12"
 dependencies = []
