@@ -1,0 +1,14 @@
+[project]
+name = "trade-sentiment-journal"
+version = "0.1.0"
+description = "A portfolio project for performing sentiment analysis on trading journal entries."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+    "backend",
+    "frontend",
+    "dl",
+]
