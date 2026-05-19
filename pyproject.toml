@@ -14,7 +14,7 @@ members = [
 ]
 
 [tool.ty.environment]
-root = ["./ml", "./backend", "./frontend"]
+root = ["./dl", "./backend", "./frontend"]
 
 [dependency-groups]
 dev = [
