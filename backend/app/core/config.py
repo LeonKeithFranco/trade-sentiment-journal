@@ -1,3 +1,4 @@
+from functools import lru_cache
 from pathlib import Path
 
 from pydantic import BaseModel, Field
@@ -32,3 +33,8 @@ class _Settings(BaseSettings):
 
     db: _DbSettings = Field(default_factory=_DbSettings)
     app: _AppSettings = Field(default_factory=_AppSettings)
+
+
+@lru_cache
+def get_settings() -> _Settings:
+    return _Settings()
