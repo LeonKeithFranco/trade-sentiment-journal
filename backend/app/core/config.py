@@ -1,7 +1,8 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PostgresDsn, computed_field
+from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,6 +12,20 @@ class _DbSettings(BaseModel):
     password: str
     name: str
     port: int = 5432
+
+    @computed_field
+    @property
+    def db_url(self) -> PostgresDsn:
+        return PostgresDsn(
+            MultiHostUrl.build(
+                scheme="postgresql+asyncpg",
+                username=self.user,
+                password=self.password,
+                host=self.host,
+                port=self.port,
+                path=self.name,
+            )
+        )
 
 
 class _AppSettings(BaseModel):
