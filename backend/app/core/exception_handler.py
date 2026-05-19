@@ -17,8 +17,8 @@ def attach_exception_handlers(app: FastAPI) -> None:
         request: Request, exc: DatabaseError
     ) -> JSONResponse:
         return JSONResponse(
-            status_code=HTTP_503_SERVICE_UNAVAILABLE,
-            content={"details": "Database cannot be reached."},
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"detail": "Database cannot be reached."},
         )
 
     @app.exception_handler(Exception)
@@ -28,6 +28,6 @@ def attach_exception_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
-                "details": "An internal server error occurred. Please try again later."
+                "detail": "An internal server error occurred. Please try again later."
             },
         )
