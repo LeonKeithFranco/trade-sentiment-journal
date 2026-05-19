@@ -15,5 +15,5 @@ class _Settings(BaseSettings):
         case_sensitive=False,
     )
 
-    postgres_user: str
-    postgres_db: str
+    db_user: str
+    db_name: str

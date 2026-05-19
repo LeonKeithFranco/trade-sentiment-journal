@@ -12,7 +12,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}",
+          "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-postgres}",
         ]
       interval: 10s
       timeout: 5s
