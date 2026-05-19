@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
-from starlette.status import HTTP_503_SERVICE_UNAVAILABLE
 
 from app.database.exceptions import DatabaseError
 
