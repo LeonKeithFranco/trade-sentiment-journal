@@ -1,5 +1,8 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
+from starlette.status import HTTP_503_SERVICE_UNAVAILABLE
+
+from app.database.exceptions import DatabaseError
 
 
 def attach_exception_handlers(app: FastAPI) -> None:
@@ -8,6 +11,15 @@ def attach_exception_handlers(app: FastAPI) -> None:
     Args:
         app: The FastAPI application to attach the handlers to.
     """
+
+    @app.exception_handler(DatabaseError)
+    async def catch_database_error(
+        request: Request, exc: DatabaseError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=HTTP_503_SERVICE_UNAVAILABLE,
+            content={"details": "Database cannot be reached."},
+        )
 
     @app.exception_handler(Exception)
     async def catch_all_exception_handler(
