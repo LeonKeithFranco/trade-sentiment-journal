@@ -12,6 +12,11 @@ class _DbSettings(BaseModel):
     port: int = 5432
 
 
+class _AppSettings(BaseModel):
+    name: str = "App Name"
+    debut: bool = True
+
+
 class _Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=[
@@ -26,3 +31,4 @@ class _Settings(BaseSettings):
     )
 
     db: _DbSettings
+    app: _AppSettings
