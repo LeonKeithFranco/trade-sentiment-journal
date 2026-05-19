@@ -15,7 +15,7 @@ class _DbSettings(BaseModel):
 
     @computed_field
     @property
-    def db_url(self) -> PostgresDsn:
+    def url(self) -> PostgresDsn:
         return PostgresDsn(
             MultiHostUrl.build(
                 scheme="postgresql+asyncpg",
