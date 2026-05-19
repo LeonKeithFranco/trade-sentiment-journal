@@ -15,6 +15,7 @@ class _Settings(BaseSettings):
         case_sensitive=False,
     )
 
+    db_host: str
     db_user: str
     db_password: str
     db_name: str
