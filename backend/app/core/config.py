@@ -15,7 +15,7 @@ class _DbSettings(BaseModel):
 
 class _AppSettings(BaseModel):
     name: str = "App Name"
-    debut: bool = True
+    debug: bool = True
 
 
 class _Settings(BaseSettings):
