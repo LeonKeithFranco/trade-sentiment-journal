@@ -1,6 +1,6 @@
 [project]
 name = "backend"
 version = "0.1.0"
-description = "Add your description here"
+description = "Backend workspace for the project."
 requires-python = ">=3.12"
 dependencies = []
