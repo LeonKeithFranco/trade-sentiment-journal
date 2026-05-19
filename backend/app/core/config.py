@@ -1,6 +1,15 @@
 from pathlib import Path
 
+from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class _DbSettings(BaseModel):
+    host: str
+    user: str
+    password: str
+    name: str
+    port: int
 
 
 class _Settings(BaseSettings):
@@ -9,14 +18,11 @@ class _Settings(BaseSettings):
             Path(__file__).parent.parent.parent.parent / ".env",
             Path(__file__).parent.parent.parent / ".env",
         ],
+        env_nested_delimiter="__",
         env_ignore_empty=True,
         env_file_encoding="utf-8",
         extra="ignore",
         case_sensitive=False,
     )
 
-    db_host: str
-    db_user: str
-    db_password: str
-    db_name: str
-    db_port: int
+    db: _DbSettings
