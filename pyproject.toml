@@ -13,6 +13,9 @@ members = [
     "dl",
 ]
 
+[tool.ty.environment]
+root = ["./ml", "./backend", "./frontend"]
+
 [dependency-groups]
 dev = [
     "pytest>=9.0.3",
@@ -21,3 +24,12 @@ dev = [
     "ty>=0.0.37",
     "typos>=1.46.2",
 ]
+
+[tool.typos.files]
+extend-exclude = [
+    "uv.lock",
+]
+
+[tool.typos.default.extend-words]
+# crate = "crate" # supressing false positive
+# teh = "the" # force correction
