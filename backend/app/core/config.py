@@ -17,3 +17,4 @@ class _Settings(BaseSettings):
 
     db_user: str
     db_name: str
+    db_port: int
