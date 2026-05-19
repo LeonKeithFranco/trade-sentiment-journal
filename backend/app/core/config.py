@@ -5,11 +5,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class _DbSettings(BaseModel):
-    host: str
+    host: str = "localhost"
     user: str
     password: str
     name: str
-    port: int
+    port: int = 5432
 
 
 class _Settings(BaseSettings):
