@@ -6,6 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import get_settings
+from app.database.exceptions import DatabaseError
 
 engine = create_async_engine(
     str(get_settings().db.url),
@@ -36,4 +37,4 @@ async def check_db_connection() -> None:
         async with engine.begin() as conn:
             await conn.execute(text("SELECT 1"))
     except Exception as e:
-        raise RuntimeError("Could not connect to database") from e
+        raise DatabaseError("Could not connect to database") from e
