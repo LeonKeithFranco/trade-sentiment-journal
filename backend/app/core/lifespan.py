@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.core.config import get_settings
-from app.database.session import check_db_connection
+from app.database import check_db_connection
 
 
 @asynccontextmanager

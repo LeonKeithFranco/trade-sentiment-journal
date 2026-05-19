@@ -3,8 +3,8 @@ from sqlalchemy import text
 
 from app.core.exception_handler import attach_exception_handlers
 from app.core.lifespan import lifespan
+from app.database import DbDependency
 from app.database.exceptions import DatabaseError
-from app.database.session import DbDependency
 
 app = FastAPI(lifespan=lifespan)
 
