@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from app.auth.exceptions import UserAlreadyExists
+from app.auth.exceptions import UserAlreadyExistsError
 from app.auth.repository import AuthRepoDependency, AuthRepository
 from app.auth.schemas import UserRegisterRequest, UserResponse
 from app.security import hash_password
@@ -16,7 +16,7 @@ class AuthService:
         existing_user = await self.auth_repo.get_user_by_email(user_register_info.email)
 
         if existing_user is not None:
-            raise UserAlreadyExists(
+            raise UserAlreadyExistsError(
                 f"User with email {user_register_info.email} already exists"
             )
 

@@ -2,5 +2,5 @@ class AuthError(Exception):
     """Base error for all auth errors."""
 
 
-class UserAlreadyExists(AuthError):
+class UserAlreadyExistsError(AuthError):
     """The user already exists in the database."""
