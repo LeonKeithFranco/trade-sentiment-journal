@@ -16,3 +16,8 @@ pythonpath = ["."]
 
 [tool.pytest_env]
 TESTCONTAINERS_RYUK_DISABLED = "true"
+
+[dependency-groups]
+dev = [
+    "testcontainers>=4.14.2",
+]
