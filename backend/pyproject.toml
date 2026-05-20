@@ -13,3 +13,6 @@ dependencies = [
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+
+[tool.pytest_env]
+TESTCONTAINERS_RYUK_DISABLED = "true"
