@@ -19,6 +19,7 @@ root = ["./dl", "./backend", "./frontend"]
 [dependency-groups]
 dev = [
     "pytest>=9.0.3",
+    "pytest-env>=1.6.0",
     "pytest-mock>=3.15.1",
     "ruff>=0.15.13",
     "ty>=0.0.37",
