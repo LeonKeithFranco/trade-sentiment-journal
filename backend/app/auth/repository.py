@@ -1,3 +1,6 @@
+from typing import Annotated
+
+from fastapi import Depends
 from sqlalchemy import select
 
 from app.auth.models import User
@@ -17,3 +20,6 @@ class AuthRepository(Repository):
         user = results.scalar_one_or_none()
 
         return user
+
+
+AuthRepoDependency = Annotated[AuthRepository, Depends(AuthRepository)]
