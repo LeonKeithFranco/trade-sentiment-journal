@@ -8,7 +8,7 @@ class UserBase(BaseModel):
     email: EmailStr
 
 
-class UserRequest(UserBase):
+class UserRegisterRequest(UserBase):
     password: str = Field(
         min_length=12,
     )
