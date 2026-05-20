@@ -27,6 +27,7 @@ class AuthRepository(Repository):
         new_user.hashed_password = hashed_password
 
         self.db.add(new_user)
+        await self.db.flush()
         await self.db.refresh(new_user)
 
         return new_user
