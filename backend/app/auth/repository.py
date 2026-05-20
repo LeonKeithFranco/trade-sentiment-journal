@@ -3,9 +3,9 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy import select
 
-from app.auth.models import User
 from app.database import DbDependency
 from app.database.repository import Repository
+from app.models import User
 
 type MaybeUser = User | None
 
