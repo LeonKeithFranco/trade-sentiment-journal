@@ -35,7 +35,6 @@ class _AppSettings(BaseModel):
 
 class _SecuritySettings(BaseModel):
     pepper_secret: str = Field(
-        default="this-is-a-secret-pepper-this-is-a-secret-pepper",
         min_length=32,
     )
 
