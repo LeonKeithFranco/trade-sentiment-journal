@@ -5,12 +5,16 @@ from app.core.exception_handler import attach_exception_handlers
 from app.core.lifespan import lifespan
 from app.database import DbDependency
 from app.database.exceptions import DatabaseError
+from app.routes import routers
 
 
 def create_app() -> FastAPI:
     app = FastAPI(lifespan=lifespan)
 
     attach_exception_handlers(app)
+
+    for router in routers:
+        app.include_router(router)
 
     @app.get("/health")
     async def health_check(db: DbDependency) -> dict[str, str]:
