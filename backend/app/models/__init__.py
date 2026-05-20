@@ -1,4 +1,4 @@
-from app.auth.models import User
+from app.domains.auth.models import User
 
 __all__ = [
     "User",

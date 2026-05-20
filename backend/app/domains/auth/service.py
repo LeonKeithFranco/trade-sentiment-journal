@@ -2,9 +2,9 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from app.auth.exceptions import UserAlreadyExistsError
-from app.auth.repository import AuthRepoDependency, AuthRepository
-from app.auth.schemas import UserRegisterRequest, UserResponse
+from app.domains.auth.exceptions import UserAlreadyExistsError
+from app.domains.auth.repository import AuthRepoDependency, AuthRepository
+from app.domains.auth.schemas import UserRegisterRequest, UserResponse
 from app.security import hash_password
 
 
