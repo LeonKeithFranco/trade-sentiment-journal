@@ -6,7 +6,7 @@ from app.domains.auth.service import AuthServiceDependency
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.get(
+@router.post(
     "/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED
 )
 async def register(
