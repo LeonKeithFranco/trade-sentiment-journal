@@ -13,7 +13,7 @@ from testcontainers.postgres import PostgresContainer
 
 @pytest.fixture(scope="session")
 def pg_container() -> Iterator[PostgresContainer]:
-    with PostgresContainer("docker.io/library/postgres:18-alphine") as container:
+    with PostgresContainer("docker.io/library/postgres:18-alpine") as container:
         yield container
 
 
