@@ -12,7 +12,7 @@ def attach_exception_handlers(app: FastAPI) -> None:
     """
 
     @app.exception_handler(DatabaseError)
-    async def catch_database_error(
+    async def catch_database_error_handler(
         request: Request, exc: DatabaseError
     ) -> JSONResponse:
         return JSONResponse(
