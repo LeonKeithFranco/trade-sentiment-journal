@@ -1,8 +1,7 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
-from app.database.exceptions import DatabaseError
-from app.domains.auth.exceptions import UserAlreadyExistsError
+from app.exceptions import DatabaseError, UserAlreadyExistsError
 
 
 def attach_exception_handlers(app: FastAPI) -> None:

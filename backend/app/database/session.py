@@ -6,7 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import get_settings
-from app.database.exceptions import DatabaseError
+from app.exceptions import DatabaseError
 
 engine = create_async_engine(
     str(get_settings().db.url),
