@@ -2,6 +2,7 @@ import asyncio
 from logging.config import fileConfig
 
 from alembic import context
+from app.auth.models import User  # noqa
 from app.core.config import get_settings
 from app.database import Base
 from sqlalchemy import pool
