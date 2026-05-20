@@ -15,7 +15,7 @@ class AuthService:
     async def register(self, user_register_info: UserRegisterRequest) -> UserResponse:
         existing_user = await self.auth_repo.get_user_by_email(user_register_info.email)
 
-        if existing_user is None:
+        if existing_user is not None:
             raise UserAlreadyExists(
                 f"User with email {user_register_info.email} already exists"
             )
