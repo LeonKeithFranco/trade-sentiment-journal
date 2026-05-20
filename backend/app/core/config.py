@@ -33,6 +33,13 @@ class _AppSettings(BaseModel):
     debug: bool = True
 
 
+class _SecuritySettings(BaseModel):
+    pepper_secret: str = Field(
+        default="this-is-a-secret-pepper-this-is-a-secret-pepper",
+        min_length=32,
+    )
+
+
 class _Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=[
@@ -48,6 +55,7 @@ class _Settings(BaseSettings):
 
     db: _DbSettings = Field(default_factory=_DbSettings)
     app: _AppSettings = Field(default_factory=_AppSettings)
+    security: _SecuritySettings = Field(default_factory=_SecuritySettings)
 
 
 @lru_cache
