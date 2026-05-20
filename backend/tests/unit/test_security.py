@@ -6,13 +6,8 @@ from pytest_mock import MockerFixture
 
 
 @pytest.fixture(scope="session")
-def password() -> str:
-    return "this-is-a-fake-password"
-
-
-@pytest.fixture(scope="session")
-def hashed_password(password: str) -> str:
-    return hash_password(password)
+def hashed_password(default_password: str) -> str:
+    return hash_password(default_password)
 
 
 class TestSecurity:
@@ -34,19 +29,20 @@ class TestSecurity:
         hash = argon2_hashed_password_components[5]
         assert 43 <= len(hash) <= 44
 
-    def test_verification(self, password: str, hashed_password: str) -> None:
-        assert verify_password(password, hashed_password)
-        assert not verify_password("not" + password, hashed_password)
+    def test_verification(self, default_password: str, hashed_password: str) -> None:
+        assert verify_password(default_password, hashed_password)
+        assert not verify_password("not" + default_password, hashed_password)
 
     def test_verification_when_exception_thrown(
-        self, mocker: MockerFixture, password: str, hashed_password: str
+        self, mocker: MockerFixture, default_password: str, hashed_password: str
     ) -> None:
         mock_verify = mocker.patch(
-            "app.security.password._hasher.verify", side_effect=UnknownHashError("")
+            "app.security.password._hasher.verify",
+            side_effect=UnknownHashError(""),
         )
 
-        assert not verify_password(password, hashed_password)
+        assert not verify_password(default_password, hashed_password)
 
         mock_verify.assert_called_once_with(
-            password=_pepper_password(password), hash=hashed_password
+            password=_pepper_password(default_password), hash=hashed_password
         )
