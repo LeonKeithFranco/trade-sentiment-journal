@@ -21,5 +21,15 @@ class AuthRepository(Repository):
 
         return user
 
+    async def insert_user(self, email: str, hashed_password: str) -> User:
+        new_user = User()
+        new_user.email = email
+        new_user.hashed_password = hashed_password
+
+        self.db.add(new_user)
+        await self.db.refresh(new_user)
+
+        return new_user
+
 
 AuthRepoDependency = Annotated[AuthRepository, Depends(AuthRepository)]
