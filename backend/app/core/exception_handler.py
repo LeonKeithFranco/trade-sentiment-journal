@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
 from app.database.exceptions import DatabaseError
+from app.domains.auth.exceptions import UserAlreadyExistsError
 
 
 def attach_exception_handlers(app: FastAPI) -> None:
@@ -18,6 +19,15 @@ def attach_exception_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={"detail": "Database cannot be reached."},
+        )
+
+    @app.exception_handler(UserAlreadyExistsError)
+    async def user_already_exists_error_handler(
+        request: Request, exc: UserAlreadyExistsError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={"detail": "User already exists."},
         )
 
     @app.exception_handler(Exception)
