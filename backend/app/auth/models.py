@@ -5,6 +5,8 @@ from app.database import Base
 
 
 class User(Base):
+    __tablename__ = "users"
+
     email: Mapped[str] = mapped_column(
         String(256),
         unique=True,
