@@ -3,7 +3,6 @@ from typing import Annotated
 from fastapi import Depends
 
 from app.auth.exceptions import UserAlreadyExists
-from app.auth.models import User
 from app.auth.repository import AuthRepoDependency
 from app.auth.schemas import UserRegisterRequest, UserResponse
 from app.security import hash_password
