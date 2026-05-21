@@ -1,3 +1,4 @@
+import secrets
 import uuid
 from datetime import UTC, datetime, timedelta
 
@@ -46,3 +47,12 @@ def decode_access_token(token: str) -> str:
         raise InvalidAccessTokenError("Token subject is missing")
 
     return payload["sub"]
+
+
+def create_refresh_token() -> tuple[str, datetime]:
+    token = secrets.token_urlsafe(64)
+    expire = datetime.now(UTC) + timedelta(
+        days=_security_settings.refresh_token_expire_days
+    )
+
+    return token, expire
