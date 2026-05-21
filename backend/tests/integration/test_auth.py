@@ -65,7 +65,7 @@ class TestAuth:
             ),
             (
                 "PASSWORD1!PASSWORD1!",
-                "Value error, Password must contain at least one lowercase latter",
+                "Value error, Password must contain at least one lowercase letter",
             ),
             (
                 "Password!Password!",
