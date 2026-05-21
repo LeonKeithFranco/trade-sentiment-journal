@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import AsyncIterator, Iterator
 
 import pytest
@@ -48,18 +49,20 @@ def clean_db(db_engine: Engine) -> None:
 @pytest.fixture
 def async_session_factory(
     pg_container: PostgresContainer,
-) -> async_sessionmaker[AsyncSession]:
+) -> Iterator[async_sessionmaker[AsyncSession]]:
     async_url = pg_container.get_connection_url().replace("psycopg2", "asyncpg")
 
     async_engine = create_async_engine(async_url)
 
-    return async_sessionmaker(
+    yield async_sessionmaker(
         async_engine,
         class_=AsyncSession,
         expire_on_commit=False,
         autoflush=False,
         autocommit=False,
     )
+
+    asyncio.run(async_engine.dispose())
 
 
 @pytest.fixture
