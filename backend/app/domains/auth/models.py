@@ -1,5 +1,7 @@
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from datetime import datetime
+
+from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.models.mixins import PublicIdMixin, TimestampMixin
@@ -14,4 +16,28 @@ class User(PublicIdMixin, TimestampMixin, Base):
     )
     hashed_password: Mapped[str] = mapped_column(
         String(256),
+    )
+
+    refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
+
+class RefreshToken(Base):
+    __tablename__ = "refresh_tokens"
+
+    token: Mapped[str] = mapped_column(
+        unique=True,
+    )
+    expires_on: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        index=True,
+    )
+
+    user: Mapped["User"] = relationship(
+        back_populates="refresh_tokens",
     )
