@@ -38,3 +38,7 @@ async def check_db_connection() -> None:
             await conn.execute(text("SELECT 1"))
     except Exception as e:
         raise DatabaseError("Could not connect to database") from e
+
+
+async def dispose_engine() -> None:
+    await engine.dispose()
