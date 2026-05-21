@@ -4,7 +4,7 @@ from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.mixins import PublicIdMixin, TimestampMixin
+from app.database.mixins import PublicIdMixin, TimestampMixin
 
 
 class User(PublicIdMixin, TimestampMixin, Base):
