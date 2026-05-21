@@ -6,6 +6,8 @@ from app.core.config import get_settings
 _hasher = PasswordHash.recommended()
 _security_settings = get_settings().security
 
+DUMMY_PASSWORD = "$argon2id$v=19$m=65536,t=3,p=4$MmZ5sZQf6pExLYGXF09nTQ$rWk2xBynjf5wQYbiPAantr9Meo4l7ns+Zc9Tp5Wa5Vo"
+
 
 def _pepper_password(password: str) -> str:
     return password + _security_settings.pepper_secret
@@ -27,3 +29,7 @@ def verify_password(password: str, hashed_password: str) -> bool:
         )
     except UnknownHashError:
         return False
+
+
+def run_dummy_password_verification() -> None:
+    verify_password("", DUMMY_PASSWORD)
