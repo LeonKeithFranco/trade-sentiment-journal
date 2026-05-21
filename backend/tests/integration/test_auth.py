@@ -75,6 +75,10 @@ class TestAuth:
                 "Password1Password1",
                 "Value error, Password must contain at least one of: !@#$%^&*()_+\\-=",
             ),
+            (
+                "Password1!\\Password1!\\",
+                "Value error, Password can't contain any of: \\\\\\'\\\"<>;[\\]|`~",
+            ),
         ],
     )
     def test_invalid_password(
