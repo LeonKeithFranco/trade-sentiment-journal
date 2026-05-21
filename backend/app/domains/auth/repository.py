@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import Depends
@@ -5,7 +6,7 @@ from sqlalchemy import select
 
 from app.database import DbDependency
 from app.database.repository import Repository
-from app.models import User
+from app.domains.auth.models import RefreshToken, User
 
 type MaybeUser = User | None
 
@@ -31,6 +32,21 @@ class AuthRepository(Repository):
         await self.db.refresh(new_user)
 
         return new_user
+
+    async def insert_refresh_token(
+        self, user_id: int, refresh_token: str, expire: datetime
+    ) -> RefreshToken:
+        # don't forget to flush and refresh
+        new_refresh_token = RefreshToken()
+        new_refresh_token.token = refresh_token
+        new_refresh_token.expires_on = expire
+        new_refresh_token.user_id = user_id
+
+        self.db.add(new_refresh_token)
+        await self.db.flush()
+        await self.db.refresh(new_refresh_token)
+
+        return new_refresh_token
 
 
 AuthRepoDependency = Annotated[AuthRepository, Depends(AuthRepository)]
