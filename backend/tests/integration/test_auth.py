@@ -1,5 +1,3 @@
-from pprint import pp
-
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
@@ -86,8 +84,6 @@ class TestAuth:
             "/auth/register",
             json={"email": "user@test.com", "password": invalid_password},
         )
-
-        pp(response.json()["detail"][0])
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert response.json()["detail"][0] == {
