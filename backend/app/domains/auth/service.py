@@ -13,8 +13,13 @@ from app.domains.auth.schemas import (
     UserRegisterRequest,
     UserResponse,
 )
-from app.security import hash_password, run_dummy_password_verification, verify_password
-from app.security.token import create_access_token, create_refresh_token
+from app.security import (
+    create_access_token,
+    create_refresh_token,
+    hash_password,
+    run_dummy_password_verification,
+    verify_password,
+)
 
 
 class AuthService:
