@@ -37,6 +37,9 @@ class _SecuritySettings(BaseModel):
     pepper_secret: str = Field(
         min_length=32,
     )
+    token_secret: str = Field(
+        min_length=64,
+    )
 
 
 class _Settings(BaseSettings):
