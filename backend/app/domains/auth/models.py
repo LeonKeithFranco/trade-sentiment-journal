@@ -2,9 +2,10 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
+from app.models.mixins import PublicIdMixin, TimestampMixin
 
 
-class User(Base):
+class User(PublicIdMixin, TimestampMixin, Base):
     __tablename__ = "users"
 
     email: Mapped[str] = mapped_column(
