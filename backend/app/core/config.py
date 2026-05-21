@@ -40,6 +40,12 @@ class _SecuritySettings(BaseModel):
     token_secret: str = Field(
         min_length=64,
     )
+    access_token_expire_minutes: int = Field(
+        ge=1,
+    )
+    refresh_token_expire_days: int = Field(
+        ge=1,
+    )
 
 
 class _Settings(BaseSettings):
