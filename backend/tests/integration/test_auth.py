@@ -13,7 +13,7 @@ def registered_user_response(client: TestClient, default_password: str) -> Respo
     return response
 
 
-class TestAuth:
+class TestRegister:
     def test_register_user(self, registered_user_response: Response) -> None:
         assert registered_user_response.status_code == status.HTTP_201_CREATED
 
