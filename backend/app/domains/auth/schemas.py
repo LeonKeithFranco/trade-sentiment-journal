@@ -36,6 +36,10 @@ class UserRegisterRequest(UserBase):
         return v
 
 
+class UserLoginRequest(UserBase):
+    password: str
+
+
 class UserResponse(UserBase):
     model_config = ConfigDict(
         from_attributes=True,
@@ -43,3 +47,12 @@ class UserResponse(UserBase):
 
     public_id: uuid.UUID
     created_on: datetime
+
+
+class TokenBase(BaseModel):
+    refresh_token: str
+
+
+class TokenResponse(TokenBase):
+    access_token: str
+    token_type: str = "bearer"
