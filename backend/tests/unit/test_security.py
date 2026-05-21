@@ -10,7 +10,7 @@ def hashed_password(default_password: str) -> str:
     return hash_password(default_password)
 
 
-class TestSecurity:
+class TestPassword:
     def test_hashing(self, hashed_password: str) -> None:
         argon2_hashed_password_components = hashed_password.split("$")
 
