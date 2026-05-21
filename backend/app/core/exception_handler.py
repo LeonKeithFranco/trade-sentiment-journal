@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 
 from app.exceptions import (
     DatabaseError,
+    InvalidAccessTokenError,
     UserAlreadyExistsError,
     UserInvalidCredentialsError,
 )
@@ -40,6 +41,16 @@ def attach_exception_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
             content={"detail": "Email or password is incorrect."},
+        )
+
+    @app.exception_handler(InvalidAccessTokenError)
+    async def invalid_access_token_error_handler(
+        request: Request, exc: InvalidAccessTokenError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"detail": exc.reason},
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     @app.exception_handler(Exception)
