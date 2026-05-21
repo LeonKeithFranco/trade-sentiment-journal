@@ -55,4 +55,5 @@ class TokenBase(BaseModel):
 
 class TokenResponse(TokenBase):
     access_token: str
+    refresh_token: str
     token_type: str = "bearer"
