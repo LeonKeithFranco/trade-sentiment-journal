@@ -4,3 +4,7 @@ class AuthError(Exception):
 
 class UserAlreadyExistsError(AuthError):
     """The user already exists in the database."""
+
+
+class UserInvalidCredentialsError(AuthError):
+    """Either email or password is incorrect."""

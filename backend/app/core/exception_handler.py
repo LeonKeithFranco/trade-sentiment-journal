@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
+from app.domains.auth.exceptions import UserInvalidCredentialsError
 from app.exceptions import DatabaseError, UserAlreadyExistsError
 
 
@@ -27,6 +28,15 @@ def attach_exception_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT,
             content={"detail": "User already exists."},
+        )
+
+    @app.exception_handler(UserInvalidCredentialsError)
+    async def user_invalid_credentials_error_handler(
+        request: Request, exc: UserInvalidCredentialsError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"detail": "Email or password is incorrect."},
         )
 
     @app.exception_handler(Exception)
