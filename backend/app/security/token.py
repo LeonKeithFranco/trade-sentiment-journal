@@ -33,7 +33,7 @@ def create_access_token(user_public_id: uuid.UUID) -> str:
 def decode_access_token(token: str) -> str:
     try:
         payload = jwt.decode(
-            token, key=_security_settings.token_secret, algorithm=_ALGORITHM
+            token, key=_security_settings.token_secret, algorithms=[_ALGORITHM]
         )
     except jwt.ExpiredSignatureError as exc:
         raise InvalidAccessTokenError("Token has expired") from exc
