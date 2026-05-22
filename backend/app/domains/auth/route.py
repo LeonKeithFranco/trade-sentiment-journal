@@ -7,6 +7,8 @@ from app.domains.auth.schemas import (
     UserResponse,
 )
 from app.domains.auth.service import AuthServiceDependency
+from app.models import User
+from app.security import CurrentUserDependency
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -25,3 +27,8 @@ async def login(
     user_login_request: UserLoginRequest, auth_service: AuthServiceDependency
 ) -> TokenResponse:
     return await auth_service.login(user_login_request)
+
+
+@router.get("/me", response_model=UserResponse)
+async def me(current_user: CurrentUserDependency) -> User:
+    return current_user
