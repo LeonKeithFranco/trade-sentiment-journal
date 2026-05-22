@@ -1,10 +1,13 @@
+import secrets
 import uuid
 from datetime import UTC, datetime, timedelta
+from pprint import pp
 
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import Response
+from sqlalchemy import Engine, text
 from tests.utils import jwt_encode
 
 
@@ -235,3 +238,73 @@ class TestMe:
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         assert response.json() == {"detail": "Email or password is incorrect."}
+
+
+class TestRefresh:
+    def test_refresh(
+        self,
+        client: TestClient,
+        registered_user_response: Response,
+        default_password: str,
+    ) -> None:
+        login_response = client.post(
+            "/auth/login",
+            json={
+                "email": registered_user_response.json()["email"],
+                "password": default_password,
+            },
+        )
+
+        refresh_token = login_response.json()["refresh_token"]
+
+        response = client.post(
+            "/auth/refresh",
+            json={"refresh_token": refresh_token},
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert refresh_token != response.json()["refresh_token"]
+
+    def test_not_real_refresh_token(self, client: TestClient) -> None:
+        response = client.post(
+            "/auth/refresh",
+            json={"refresh_token": secrets.token_urlsafe(64)},
+        )
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.json() == {"detail": "Invalid credentials."}
+
+    def test_expired_refresh_token(
+        self,
+        client: TestClient,
+        registered_user_response: Response,
+        default_password: str,
+        db_engine: Engine,
+    ) -> None:
+        login_response = client.post(
+            "/auth/login",
+            json={
+                "email": registered_user_response.json()["email"],
+                "password": default_password,
+            },
+        )
+
+        refresh_token = login_response.json()["refresh_token"]
+
+        expiration = datetime.now(UTC) - timedelta(minutes=1)
+
+        with db_engine.begin() as conn:
+            conn.execute(
+                text(
+                    "UPDATE refresh_tokens SET expires_on = :expiration WHERE token = :refresh_token"
+                ),
+                {"expiration": expiration, "refresh_token": refresh_token},
+            )
+
+        response = client.post(
+            "/auth/refresh",
+            json={"refresh_token": refresh_token},
+        )
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.json() == {"detail": "Invalid credentials."}
