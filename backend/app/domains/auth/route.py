@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status
 
 from app.domains.auth.schemas import (
+    RefreshRequest,
     TokenResponse,
     UserLoginRequest,
     UserRegisterRequest,
@@ -32,3 +33,10 @@ async def login(
 @router.get("/me", response_model=UserResponse)
 async def me(current_user: CurrentUserDependency) -> User:
     return current_user
+
+
+@router.post("/refresh", response_model=TokenResponse)
+async def refresh(
+    refresh_request: RefreshRequest, auth_service: AuthServiceDependency
+) -> TokenResponse:
+    return await auth_service.refresh_tokens(refresh_request)
