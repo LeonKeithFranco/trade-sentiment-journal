@@ -1,7 +1,6 @@
 import time
 import uuid
 from datetime import UTC, datetime
-from pprint import pp
 
 import pytest
 from fastapi import status
