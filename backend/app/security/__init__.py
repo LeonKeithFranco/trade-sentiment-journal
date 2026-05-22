@@ -1,4 +1,3 @@
-from app.security.get_current_user import CurrentUserDependency
 from app.security.password import (
     hash_password,
     run_dummy_password_verification,
@@ -9,6 +8,8 @@ from app.security.token import (
     create_refresh_token,
     decode_access_token,
 )
+
+from app.security.get_current_user import CurrentUserDependency  # isort: skip
 
 __all__ = [
     "hash_password",
