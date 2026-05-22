@@ -158,6 +158,8 @@ class TestLogin:
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         assert response.json() == {"detail": "Email or password is incorrect."}
 
+
+class TestMe:
     def test_get_current_user(
         self,
         client: TestClient,
