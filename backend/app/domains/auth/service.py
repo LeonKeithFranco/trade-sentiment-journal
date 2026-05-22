@@ -51,7 +51,7 @@ class AuthService:
             run_dummy_password_verification()
 
             raise UserInvalidCredentialsError(
-                f"User does not exist with email {user_login_info.email} does not exist."
+                f"User with email {user_login_info.email} does not exist."
             )
 
         if not verify_password(user_login_info.password, existing_user.hashed_password):
