@@ -40,7 +40,7 @@ def attach_exception_handlers(app: FastAPI) -> None:
     ) -> JSONResponse:
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            content={"detail": "Email or password is incorrect."},
+            content={"detail": "Invalid credentials."},
         )
 
     @app.exception_handler(InvalidAccessTokenError)
