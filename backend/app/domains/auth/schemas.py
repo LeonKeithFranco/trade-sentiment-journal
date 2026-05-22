@@ -49,7 +49,10 @@ class UserResponse(UserBase):
     created_on: datetime
 
 
-class TokenResponse(BaseModel):
-    access_token: str
+class TokenBase(BaseModel):
     refresh_token: str
+
+
+class TokenResponse(TokenBase):
+    access_token: str
     token_type: str = "bearer"
