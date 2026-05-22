@@ -74,7 +74,7 @@ class AuthService:
             existing_user.id, *refresh_token_info
         )
 
-        await self.user_repo.commit()
+        await self.refresh_token_repo.commit()
 
         return TokenResponse(
             access_token=access_token,
