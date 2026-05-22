@@ -157,3 +157,31 @@ class TestLogin:
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         assert response.json() == {"detail": "Email or password is incorrect."}
+
+    def test_get_current_user(
+        self,
+        client: TestClient,
+        registered_user_response: Response,
+        default_password: str,
+    ) -> None:
+        login_response = client.post(
+            "/auth/login",
+            json={
+                "email": registered_user_response.json()["email"],
+                "password": default_password,
+            },
+        )
+
+        access_token = login_response.json()["access_token"]
+
+        response = client.get(
+            "/auth/me", headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+
+        data = response.json()
+
+        assert data["email"] == registered_user_response.json()["email"]
+        assert data["public_id"] == registered_user_response.json()["public_id"]
+        assert data["created_on"] == registered_user_response.json()["created_on"]
