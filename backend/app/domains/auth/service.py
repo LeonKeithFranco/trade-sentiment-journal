@@ -94,12 +94,17 @@ class AuthService:
         if refresh_token_record is None:
             raise UserInvalidCredentialsError("Invalid refresh token")
 
+        if refresh_token_record.revoked:
+            raise UserInvalidCredentialsError("Refresh token is revoked")
+
         if refresh_token_record.expires_on < datetime.now(UTC):
             raise UserInvalidCredentialsError("Refresh token is expired")
 
         access_token, refresh_token = await self._create_new_tokens(
             refresh_token_record.user
         )
+
+        await self.refresh_token_repo.revoke_refresh_token(refresh_info.refresh_token)
 
         await self.refresh_token_repo.commit()
 
