@@ -33,6 +33,10 @@ class RefreshToken(Base):
     expires_on: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
     )
+    revoked: Mapped[bool] = mapped_column(
+        default=False,
+        index=True,
+    )
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"),
         index=True,
