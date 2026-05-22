@@ -1,6 +1,5 @@
-import time
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from fastapi import status
@@ -201,12 +200,10 @@ class TestMe:
         expired_payload = {
             "sub": str(uuid.uuid4()),
             "type": "access",
-            "exp": datetime.now(UTC),
+            "exp": datetime.now(UTC) - timedelta(minutes=1),
         }
 
         expired_access_token = jwt_encode(expired_payload)
-
-        time.sleep(1)
 
         response = client.get(
             "/auth/me", headers={"Authorization": f"Bearer {expired_access_token}"}
