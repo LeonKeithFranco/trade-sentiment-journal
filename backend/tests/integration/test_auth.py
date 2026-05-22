@@ -1,7 +1,6 @@
 import secrets
 import uuid
 from datetime import UTC, datetime, timedelta
-from pprint import pp
 
 import pytest
 from fastapi import status
