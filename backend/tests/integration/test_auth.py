@@ -1,3 +1,5 @@
+from pprint import pp
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
@@ -97,3 +99,60 @@ class TestRegister:
             "input": invalid_password,
             "ctx": {"error": {}},
         }
+
+
+class TestLogin:
+    def test_login(
+        self,
+        client: TestClient,
+        registered_user_response: Response,
+        default_password: str,
+    ) -> None:
+        response = client.post(
+            "/auth/login",
+            json={
+                "email": registered_user_response.json()["email"],
+                "password": default_password,
+            },
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+
+        data = response.json()
+
+        assert "access_token" in data
+        assert "refresh_token" in data
+        assert data["token_type"] == "bearer"
+
+    def test_invalid_email_login(
+        self,
+        client: TestClient,
+        registered_user_response: Response,  # included to make sure first user is registered
+    ) -> None:
+        response = client.post(
+            "/auth/login",
+            json={
+                "email": "invalid@email.com",
+                "password": "Password1!Password1!",
+            },
+        )
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.json() == {"detail": "Email or password is incorrect."}
+
+    def test_invalid_password_login(
+        self,
+        client: TestClient,
+        registered_user_response: Response,
+        default_password: str,
+    ) -> None:
+        response = client.post(
+            "/auth/login",
+            json={
+                "email": registered_user_response.json()["email"],
+                "password": default_password + "!",
+            },
+        )
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.json() == {"detail": "Email or password is incorrect."}
