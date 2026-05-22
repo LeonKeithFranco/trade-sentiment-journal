@@ -312,3 +312,32 @@ class TestRefresh:
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         assert response.json() == {"detail": "Invalid credentials."}
+
+        def test_revoked_refresh_token(
+            self,
+            client: TestClient,
+            registered_user_response: Response,
+            default_password: str,
+        ) -> None:
+            login_response = client.post(
+                "/auth/login",
+                json={
+                    "email": registered_user_response.json()["email"],
+                    "password": default_password,
+                },
+            )
+
+            old_refresh_token = login_response.json()["refresh_token"]
+
+            client.post(
+                "/auth/refresh",
+                json={"refresh_token": old_refresh_token},
+            )
+
+            response = client.post(
+                "/auth/refresh",
+                json={"refresh_token": old_refresh_token},
+            )
+
+            assert response.status_code == status.HTTP_401_UNAUTHORIZED
+            assert response.json() == {"detail": "Invalid credentials."}
