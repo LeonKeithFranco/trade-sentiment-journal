@@ -1,5 +1,3 @@
-from pprint import pp
-
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
