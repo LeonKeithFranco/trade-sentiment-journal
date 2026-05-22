@@ -12,7 +12,7 @@ from app.security import decode_access_token
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
-async def get_current_user(
+async def _get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)], user_repo: UserRepoDependency
 ) -> User:
     user_public_id = uuid.UUID(decode_access_token(token))
@@ -26,4 +26,4 @@ async def get_current_user(
     return user
 
 
-CurrentUserDependency = Annotated[User, Depends(get_current_user)]
+CurrentUserDependency = Annotated[User, Depends(_get_current_user)]
