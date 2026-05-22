@@ -143,7 +143,6 @@ class TestRefreshToken:
     def test_create_refresh_token(self) -> None:
         token, expire = create_refresh_token()
         today = datetime.now(UTC)
+        diff_days = (expire.date() - today.date()).days
 
-        assert (
-            expire.date() - today.date()
-        ).days == get_settings().security.refresh_token_expire_days
+        assert diff_days == get_settings().security.refresh_token_expire_days
