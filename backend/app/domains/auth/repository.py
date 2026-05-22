@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from typing import Annotated
 
@@ -23,6 +24,9 @@ class UserRepository(Repository):
 
     async def get_user_by_email(self, email: str) -> MaybeUser:
         return await self._get_user_by(User.email == email)
+
+    async def get_user_by_public_ud(self, id: uuid.UUID) -> MaybeUser:
+        return await self._get_user_by(User.public_id == id)
 
     async def insert_user(self, email: str, hashed_password: str) -> User:
         new_user = User()
