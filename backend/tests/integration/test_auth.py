@@ -262,7 +262,12 @@ class TestRefresh:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        assert refresh_token != response.json()["refresh_token"]
+
+        data = response.json()
+
+        assert data["refresh_token"] != refresh_token
+        assert "access_token" in data
+        assert data["token_type"] == "bearer"
 
     def test_not_real_refresh_token(self, client: TestClient) -> None:
         response = client.post(
