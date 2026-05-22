@@ -219,3 +219,19 @@ class TestMe:
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         assert response.json() == {"detail": "Token is invalid"}
+
+    def test_not_real_user(self, client: TestClient) -> None:
+        payload = {
+            "sub": str(uuid.uuid4()),
+            "type": "access",
+            "exp": datetime.now(UTC) + timedelta(minutes=10),
+        }
+
+        access_token = jwt_encode(payload)
+
+        response = client.get(
+            "/auth/me", headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.json() == {"detail": "Email or password is incorrect."}
