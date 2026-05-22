@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import ColumnElement, select
+from sqlalchemy import ColumnElement, select, update
 from sqlalchemy.orm import selectinload
 
 from app.database import DbDependency
@@ -58,6 +58,14 @@ class RefreshTokenRepository(Repository):
         results = await self.db.execute(query)
 
         return results.scalar_one_or_none()
+
+    async def revoke_refresh_token(self, token: str) -> None:
+        query = (
+            update(RefreshToken)
+            .where(RefreshToken.token == token)
+            .values({RefreshToken.revoked: True})
+        )
+        await self.db.execute(query)
 
     async def insert_refresh_token(
         self, user_id: int, refresh_token: str, expire: datetime
