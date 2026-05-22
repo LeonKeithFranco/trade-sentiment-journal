@@ -144,7 +144,7 @@ class TestLogin:
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
-        assert response.json() == {"detail": "Email or password is incorrect."}
+        assert response.json() == {"detail": "Invalid credentials."}
 
     def test_invalid_password_login(
         self,
@@ -161,7 +161,7 @@ class TestLogin:
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
-        assert response.json() == {"detail": "Email or password is incorrect."}
+        assert response.json() == {"detail": "Invalid credentials."}
 
 
 class TestMe:
@@ -237,7 +237,7 @@ class TestMe:
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
-        assert response.json() == {"detail": "Email or password is incorrect."}
+        assert response.json() == {"detail": "Invalid credentials."}
 
 
 class TestRefresh:
