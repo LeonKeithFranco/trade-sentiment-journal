@@ -1,9 +1,13 @@
+import time
+import uuid
 from datetime import UTC, datetime
+from pprint import pp
 
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import Response
+from tests.utils import jwt_encode
 
 
 @pytest.fixture
@@ -187,3 +191,35 @@ class TestMe:
         assert data["email"] == registered_user_response.json()["email"]
         assert data["public_id"] == registered_user_response.json()["public_id"]
         assert data["created_on"] == registered_user_response.json()["created_on"]
+
+    def test_no_token(self, client: TestClient) -> None:
+        response = client.get("/auth/me")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.json() == {"detail": "Not authenticated"}
+
+    def test_expired_token(self, client: TestClient) -> None:
+        expired_payload = {
+            "sub": str(uuid.uuid4()),
+            "type": "access",
+            "exp": datetime.now(UTC),
+        }
+
+        expired_access_token = jwt_encode(expired_payload)
+
+        time.sleep(1)
+
+        response = client.get(
+            "/auth/me", headers={"Authorization": f"Bearer {expired_access_token}"}
+        )
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.json() == {"detail": "Token has expired"}
+
+    def test_invalid_token(self, client: TestClient) -> None:
+        response = client.get(
+            "/auth/me", headers={"Authorization": "Bearer not.real.token"}
+        )
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.json() == {"detail": "Token is invalid"}
