@@ -11,7 +11,7 @@ from app.domains.auth.models import RefreshToken, User
 type MaybeUser = User | None
 
 
-class AuthRepository(Repository):
+class UserRepository(Repository):
     def __init__(self, db: DbDependency) -> None:
         super().__init__(db)
 
@@ -33,6 +33,14 @@ class AuthRepository(Repository):
 
         return new_user
 
+
+UserRepoDependency = Annotated[UserRepository, Depends(UserRepository)]
+
+
+class RefreshTokenRepository(Repository):
+    def __init__(self, db: DbDependency) -> None:
+        super().__init__(db)
+
     async def insert_refresh_token(
         self, user_id: int, refresh_token: str, expire: datetime
     ) -> RefreshToken:
@@ -49,4 +57,6 @@ class AuthRepository(Repository):
         return new_refresh_token
 
 
-AuthRepoDependency = Annotated[AuthRepository, Depends(AuthRepository)]
+RefreshTokenRepoDependency = Annotated[
+    RefreshTokenRepository, Depends(RefreshTokenRepository)
+]

@@ -6,7 +6,12 @@ from app.domains.auth.exceptions import (
     UserAlreadyExistsError,
     UserInvalidCredentialsError,
 )
-from app.domains.auth.repository import AuthRepoDependency, AuthRepository
+from app.domains.auth.repository import (
+    RefreshTokenRepoDependency,
+    RefreshTokenRepository,
+    UserRepoDependency,
+    UserRepository,
+)
 from app.domains.auth.schemas import (
     TokenResponse,
     UserLoginRequest,
@@ -23,28 +28,33 @@ from app.security import (
 
 
 class AuthService:
-    def __init__(self, auth_repo: AuthRepoDependency) -> None:
-        self.auth_repo: AuthRepository = auth_repo
+    def __init__(
+        self,
+        user_repo: UserRepoDependency,
+        refresh_token_repo: RefreshTokenRepoDependency,
+    ) -> None:
+        self.user_repo: UserRepository = user_repo
+        self.refresh_token_repo: RefreshTokenRepository = refresh_token_repo
 
     async def register(self, user_register_info: UserRegisterRequest) -> UserResponse:
-        existing_user = await self.auth_repo.get_user_by_email(user_register_info.email)
+        existing_user = await self.user_repo.get_user_by_email(user_register_info.email)
 
         if existing_user is not None:
             raise UserAlreadyExistsError(
                 f"User with email {user_register_info.email} already exists"
             )
 
-        user = await self.auth_repo.insert_user(
+        user = await self.user_repo.insert_user(
             email=user_register_info.email,
             hashed_password=hash_password(user_register_info.password),
         )
 
-        await self.auth_repo.commit()
+        await self.user_repo.commit()
 
         return UserResponse.model_validate(user)
 
     async def login(self, user_login_info: UserLoginRequest) -> TokenResponse:
-        existing_user = await self.auth_repo.get_user_by_email(user_login_info.email)
+        existing_user = await self.user_repo.get_user_by_email(user_login_info.email)
 
         if existing_user is None:
             # for timing
@@ -60,11 +70,11 @@ class AuthService:
         access_token = create_access_token(existing_user.public_id)
 
         refresh_token_info = create_refresh_token()
-        refresh_token_record = await self.auth_repo.insert_refresh_token(
+        refresh_token_record = await self.refresh_token_repo.insert_refresh_token(
             existing_user.id, *refresh_token_info
         )
 
-        await self.auth_repo.commit()
+        await self.user_repo.commit()
 
         return TokenResponse(
             access_token=access_token,
