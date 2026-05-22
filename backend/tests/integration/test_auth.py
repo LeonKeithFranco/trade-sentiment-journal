@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
@@ -23,6 +25,7 @@ class TestRegister:
         assert "hashed_password" not in data
         assert "public_id" in data
         assert data["email"] == "user@test.com"
+        assert datetime.fromisoformat(data["created_on"]) <= datetime.now(UTC)
 
     def test_duplicate_email(
         self,
