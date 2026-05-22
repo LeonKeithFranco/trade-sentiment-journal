@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import select
+from sqlalchemy import ColumnElement, select
 
 from app.database import DbDependency
 from app.database.repository import Repository
@@ -15,12 +15,14 @@ class UserRepository(Repository):
     def __init__(self, db: DbDependency) -> None:
         super().__init__(db)
 
-    async def get_user_by_email(self, email: str) -> MaybeUser:
-        query = select(User).where(User.email == email)
+    async def _get_user_by(self, where_clause: ColumnElement[bool]) -> MaybeUser:
+        query = select(User).where(where_clause)
         results = await self.db.execute(query)
-        user = results.scalar_one_or_none()
 
-        return user
+        return results.scalar_one_or_none()
+
+    async def get_user_by_email(self, email: str) -> MaybeUser:
+        return await self._get_user_by(User.email == email)
 
     async def insert_user(self, email: str, hashed_password: str) -> User:
         new_user = User()
