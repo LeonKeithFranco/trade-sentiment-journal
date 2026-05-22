@@ -1,7 +1,6 @@
 import time
 import uuid
 from datetime import UTC, datetime, timedelta
-from pprint import pp
 
 import jwt
 import pytest
@@ -18,12 +17,7 @@ from app.security.password import _pepper_password
 from app.security.token import _ALGORITHM
 from pwdlib.exceptions import UnknownHashError
 from pytest_mock import MockerFixture
-
-
-def _jwt_encode(payload: dict) -> str:
-    return jwt.encode(
-        payload, key=get_settings().security.token_secret, algorithm=_ALGORITHM
-    )
+from tests.utils import jwt_encode
 
 
 @pytest.fixture(scope="session")
@@ -91,7 +85,7 @@ class TestAccessToken:
             - timedelta(minutes=get_settings().security.access_token_expire_minutes),
         }
 
-        token = _jwt_encode(expired_payload)
+        token = jwt_encode(expired_payload)
 
         time.sleep(1)
 
@@ -107,7 +101,7 @@ class TestAccessToken:
             "exp": datetime.now(UTC) + timedelta(minutes=5),
         }
 
-        token = _jwt_encode(wrong_type_payload)
+        token = jwt_encode(wrong_type_payload)
 
         with pytest.raises(InvalidAccessTokenError, match="Token type is incorrect"):
             decode_access_token(token)
@@ -118,7 +112,7 @@ class TestAccessToken:
             "exp": datetime.now(UTC) + timedelta(minutes=5),
         }
 
-        token = _jwt_encode(wrong_type_payload)
+        token = jwt_encode(wrong_type_payload)
 
         with pytest.raises(InvalidAccessTokenError, match="Token subject is missing"):
             decode_access_token(token)
@@ -134,7 +128,7 @@ class TestAccessToken:
             "iat": datetime.now(UTC),
         }
 
-        token = _jwt_encode(payload)
+        token = jwt_encode(payload)
 
         mock_decode = mocker.patch(
             "app.security.token.jwt.decode", side_effect=jwt.InvalidTokenError
