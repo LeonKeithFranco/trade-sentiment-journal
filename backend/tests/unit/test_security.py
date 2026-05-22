@@ -1,4 +1,3 @@
-import time
 import uuid
 from datetime import UTC, datetime, timedelta
 
@@ -86,8 +85,6 @@ class TestAccessToken:
         }
 
         token = jwt_encode(expired_payload)
-
-        time.sleep(1)
 
         with pytest.raises(InvalidAccessTokenError, match="Token has expired"):
             decode_access_token(token)
