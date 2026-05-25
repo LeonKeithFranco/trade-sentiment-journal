@@ -38,7 +38,7 @@ class RefreshToken(Base):
         default=False,
         index=True,
     )
-    user_id: UserIDColumn
+    user_id: Mapped[UserIDColumn]
 
     user: Mapped["User"] = relationship(
         back_populates="refresh_tokens",
