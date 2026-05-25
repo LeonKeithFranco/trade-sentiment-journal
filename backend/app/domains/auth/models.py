@@ -1,9 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy import DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+from app.database.columns import UserIDColumn
 from app.database.mixins import PublicIdMixin, TimestampMixin
 
 
@@ -37,10 +38,7 @@ class RefreshToken(Base):
         default=False,
         index=True,
     )
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
-        index=True,
-    )
+    user_id: UserIDColumn
 
     user: Mapped["User"] = relationship(
         back_populates="refresh_tokens",
