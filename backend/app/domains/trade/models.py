@@ -20,6 +20,10 @@ class Trade(PublicIdMixin, TimestampMixin, Base):
 
     __table_args__ = (
         CheckConstraint("direction in ('LONG','SHORT')", name="check_direction"),
+        CheckConstraint(
+            "closed_at IS NULL OR closed_at >= opened_at",
+            name="check_closed_at_After_opened_at",
+        ),
     )
 
     ticker: Mapped[str] = mapped_column(
