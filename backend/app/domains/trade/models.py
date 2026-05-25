@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import CheckConstraint, DateTime, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.constants import MAX_TICKER_LENGTH
 from app.database import Base
 from app.database.columns import UserIDColumn
 from app.database.mixins import PublicIdMixin, TimestampMixin
@@ -22,7 +23,7 @@ class Trade(PublicIdMixin, TimestampMixin, Base):
     )
 
     ticker: Mapped[str] = mapped_column(
-        String(10),
+        String(MAX_TICKER_LENGTH),
         index=True,
     )
     _direction: Mapped[str] = mapped_column(
