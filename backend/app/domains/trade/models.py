@@ -2,8 +2,8 @@ from datetime import datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from sqlalchemy import CheckConstraint, DateTime, Numeric, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import CheckConstraint, Connection, DateTime, Numeric, String, event
+from sqlalchemy.orm import Mapped, Mapper, mapped_column, relationship
 
 from app.core.constants import MAX_TICKER_LENGTH
 from app.database import Base
@@ -64,3 +64,27 @@ class Trade(PublicIdMixin, TimestampMixin, Base):
     user: Mapped["User"] = relationship(
         back_populates="trades",
     )
+
+    def _update_pnl(self) -> None:
+        if self.exit_price is None:
+            return
+
+        self.profit_and_loss = (
+            self.exit_price - self.entry_price
+            if self.direction == Direction.LONG
+            else self.entry_price - self.exit_price
+        ) * self.position_size
+
+
+@event.listens_for(Trade, "before_insert")
+def _receive_before_insert(
+    _mapper: Mapper[Trade], _connection: Connection, target: Trade
+) -> None:
+    target._update_pnl()
+
+
+@event.listens_for(Trade, "before_update")
+def _receive_before_update(
+    _mapper: Mapper[Trade], _connection: Connection, target: Trade
+) -> None:
+    target._update_pnl()
