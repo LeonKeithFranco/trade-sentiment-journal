@@ -13,7 +13,7 @@ from pydantic import (
 )
 
 from app.core.constants import MAX_TICKER_LENGTH
-from app.domains.trade.constants import Direction
+from app.domains.trades.constants import Direction
 
 
 class TradeBase(BaseModel):

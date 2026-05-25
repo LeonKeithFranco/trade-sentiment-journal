@@ -9,7 +9,7 @@ from app.core.constants import MAX_TICKER_LENGTH
 from app.database import Base
 from app.database.columns import UserIDColumn
 from app.database.mixins import PublicIdMixin, TimestampMixin
-from app.domains.trade.constants import Direction
+from app.domains.trades.constants import Direction
 
 if TYPE_CHECKING:
     from app.models import User

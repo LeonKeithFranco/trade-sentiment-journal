@@ -1,10 +1,10 @@
 from fastapi import APIRouter, status
 
-from app.domains.trade.schemas import TradeRequest, TradeResponse
-from app.domains.trade.service import TradeServiceDependency
+from app.domains.trades.schemas import TradeRequest, TradeResponse
+from app.domains.trades.service import TradeServiceDependency
 from app.security import CurrentUserDependency
 
-router = APIRouter(prefix="/trade", tags=["trade"])
+router = APIRouter(prefix="/trades", tags=["trades"])
 
 
 @router.post("", response_model=TradeResponse, status_code=status.HTTP_201_CREATED)

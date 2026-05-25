@@ -4,7 +4,7 @@ from fastapi import Depends
 
 from app.database import DbDependency
 from app.database.repository import Repository
-from app.domains.trade.schemas import TradeRequest
+from app.domains.trades.schemas import TradeRequest
 from app.models import Trade
 
 

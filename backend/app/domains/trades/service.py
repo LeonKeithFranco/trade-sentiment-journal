@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import Depends
 
 from app.domains.auth.repository import UserRepoDependency, UserRepository
-from app.domains.trade.repository import TradeRepoDependency, TradeRepository
-from app.domains.trade.schemas import TradeRequest, TradeResponse
+from app.domains.trades.repository import TradeRepoDependency, TradeRepository
+from app.domains.trades.schemas import TradeRequest, TradeResponse
 
 
 class TradeService:

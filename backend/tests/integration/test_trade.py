@@ -74,7 +74,7 @@ class TestCreate:
         self, client: TestClient, access_token: str, payload: dict, pnl: Decimal | None
     ) -> None:
         response = client.post(
-            "/trade",
+            "/trades",
             headers={"Authorization": f"Bearer {access_token}"},
             json=payload,
         )
@@ -113,7 +113,7 @@ class TestCreate:
         }
 
         response = client.post(
-            "/trade",
+            "/trades",
             headers={"Authorization": f"Bearer {uuid.uuid4()}"},
             json=payload,
         )
@@ -151,7 +151,7 @@ class TestCreate:
         self, client: TestClient, access_token: str, payload: dict
     ) -> None:
         response = client.post(
-            "/trade",
+            "/trades",
             headers={"Authorization": f"Bearer {access_token}"},
             json=payload,
         )
@@ -183,7 +183,7 @@ class TestCreate:
         }
 
         response = client.post(
-            "/trade",
+            "/trades",
             headers={"Authorization": f"Bearer {access_token}"},
             json=payload,
         )
