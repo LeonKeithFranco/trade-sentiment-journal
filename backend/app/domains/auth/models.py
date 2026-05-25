@@ -28,7 +28,7 @@ class User(PublicIdMixin, TimestampMixin, Base):
         cascade="all, delete-orphan",
     )
 
-    traes: Mapped[list["Trade"]] = relationship(
+    trades: Mapped[list["Trade"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
     )
