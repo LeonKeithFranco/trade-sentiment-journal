@@ -1,4 +1,4 @@
-from asyncpg.compat import StrEnum
+from enum import StrEnum
 
 
 class Direction(StrEnum):
