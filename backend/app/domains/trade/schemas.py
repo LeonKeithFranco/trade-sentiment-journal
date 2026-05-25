@@ -51,6 +51,13 @@ class TradeRequest(TradeBase):
 
         return self
 
+    @model_validator(mode="after")
+    def validate_closed_at_later_than_opened_at(self) -> Self:
+        if (self.closed_at is not None) and (self.opened_at > self.closed_at):
+            raise ValueError("closed_at should be later than opened_at")
+
+        return self
+
     @field_validator("opened_at")
     @classmethod
     def convert_to_utc(cls, v: datetime) -> datetime:
