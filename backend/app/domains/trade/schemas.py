@@ -22,16 +22,9 @@ class TradeBase(BaseModel):
         max_length=MAX_TICKER_LENGTH,
     )
     direction: Direction
-    position_size: Decimal = Field(
-        gt=0,
-    )
-    entry_price: Decimal = Field(
-        gt=0,
-    )
-    exit_price: Decimal | None = Field(
-        default=None,
-        gt=0,
-    )
+    position_size: Decimal = Field(gt=0, examples=[1.000])
+    entry_price: Decimal = Field(gt=0, examples=[123.45])
+    exit_price: Decimal | None = Field(default=None, gt=0, examples=[500.55])
 
     opened_at: AwareDatetime
     closed_at: AwareDatetime | None
