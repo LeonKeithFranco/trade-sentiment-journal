@@ -2,7 +2,7 @@ from app.domains.auth.repository import UserRepoDependency, UserRepository
 from app.domains.trade.repository import TradeRepoDependency, TradeRepository
 
 
-class TradeSerive:
+class TradeService:
     def __init__(
         self,
         user_repo: UserRepoDependency,
