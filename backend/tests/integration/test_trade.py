@@ -233,7 +233,7 @@ class TestCreate:
                     {
                         "user_id": 1,
                         "ticker": "MAPPL",
-                        "_direction": "FAKE",
+                        "_direction": "LONG",
                         "position_size": 3.33,
                         "entry_price": 50.51,
                         "exit_price": 100.11,
