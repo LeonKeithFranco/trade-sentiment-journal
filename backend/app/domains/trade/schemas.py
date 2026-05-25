@@ -67,6 +67,8 @@ class TradeResponse(TradeBase):
         from_attributes=True,
     )
 
+    profit_and_loss: Decimal | None = Field(examples=[6.70])
+
     public_id: uuid.UUID
     created_on: datetime
     updated_on: datetime
