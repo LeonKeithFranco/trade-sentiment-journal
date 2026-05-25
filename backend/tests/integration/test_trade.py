@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 _OPENED_AT = datetime.now(UTC).isoformat().removesuffix("+00:00") + "Z"
 _CLOSED_AT = (
-    datetime.now(UTC) + timedelta(days=1)  # noqa: F401
+    datetime.now(UTC) + timedelta(days=1)  # noqa
 ).isoformat().removesuffix("+00:00") + "Z"
 
 
