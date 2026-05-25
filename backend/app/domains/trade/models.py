@@ -25,17 +25,18 @@ class Trade(PublicIdMixin, TimestampMixin, Base):
         String(10),
         index=True,
     )
-    direction: Mapped[str] = mapped_column(
+    _direction: Mapped[str] = mapped_column(
         String(5),
+        name="direction",
     )
 
     @property
-    def direction_(self) -> Direction:
-        return Direction(self.direction)
+    def direction(self) -> Direction:
+        return Direction(self._direction)
 
-    @direction_.setter
-    def direction_(self, direction: Direction) -> None:
-        self.direction = direction.value
+    @direction.setter
+    def direction(self, direction: Direction) -> None:
+        self._direction = direction.value
 
     position_size: Mapped[Decimal] = mapped_column(
         Numeric(12, 2),
