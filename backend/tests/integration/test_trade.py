@@ -206,7 +206,7 @@ class TestCreate:
         access_token: str,  # here to make sure a use is in the db
     ) -> None:
         with pytest.raises(IntegrityError):
-            with db_engine.begin() as conn:
+            with Session(db_engine) as session:
                 query = insert(Trade).values(
                     {
                         "user_id": 1,
@@ -220,7 +220,7 @@ class TestCreate:
                     }
                 )
 
-                conn.execute(query)
+                session.execute(query)
 
     def test_closed_at_after_opened_at_constraint(
         self,
