@@ -1,13 +1,12 @@
 import uuid
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from pprint import pp
 
 import pytest
 from app.models import Trade
 from fastapi import status
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine, insert, select
+from sqlalchemy import Engine, insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
