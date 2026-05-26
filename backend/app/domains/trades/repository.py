@@ -77,5 +77,17 @@ class TradeRepository(Repository):
 
         return results.rowcount
 
+    async def update_trade(
+        self,
+        trade: Trade,
+        /,
+        **update_info,
+    ) -> None:
+        for key, val in update_info.items():
+            setattr(trade, key, val)
+
+        await self.db.flush()
+        await self.db.refresh(trade)
+
 
 TradeRepoDependency = Annotated[TradeRepository, Depends(TradeRepository)]
