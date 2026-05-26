@@ -14,7 +14,11 @@ class TradeService:
         self.trade_repo: TradeRepository = trade_repo
 
     async def create(self, trade_info: TradeRequest, user_id: int) -> TradeResponse:
-        new_trade = await self.trade_repo.insert_trade(trade_info, user_id)
+        trade_info_dict = trade_info.model_dump(exclude_unset=True)
+
+        new_trade = await self.trade_repo.insert_trade(
+            user_id=user_id, **trade_info_dict
+        )
 
         return TradeResponse.model_validate(new_trade)
 
