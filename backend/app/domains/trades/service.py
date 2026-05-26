@@ -80,7 +80,7 @@ class TradeService:
         trade_public_id: uuid.UUID,
         user_id: int,
     ) -> TradeResponse:
-        trade = trade = await self._get_helper(trade_public_id, user_id)
+        trade = await self._get_helper(trade_public_id, user_id)
         trade_update_info_dict = trade_update_info.model_dump(exclude_unset=True)
 
         await self.trade_repo.update_trade(trade, **trade_update_info_dict)
