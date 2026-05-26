@@ -2,7 +2,11 @@ import uuid
 
 from fastapi import APIRouter, status
 
-from app.domains.trades.schemas import TradeCreateRequest, TradeResponse
+from app.domains.trades.schemas import (
+    TradeCreateRequest,
+    TradeResponse,
+    TradeUpdateRequest,
+)
 from app.domains.trades.service import TradeServiceDependency
 from app.security import CurrentUserDependency
 
@@ -41,3 +45,15 @@ async def delete(
     trade_service: TradeServiceDependency,
 ) -> None:
     await trade_service.delete(trade_public_id, current_user.id)
+
+
+@router.patch("/{trade_public_id}", response_model=TradeResponse)
+async def update(
+    trade_public_id: uuid.UUID,
+    trade_update_request: TradeUpdateRequest,
+    current_user: CurrentUserDependency,
+    trade_service: TradeServiceDependency,
+) -> TradeResponse:
+    return await trade_service.update(
+        trade_update_request, trade_public_id, current_user.id
+    )
