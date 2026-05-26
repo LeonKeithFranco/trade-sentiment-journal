@@ -2,6 +2,7 @@ import random
 import uuid
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+from pprint import pp
 
 import pytest
 from app.models import Trade
@@ -673,3 +674,82 @@ class TestUpdateTrade:
 
         assert update_response.status_code == status.HTTP_200_OK
         assert update_response.json()["profit_and_loss"] == f"{pnl:.2f}"
+
+    @pytest.mark.parametrize(
+        "update_payload",
+        (
+            {
+                "closed_at": (datetime.now(UTC) - timedelta(days=1)).isoformat(),
+            },
+            {
+                "opened_at": (datetime.now(UTC) + timedelta(days=1)).isoformat(),
+            },
+        ),
+    )
+    def test_update_closed_at_to_before_opened_at(
+        self, client: TestClient, access_token: str, update_payload: dict
+    ) -> None:
+        create_payload = {
+            "ticker": "MAPPL",
+            "direction": "LONG",
+            "position_size": 3.33,
+            "entry_price": 50.51,
+            "exit_price": 100.01,
+            "opened_at": _OPENED_AT,
+            "closed_at": _CLOSED_AT,
+        }
+
+        create_response = client.post(
+            "/trades",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=create_payload,
+        )
+
+        create_data = create_response.json()
+
+        update_response = client.patch(
+            f"/trades/{create_data['public_id']}",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=update_payload,
+        )
+
+        assert update_response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+        assert update_response.json() == {
+            "detail": "closed_at cannot be set before opened_at and vice versa."
+        }
+
+    def test_update_direction(self, client: TestClient, access_token: str) -> None:
+        create_payload = {
+            "ticker": "MAPPL",
+            "direction": "LONG",
+            "position_size": 3.33,
+            "entry_price": 50.51,
+            "exit_price": 100.01,
+            "opened_at": _OPENED_AT,
+            "closed_at": _CLOSED_AT,
+        }
+
+        create_response = client.post(
+            "/trades",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=create_payload,
+        )
+
+        update_payload = {
+            "direction": "FAKE",
+        }
+
+        update_response = client.patch(
+            f"/trades/{create_response.json()['public_id']}",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=update_payload,
+        )
+
+        assert update_response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+        assert update_response.json()["detail"][0] == {
+            "ctx": {"expected": "'LONG' or 'SHORT'"},
+            "input": update_payload["direction"],
+            "loc": ["body", "direction"],
+            "msg": "Input should be 'LONG' or 'SHORT'",
+            "type": "enum",
+        }
