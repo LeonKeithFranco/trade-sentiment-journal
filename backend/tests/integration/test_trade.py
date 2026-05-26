@@ -15,7 +15,7 @@ _CLOSED_AT = (
 ).isoformat().removesuffix("+00:00") + "Z"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def fake_jwt() -> str:
     return (
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
