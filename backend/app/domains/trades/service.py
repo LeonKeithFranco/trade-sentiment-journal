@@ -20,6 +20,8 @@ class TradeService:
             user_id=user_id, **trade_info_dict
         )
 
+        await self.trade_repo.commit()
+
         return TradeResponse.model_validate(new_trade)
 
 
