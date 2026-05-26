@@ -27,7 +27,6 @@ class TradeRepository(Repository):
         opened_at: datetime,
         user_id: int,
         exit_price: Decimal | None = None,
-        profit_and_loss: Decimal | None = None,
         closed_at: datetime | None = None,
     ) -> Trade:
         trade = Trade()
@@ -36,7 +35,6 @@ class TradeRepository(Repository):
         trade.position_size = position_size
         trade.entry_price = entry_price
         trade.exit_price = exit_price
-        trade.profit_and_loss = profit_and_loss
         trade.opened_at = opened_at
         trade.closed_at = closed_at
         trade.user_id = user_id
