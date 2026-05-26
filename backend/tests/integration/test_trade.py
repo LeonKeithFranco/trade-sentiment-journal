@@ -16,7 +16,7 @@ _CLOSED_AT = (
 ).isoformat().removesuffix("+00:00") + "Z"
 
 
-class TestCreate:
+class TestCreateTrade:
     @pytest.mark.parametrize(
         "payload,pnl",
         [
