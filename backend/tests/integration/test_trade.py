@@ -16,7 +16,7 @@ _CLOSED_AT = (
 
 
 @pytest.fixture(scope="session")
-def fake_jwt() -> str:
+def fake_access_token() -> str:
     return (
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
         "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0."
@@ -110,7 +110,7 @@ class TestCreateTrade:
         assert "updated_on" in data
 
     def test_add_trade_to_non_existent_user(
-        self, client: TestClient, fake_jwt: str
+        self, client: TestClient, fake_access_token: str
     ) -> None:
         payload = {
             "ticker": "MAPPL",
@@ -124,7 +124,7 @@ class TestCreateTrade:
 
         response = client.post(
             "/trades",
-            headers={"Authorization": f"Bearer {fake_jwt}"},
+            headers={"Authorization": f"Bearer {fake_access_token}"},
             json=payload,
         )
 
