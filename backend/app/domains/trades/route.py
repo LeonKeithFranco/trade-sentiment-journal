@@ -32,3 +32,12 @@ async def get(
     trade_service: TradeServiceDependency,
 ) -> TradeResponse:
     return await trade_service.get(trade_public_id, current_user.id)
+
+
+@router.delete("/{trade_public_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete(
+    trade_public_id: uuid.UUID,
+    current_user: CurrentUserDependency,
+    trade_service: TradeServiceDependency,
+) -> None:
+    await trade_service.delete(trade_public_id, current_user.id)
