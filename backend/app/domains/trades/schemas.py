@@ -27,7 +27,7 @@ class TradeBase(BaseModel):
     exit_price: Decimal | None = Field(default=None, gt=0, examples=[500.55])
 
     opened_at: AwareDatetime
-    closed_at: AwareDatetime | None
+    closed_at: AwareDatetime | None = None
 
 
 class TradeRequest(TradeBase):
