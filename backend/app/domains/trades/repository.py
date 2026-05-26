@@ -1,10 +1,10 @@
 import uuid
 from datetime import datetime
 from decimal import Decimal
-from typing import Annotated
+from typing import Annotated, cast
 
 from fastapi import Depends
-from sqlalchemy import select
+from sqlalchemy import CursorResult, delete, select
 
 from app.database import DbDependency
 from app.database.repository import Repository
@@ -64,6 +64,18 @@ class TradeRepository(Repository):
         trades = results.scalars().all()
 
         return list(trades)
+
+    async def delete_trade_by_public_id_for_user(
+        self, trade_public_id: uuid.UUID, user_id: int
+    ) -> int:
+        query = (
+            delete(Trade)
+            .where(Trade.public_id == trade_public_id)
+            .where(Trade.user_id == user_id)
+        )
+        results = cast(CursorResult, await self.db.execute(query))
+
+        return results.rowcount
 
 
 TradeRepoDependency = Annotated[TradeRepository, Depends(TradeRepository)]
