@@ -1,13 +1,17 @@
+import uuid
 from datetime import datetime
 from decimal import Decimal
 from typing import Annotated
 
 from fastapi import Depends
+from sqlalchemy import select
 
 from app.database import DbDependency
 from app.database.repository import Repository
 from app.domains.trades.constants import Direction
 from app.models import Trade
+
+type MaybeTrade = Trade | None
 
 
 class TradeRepository(Repository):
@@ -40,6 +44,19 @@ class TradeRepository(Repository):
         self.db.add(trade)
         await self.db.flush()
         await self.db.refresh(trade)
+
+        return trade
+
+    async def get_trade_by_public_id_for_user(
+        self, trade_public_id: uuid.UUID, user_id: int
+    ) -> MaybeTrade:
+        query = (
+            select(Trade)
+            .where(Trade.public_id == trade_public_id)
+            .where(Trade.user_id == user_id)
+        )
+        results = await self.db.execute(query)
+        trade = results.scalar_one_or_none()
 
         return trade
 
