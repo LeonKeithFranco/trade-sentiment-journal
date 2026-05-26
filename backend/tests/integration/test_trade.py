@@ -1,7 +1,7 @@
+import random
 import uuid
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from pprint import pp
 
 import pytest
 from app.models import Trade
@@ -344,7 +344,7 @@ class TestGetTrade:
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.json() == {"detail": "Trade does not exist."}
+        assert response.json() == {"detail": "Trade(s) does not exist."}
 
     def test_get_trade_of_another_user(
         self, client: TestClient, access_token: str, other_access_token: str
@@ -373,4 +373,4 @@ class TestGetTrade:
         )
 
         assert get_response.status_code == status.HTTP_404_NOT_FOUND
-        assert get_response.json() == {"detail": "Trade does not exist."}
+        assert get_response.json() == {"detail": "Trade(s) does not exist."}
