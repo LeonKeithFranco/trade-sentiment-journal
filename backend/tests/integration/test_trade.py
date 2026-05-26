@@ -533,3 +533,143 @@ class TestDeleteTrade:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json() == {"detail": "Trade(s) does not exist."}
+
+
+class TestUpdateTrade:
+    def test_update_trade(self, client: TestClient, access_token: str) -> None:
+        create_payload = {
+            "ticker": "MAPPL",
+            "direction": "LONG",
+            "position_size": 3.33,
+            "entry_price": 50.51,
+            "exit_price": None,
+            "opened_at": _OPENED_AT,
+            "closed_at": None,
+        }
+
+        create_response = client.post(
+            "/trades",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=create_payload,
+        )
+
+        create_data = create_response.json()
+
+        update_payload = {
+            "ticker": "GNG",
+        }
+
+        update_response = client.patch(
+            f"/trades/{create_data['public_id']}",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=update_payload,
+        )
+
+        assert update_response.status_code == status.HTTP_200_OK
+
+        update_data = update_response.json()
+
+        assert (update_data["ticker"] != create_data["ticker"]) and (
+            update_data["ticker"] == "GNG"
+        )
+        assert update_data["direction"] == create_data["direction"]
+        assert update_data["position_size"] == create_data["position_size"]
+        assert update_data["entry_price"] == create_data["entry_price"]
+        assert update_data["exit_price"] == create_data["exit_price"]
+        assert update_data["opened_at"] == create_data["opened_at"]
+        assert update_data["closed_at"] == create_data["closed_at"]
+        assert update_data["profit_and_loss"] == create_data["profit_and_loss"]
+        assert update_data["public_id"] == create_data["public_id"]
+        assert update_data["created_on"] == create_data["created_on"]
+        assert datetime.fromisoformat(
+            update_data["updated_on"]
+        ) > datetime.fromisoformat(create_data["updated_on"])
+
+    @pytest.mark.parametrize(
+        "create_payload,update_payload,pnl",
+        [
+            (
+                {
+                    "ticker": "MAPPL",
+                    "direction": "LONG",
+                    "position_size": 1,
+                    "entry_price": 1,
+                    "exit_price": None,
+                    "opened_at": _OPENED_AT,
+                    "closed_at": None,
+                },
+                {
+                    "exit_price": 2,
+                    "closed_at": _CLOSED_AT,
+                },
+                1,
+            ),
+            (
+                {
+                    "ticker": "MAPPL",
+                    "direction": "LONG",
+                    "position_size": 1,
+                    "entry_price": 1,
+                    "exit_price": 2,
+                    "opened_at": _OPENED_AT,
+                    "closed_at": _CLOSED_AT,
+                },
+                {
+                    "entry_price": 3,
+                },
+                -1,
+            ),
+            (
+                {
+                    "ticker": "MAPPL",
+                    "direction": "LONG",
+                    "position_size": 1,
+                    "entry_price": 1,
+                    "exit_price": 2,
+                    "opened_at": _OPENED_AT,
+                    "closed_at": _CLOSED_AT,
+                },
+                {
+                    "position_size": 3,
+                },
+                3,
+            ),
+            (
+                {
+                    "ticker": "MAPPL",
+                    "direction": "LONG",
+                    "position_size": 1,
+                    "entry_price": 1,
+                    "exit_price": 2,
+                    "opened_at": _OPENED_AT,
+                    "closed_at": _CLOSED_AT,
+                },
+                {
+                    "direction": "SHORT",
+                },
+                -1,
+            ),
+        ],
+    )
+    def test_pnl_update_trade(
+        self,
+        client: TestClient,
+        access_token: str,
+        create_payload: dict,
+        update_payload: dict,
+        pnl: Decimal,
+    ) -> None:
+        create_response = client.post(
+            "/trades",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=create_payload,
+        )
+
+        update_response = client.patch(
+            f"/trades/{create_response.json()['public_id']}",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=update_payload,
+        )
+
+        assert update_response.status_code == status.HTTP_200_OK
+        assert update_response.json()["profit_and_loss"] == f"{pnl:.2f}"
