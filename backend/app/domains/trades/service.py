@@ -2,7 +2,9 @@ import uuid
 from typing import Annotated
 
 from fastapi import Depends
+from sqlalchemy.exc import IntegrityError
 
+from app.database.exceptions import ClosedAtBeforeOpenedAtError
 from app.domains.trades.exceptions import TradeDoesNotExistError
 from app.domains.trades.repository import TradeRepoDependency, TradeRepository
 from app.domains.trades.schemas import (
@@ -83,7 +85,17 @@ class TradeService:
         trade = await self._get_helper(trade_public_id, user_id)
         trade_update_info_dict = trade_update_info.model_dump(exclude_unset=True)
 
-        await self.trade_repo.update_trade(trade, **trade_update_info_dict)
+        try:
+            await self.trade_repo.update_trade(trade, **trade_update_info_dict)
+        except IntegrityError as exc:
+            cause = getattr(exc.orig, "__cause__", None)
+            constraint = getattr(cause, "constraint_name", None)
+
+            match constraint:
+                case "check_closed_at_after_opened_at":
+                    raise ClosedAtBeforeOpenedAtError
+                case _:
+                    raise
 
         await self.trade_repo.commit()
 
