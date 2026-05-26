@@ -58,5 +58,12 @@ class TradeRepository(Repository):
 
         return trade
 
+    async def get_all_trades_by_user_id(self, user_id: int) -> list[Trade]:
+        query = select(Trade).where(Trade.user_id == user_id)
+        results = await self.db.execute(query)
+        trades = results.scalars().all()
+
+        return list(trades)
+
 
 TradeRepoDependency = Annotated[TradeRepository, Depends(TradeRepository)]
