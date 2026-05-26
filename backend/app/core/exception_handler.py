@@ -60,7 +60,7 @@ def attach_exception_handlers(app: FastAPI) -> None:
     ) -> JSONResponse:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content={"detail": "Trade does not exist."},
+            content={"detail": "Trade(s) does not exist."},
         )
 
     @app.exception_handler(Exception)
