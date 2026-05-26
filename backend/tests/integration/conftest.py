@@ -101,3 +101,20 @@ def access_token(client: TestClient, default_password: str) -> str:
     )
 
     return login_response.json()["access_token"]
+
+
+@pytest.fixture
+def other_access_token(client: TestClient, default_password: str) -> str:
+    email = "user2@test.com"
+
+    client.post("/auth/register", json={"email": email, "password": default_password})
+
+    login_response = client.post(
+        "/auth/login",
+        json={
+            "email": email,
+            "password": default_password,
+        },
+    )
+
+    return login_response.json()["access_token"]
