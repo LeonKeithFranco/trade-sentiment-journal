@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
+from app.database.exceptions import ClosedAtBeforeOpenedAtError
 from app.exceptions import (
     DatabaseError,
     InvalidAccessTokenError,
@@ -18,12 +19,23 @@ def attach_exception_handlers(app: FastAPI) -> None:
     """
 
     @app.exception_handler(DatabaseError)
-    async def catch_database_error_handler(
+    async def database_error_handler(
         request: Request, exc: DatabaseError
     ) -> JSONResponse:
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={"detail": "Database cannot be reached."},
+        )
+
+    @app.exception_handler(ClosedAtBeforeOpenedAtError)
+    async def closed_at_before_opened_at_error_handler(
+        request: Request, exc: ClosedAtBeforeOpenedAtError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            content={
+                "detail": "closed_at cannot be set before opened_at and vice versa."
+            },
         )
 
     @app.exception_handler(UserAlreadyExistsError)
