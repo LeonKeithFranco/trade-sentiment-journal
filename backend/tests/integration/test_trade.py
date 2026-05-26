@@ -334,3 +334,43 @@ class TestGetTrade:
 
         assert get_response.status_code == status.HTTP_200_OK
         assert get_response.json() == create_response.json()
+
+    def test_get_non_existent_trade(
+        self, client: TestClient, access_token: str
+    ) -> None:
+        response = client.get(
+            f"/trades/{uuid.uuid4()}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json() == {"detail": "Trade does not exist."}
+
+    def test_get_trade_of_another_user(
+        self, client: TestClient, access_token: str, other_access_token: str
+    ) -> None:
+        payload = {
+            "ticker": "MAPPL",
+            "direction": "LONG",
+            "position_size": 3.33,
+            "entry_price": 50.51,
+            "exit_price": None,
+            "opened_at": _OPENED_AT,
+            "closed_at": None,
+        }
+
+        create_response = client.post(
+            "/trades",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
+        trade_public_id = create_response.json()["public_id"]
+
+        get_response = client.get(
+            f"/trades/{trade_public_id}",
+            headers={"Authorization": f"Bearer {other_access_token}"},
+        )
+
+        assert get_response.status_code == status.HTTP_404_NOT_FOUND
+        assert get_response.json() == {"detail": "Trade does not exist."}
