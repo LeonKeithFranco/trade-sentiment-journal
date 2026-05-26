@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from app.exceptions import (
     DatabaseError,
     InvalidAccessTokenError,
+    TradeDoesNotExistError,
     UserAlreadyExistsError,
     UserInvalidCredentialsError,
 )
@@ -51,6 +52,15 @@ def attach_exception_handlers(app: FastAPI) -> None:
             status_code=status.HTTP_401_UNAUTHORIZED,
             content={"detail": exc.reason},
             headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    @app.exception_handler(TradeDoesNotExistError)
+    async def trade_does_not_exist_error(
+        equest: Request, exc: TradeDoesNotExistError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"detail": "Trade does not exist."},
         )
 
     @app.exception_handler(Exception)

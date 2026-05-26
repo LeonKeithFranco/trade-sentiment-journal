@@ -3,6 +3,7 @@ from app.domains.auth.exceptions import (
     UserAlreadyExistsError,
     UserInvalidCredentialsError,
 )
+from app.domains.trades.exceptions import TradeDoesNotExistError
 from app.security.exceptions import InvalidAccessTokenError
 
 __all__ = [
@@ -10,4 +11,5 @@ __all__ = [
     "UserAlreadyExistsError",
     "UserInvalidCredentialsError",
     "InvalidAccessTokenError",
+    "TradeDoesNotExistError",
 ]
