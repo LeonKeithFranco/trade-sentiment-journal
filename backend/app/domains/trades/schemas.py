@@ -40,7 +40,7 @@ class TradeBase(BaseModel):
     closed_at: AwareDatetime | None = None
 
 
-class TradeRequest(TradeBase):
+class TradeCreateRequest(TradeBase):
     @model_validator(mode="after")
     def validate_exit_price_and_closed_at(self) -> Self:
         exit_price_is_none = self.exit_price is None
