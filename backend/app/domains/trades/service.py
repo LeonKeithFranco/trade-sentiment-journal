@@ -50,5 +50,17 @@ class TradeService:
 
         return trade_responses
 
+    async def delete(self, trade_public_id: uuid.UUID, user_id: int) -> None:
+        trades_deleted = await self.trade_repo.delete_trade_by_public_id_for_user(
+            trade_public_id, user_id
+        )
+
+        if not trades_deleted:
+            raise TradeDoesNotExistError(
+                f"There is no trade with public_id {trade_public_id} for user with id {user_id}"
+            )
+
+        await self.trade_repo.commit()
+
 
 TradeServiceDependency = Annotated[TradeService, Depends(TradeService)]
