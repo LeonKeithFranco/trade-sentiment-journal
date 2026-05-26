@@ -458,3 +458,38 @@ class TestGetTrade:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json() == {"detail": "Trade(s) does not exist."}
+
+
+class TestDeleteTrade:
+    def test_delete_trade(self, client: TestClient, access_token: str) -> None:
+        payload = {
+            "ticker": "MAPPL",
+            "direction": "LONG",
+            "position_size": 3.33,
+            "entry_price": 50.51,
+            "exit_price": None,
+            "opened_at": _OPENED_AT,
+            "closed_at": None,
+        }
+
+        create_response = client.post(
+            "/trades",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
+        trade_public_id = create_response.json()["public_id"]
+
+        delete_response = client.delete(
+            f"/trades/{trade_public_id}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        assert delete_response.status_code == status.HTTP_204_NO_CONTENT
+
+        get_response = client.get(
+            f"/trades/{trade_public_id}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        assert get_response.status_code == status.HTTP_404_NOT_FOUND
