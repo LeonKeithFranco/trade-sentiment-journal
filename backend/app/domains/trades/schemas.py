@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC
 from decimal import Decimal
 from typing import Self
 
@@ -63,12 +63,14 @@ class TradeRequest(TradeBase):
 
     @field_validator("opened_at")
     @classmethod
-    def convert_to_utc(cls, v: datetime) -> datetime:
+    def convert_to_utc(cls, v: AwareDatetime) -> AwareDatetime:
         return v.astimezone(UTC)
 
     @field_validator("closed_at")
     @classmethod
-    def convert_to_utc_if_not_none(cls, v: datetime | None) -> datetime | None:
+    def convert_to_utc_if_not_none(
+        cls, v: AwareDatetime | None
+    ) -> AwareDatetime | None:
         return v.astimezone(UTC) if v is not None else None
 
 
@@ -77,8 +79,8 @@ class TradeResponse(TradeBase):
         from_attributes=True,
     )
 
-    profit_and_loss: Decimal | None = Field(examples=[6.70])
+    profit_and_loss: Decimal | None = Field(None, examples=[6.70])
 
     public_id: uuid.UUID
-    created_on: datetime
-    updated_on: datetime
+    created_on: AwareDatetime
+    updated_on: AwareDatetime
