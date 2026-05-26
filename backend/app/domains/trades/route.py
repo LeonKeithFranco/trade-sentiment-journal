@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import APIRouter, status
 
 from app.domains.trades.schemas import TradeRequest, TradeResponse
@@ -14,3 +16,12 @@ async def create(
     trade_service: TradeServiceDependency,
 ) -> TradeResponse:
     return await trade_service.create(trade_request, current_user.id)
+
+
+@router.get("/{trade_public_id}", response_model=TradeResponse)
+async def get(
+    trade_public_id: uuid.UUID,
+    current_user: CurrentUserDependency,
+    trade_service: TradeServiceDependency,
+) -> TradeResponse:
+    return await trade_service.get(trade_public_id, current_user.id)
