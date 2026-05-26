@@ -74,6 +74,51 @@ class TradeRequest(TradeBase):
         return v.astimezone(UTC) if v is not None else None
 
 
+class TradeUpdateRequest(BaseModel):
+    ticker: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=MAX_TICKER_LENGTH,
+    )
+    direction: Direction | None = None
+    position_size: Decimal | None = Field(
+        default=None,
+        gt=0,
+        examples=[1.000],
+    )
+    entry_price: Decimal | None = Field(
+        default=None,
+        gt=0,
+        examples=[123.45],
+    )
+    exit_price: Decimal | None = Field(
+        default=None,
+        gt=0,
+        examples=[500.55],
+    )
+
+    opened_at: AwareDatetime | None = None
+    closed_at: AwareDatetime | None = None
+
+    @model_validator(mode="after")
+    def validate_closed_at_later_than_opened_at(self) -> Self:
+        if (
+            (self.opened_at is not None)
+            and (self.closed_at is not None)
+            and (self.opened_at > self.closed_at)
+        ):
+            raise ValueError("closed_at should be later than opened_at")
+
+        return self
+
+    @field_validator("opened_at", "closed_at")
+    @classmethod
+    def convert_to_utc_if_not_none(
+        cls, v: AwareDatetime | None
+    ) -> AwareDatetime | None:
+        return v.astimezone(UTC) if v is not None else None
+
+
 class TradeResponse(TradeBase):
     model_config = ConfigDict(
         from_attributes=True,
