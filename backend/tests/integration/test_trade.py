@@ -374,3 +374,46 @@ class TestGetTrade:
 
         assert get_response.status_code == status.HTTP_404_NOT_FOUND
         assert get_response.json() == {"detail": "Trade(s) does not exist."}
+
+    @pytest.mark.parametrize(
+        "num_trades",
+        [1, 3],
+    )
+    def test_get_all(
+        self, client: TestClient, access_token: str, num_trades: int
+    ) -> None:
+        payloads = [
+            {
+                "ticker": "JOOJL",
+                "direction": "SHORT",
+                "position_size": random.uniform(1, 10),
+                "entry_price": random.uniform(1, 10),
+                "exit_price": random.uniform(1, 10),
+                "opened_at": _OPENED_AT,
+                "closed_at": _CLOSED_AT,
+            }
+            for _ in range(num_trades)
+        ]
+
+        trade_response_data = []
+
+        for payload in payloads:
+            create_response = client.post(
+                "/trades",
+                headers={"Authorization": f"Bearer {access_token}"},
+                json=payload,
+            )
+            trade_response_data.append(create_response.json())
+
+        get_all_response = client.get(
+            "/trades/all", headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        assert get_all_response.status_code == status.HTTP_200_OK, (
+            get_all_response.json()
+        )
+
+        for trade_response_datum, get_all_trade_response_datum in zip(
+            trade_response_data, get_all_response.json()
+        ):
+            assert trade_response_datum == get_all_trade_response_datum
