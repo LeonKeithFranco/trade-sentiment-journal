@@ -15,6 +15,15 @@ _CLOSED_AT = (
 ).isoformat().removesuffix("+00:00") + "Z"
 
 
+@pytest.fixture
+def fake_jwt() -> str:
+    return (
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+        "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0."
+        "KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30"
+    )
+
+
 class TestCreateTrade:
     @pytest.mark.parametrize(
         "payload,pnl",
@@ -100,7 +109,9 @@ class TestCreateTrade:
         assert "created_on" in data
         assert "updated_on" in data
 
-    def test_add_trade_to_non_existent_user(self, client: TestClient) -> None:
+    def test_add_trade_to_non_existent_user(
+        self, client: TestClient, fake_jwt: str
+    ) -> None:
         payload = {
             "ticker": "MAPPL",
             "direction": "LONG",
@@ -113,9 +124,7 @@ class TestCreateTrade:
 
         response = client.post(
             "/trades",
-            headers={
-                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30"
-            },
+            headers={"Authorization": f"Bearer {fake_jwt}"},
             json=payload,
         )
 
