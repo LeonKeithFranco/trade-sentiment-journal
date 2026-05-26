@@ -1,4 +1,3 @@
-import uuid
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
@@ -114,7 +113,9 @@ class TestCreateTrade:
 
         response = client.post(
             "/trades",
-            headers={"Authorization": f"Bearer {uuid.uuid4()}"},
+            headers={
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30"
+            },
             json=payload,
         )
 
