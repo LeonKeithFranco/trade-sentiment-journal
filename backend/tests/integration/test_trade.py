@@ -417,3 +417,44 @@ class TestGetTrade:
             trade_response_data, get_all_response.json()
         ):
             assert trade_response_datum == get_all_trade_response_datum
+
+    def test_no_trades_get_all(self, client: TestClient, access_token: str) -> None:
+        response = client.get(
+            "/trades/all", headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json() == {"detail": "Trade(s) does not exist."}
+
+    def test_get_all_trade_of_another_user(
+        self, client: TestClient, access_token: str, other_access_token: str
+    ) -> None:
+        payload = {
+            "ticker": "MAPPL",
+            "direction": "LONG",
+            "position_size": 3.33,
+            "entry_price": 50.51,
+            "exit_price": None,
+            "opened_at": _OPENED_AT,
+            "closed_at": None,
+        }
+
+        client.post(
+            "/trades",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
+        client.post(
+            "/trades",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
+        response = client.get(
+            "/trades/all",
+            headers={"Authorization": f"Bearer {other_access_token}"},
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json() == {"detail": "Trade(s) does not exist."}
