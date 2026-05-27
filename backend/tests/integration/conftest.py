@@ -122,6 +122,15 @@ def other_access_token(client: TestClient, default_password: str) -> str:
     return login_response.json()["access_token"]
 
 
+@pytest.fixture(scope="session")
+def fake_access_token() -> str:
+    return (
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+        "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0."
+        "KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30"
+    )
+
+
 @pytest.fixture
 def trade_public_id(client: TestClient, access_token: str) -> str:
     payload = {

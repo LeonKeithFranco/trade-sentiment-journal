@@ -19,15 +19,6 @@ _CLOSED_AT = (
 ).isoformat().removesuffix("+00:00") + "Z"
 
 
-@pytest.fixture(scope="session")
-def fake_access_token() -> str:
-    return (
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
-        "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0."
-        "KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30"
-    )
-
-
 class TestCreateTrade:
     @pytest.mark.parametrize(
         "payload,pnl",
