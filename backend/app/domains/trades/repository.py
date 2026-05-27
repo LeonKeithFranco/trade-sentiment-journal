@@ -14,7 +14,7 @@ from app.models import Trade
 type MaybeTrade = Trade | None
 
 
-class TradeRepository(Repository):
+class TradeRepository(Repository[Trade]):
     def __init__(self, db: DbDependency) -> None:
         super().__init__(db)
 
