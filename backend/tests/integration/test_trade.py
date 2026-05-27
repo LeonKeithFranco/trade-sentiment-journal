@@ -452,8 +452,8 @@ class TestGetTrade:
             "/trades", headers={"Authorization": f"Bearer {access_token}"}
         )
 
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.json() == {"detail": "Trade(s) does not exist."}
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == []
 
     def test_get_all_trade_of_another_user(
         self, client: TestClient, access_token: str, other_access_token: str
@@ -485,8 +485,8 @@ class TestGetTrade:
             headers={"Authorization": f"Bearer {other_access_token}"},
         )
 
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.json() == {"detail": "Trade(s) does not exist."}
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == []
 
 
 class TestDeleteTrade:

@@ -57,11 +57,6 @@ class TradeService:
     async def get_all(self, user_id: int) -> list[TradeResponse]:
         trades = await self.trade_repo.get_all_trades_by_user_id(user_id)
 
-        if not trades:
-            raise TradeDoesNotExistError(
-                f"There are no trades for user with id {user_id}"
-            )
-
         trade_responses = [TradeResponse.model_validate(trade) for trade in trades]
 
         return trade_responses
