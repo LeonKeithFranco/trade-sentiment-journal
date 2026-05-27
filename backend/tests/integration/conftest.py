@@ -123,7 +123,7 @@ def other_access_token(client: TestClient, default_password: str) -> str:
 
 
 @pytest.fixture
-def trade_public_id(client: TestClient, access_token: str) -> uuid.UUID:
+def trade_public_id(client: TestClient, access_token: str) -> str:
     payload = {
         "ticker": "MAPPL",
         "direction": "LONG",

@@ -24,7 +24,7 @@ class TestCreateJournalEntry:
         client: TestClient,
         access_token: str,
         payload: dict,
-        trade_public_id: uuid.UUID,
+        trade_public_id:str,
     ) -> None:
         payload = payload | {"trade_public_id": trade_public_id}
 
