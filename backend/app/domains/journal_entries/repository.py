@@ -26,6 +26,13 @@ class JournalEntryRepository(Repository[JournalEntry]):
             JournalEntry.user_id == user_id,
         )
 
+    async def get_all_journal_entries_by_user_id(
+        self, user_id: int
+    ) -> list[JournalEntry]:
+        return await self.get_all_from_table(
+            JournalEntry, JournalEntry.user_id == user_id
+        )
+
 
 JournalEntryRepoDependency = Annotated[
     JournalEntryRepository, Depends(JournalEntryRepository)
