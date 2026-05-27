@@ -22,7 +22,7 @@ async def create(
     return await trade_service.create(trade_request, current_user.id)
 
 
-@router.get("/all", response_model=list[TradeResponse])
+@router.get("", response_model=list[TradeResponse])
 async def get_all(
     current_user: CurrentUserDependency, trade_service: TradeServiceDependency
 ) -> list[TradeResponse]:

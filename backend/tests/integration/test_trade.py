@@ -435,7 +435,7 @@ class TestGetTrade:
             trade_response_data.append(create_response.json())
 
         get_all_response = client.get(
-            "/trades/all", headers={"Authorization": f"Bearer {access_token}"}
+            "/trades", headers={"Authorization": f"Bearer {access_token}"}
         )
 
         assert get_all_response.status_code == status.HTTP_200_OK, (
@@ -449,7 +449,7 @@ class TestGetTrade:
 
     def test_no_trades_get_all(self, client: TestClient, access_token: str) -> None:
         response = client.get(
-            "/trades/all", headers={"Authorization": f"Bearer {access_token}"}
+            "/trades", headers={"Authorization": f"Bearer {access_token}"}
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -481,7 +481,7 @@ class TestGetTrade:
         )
 
         response = client.get(
-            "/trades/all",
+            "/trades",
             headers={"Authorization": f"Bearer {other_access_token}"},
         )
 
