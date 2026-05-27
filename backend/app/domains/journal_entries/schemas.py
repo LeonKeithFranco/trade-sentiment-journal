@@ -13,6 +13,7 @@ class JournalEntryBase(BaseModel):
     )
     entry: str = Field(
         min_length=50,
+        max_length=4096,
     )
 
 
