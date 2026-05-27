@@ -933,7 +933,7 @@ class TestUpdateTrade:
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json() == {"detail": "Trade(s) does not exist."}
 
-    def test_delete_trade_of_another_user(
+    def test_update_trade_of_another_user(
         self, client: TestClient, access_token: str, other_access_token: str
     ) -> None:
         payload = {
