@@ -5,6 +5,7 @@ from app.exceptions import (
     ClosedAtBeforeOpenedAtError,
     DatabaseError,
     InvalidAccessTokenError,
+    TradeClosedFieldsMismatchError,
     TradeDoesNotExistError,
     UserAlreadyExistsError,
     UserInvalidCredentialsError,
@@ -35,6 +36,17 @@ def attach_exception_handlers(app: FastAPI) -> None:
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             content={
                 "detail": "closed_at cannot be set before opened_at and vice versa."
+            },
+        )
+
+    @app.exception_handler(TradeClosedFieldsMismatchError)
+    async def trade_closed_fields_mismatch_error_handler(
+        request: Request, exc: TradeClosedFieldsMismatchError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            content={
+                "detail": "exit_price and closed_at must both be None or must both have values."
             },
         )
 

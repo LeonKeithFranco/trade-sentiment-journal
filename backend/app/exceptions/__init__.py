@@ -5,6 +5,7 @@ from app.domains.auth.exceptions import (
 )
 from app.domains.trades.exceptions import (
     ClosedAtBeforeOpenedAtError,
+    TradeClosedFieldsMismatchError,
     TradeDoesNotExistError,
 )
 from app.security.exceptions import InvalidAccessTokenError
@@ -16,4 +17,5 @@ __all__ = [
     "InvalidAccessTokenError",
     "TradeDoesNotExistError",
     "ClosedAtBeforeOpenedAtError",
+    "TradeClosedFieldsMismatchError",
 ]
