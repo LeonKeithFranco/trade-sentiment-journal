@@ -25,7 +25,7 @@ class TradeService:
     ) -> None:
         self.trade_repo: TradeRepository = trade_repo
 
-    async def _get_helper(self, trade_public_id: uuid.UUID, user_id: int) -> Trade:
+    async def get_trade(self, trade_public_id: uuid.UUID, user_id: int) -> Trade:
         trade = await self.trade_repo.get_trade_by_public_id_for_user(
             trade_public_id, user_id
         )
@@ -51,7 +51,7 @@ class TradeService:
         return TradeResponse.model_validate(new_trade)
 
     async def get(self, trade_public_id: uuid.UUID, user_id: int) -> TradeResponse:
-        trade = await self._get_helper(trade_public_id, user_id)
+        trade = await self.get_trade(trade_public_id, user_id)
 
         return TradeResponse.model_validate(trade)
 
@@ -80,7 +80,7 @@ class TradeService:
         trade_public_id: uuid.UUID,
         user_id: int,
     ) -> TradeResponse:
-        trade = await self._get_helper(trade_public_id, user_id)
+        trade = await self.get_trade(trade_public_id, user_id)
         trade_update_info_dict = trade_update_info.model_dump(exclude_unset=True)
 
         try:
