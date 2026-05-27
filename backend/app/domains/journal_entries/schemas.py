@@ -9,6 +9,6 @@ class JournalEntryBase(BaseModel):
         min_length=1,
         max_length=MAX_TITLE_LENGTH,
     )
-    text: str = Field(
+    entry: str = Field(
         min_length=50,
     )
