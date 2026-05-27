@@ -8,3 +8,7 @@ class TradeDoesNotExistError(TradeError):
 
 class ClosedAtBeforeOpenedAtError(TradeError):
     """There is an attempt to try to set closed_at datetime to before opened_at datetime and vice versa."""
+
+
+class TradeClosedFieldsMismatchError(TradeError):
+    """exit_price and closed_at must both be None or must both have values."""
