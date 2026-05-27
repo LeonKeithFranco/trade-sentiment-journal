@@ -48,15 +48,9 @@ class TradeRepository(Repository):
     async def get_trade_by_public_id_for_user(
         self, trade_public_id: uuid.UUID, user_id: int
     ) -> MaybeTrade:
-        query = (
-            select(Trade)
-            .where(Trade.public_id == trade_public_id)
-            .where(Trade.user_id == user_id)
+        return await self.get_from_table_by(
+            Trade, Trade.public_id == trade_public_id, Trade.user_id == user_id
         )
-        results = await self.db.execute(query)
-        trade = results.scalar_one_or_none()
-
-        return trade
 
     async def get_all_trades_by_user_id(self, user_id: int) -> list[Trade]:
         query = select(Trade).where(Trade.user_id == user_id)
