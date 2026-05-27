@@ -83,7 +83,7 @@ class TradeService:
         trade_update_info_dict = trade_update_info.model_dump(exclude_unset=True)
 
         try:
-            udpated_trade = await self.trade_repo.update_trade(
+            updated_trade = await self.trade_repo.update_trade(
                 trade, **trade_update_info_dict
             )
         except IntegrityError as exc:
@@ -98,7 +98,7 @@ class TradeService:
 
         await self.trade_repo.commit()
 
-        return TradeResponse.model_validate(udpated_trade)
+        return TradeResponse.model_validate(updated_trade)
 
 
 TradeServiceDependency = Annotated[TradeService, Depends(TradeService)]
