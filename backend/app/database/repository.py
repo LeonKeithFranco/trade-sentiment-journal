@@ -11,6 +11,18 @@ class Repository[T: Base]:
     async def commit(self) -> None:
         await self.db.commit()
 
+    async def insert_into_table(self, model: type[T], **create_info) -> T:
+        record = model()
+
+        for key, val in create_info.items():
+            setattr(record, key, val)
+
+        self.db.add(record)
+        await self.db.flush()
+        await self.db.refresh(record)
+
+        return record
+
     async def get_from_table_by(
         self, model: type[T], *where_clauses: ColumnElement[bool]
     ) -> T | None:
