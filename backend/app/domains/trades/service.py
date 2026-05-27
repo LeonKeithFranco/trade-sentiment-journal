@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.domains.trades.exceptions import (
     ClosedAtBeforeOpenedAtError,
+    TradeClosedFieldsMismatchError,
     TradeDoesNotExistError,
 )
 from app.domains.trades.repository import TradeRepoDependency, TradeRepository
@@ -93,6 +94,8 @@ class TradeService:
             match constraint:
                 case "check_closed_at_after_opened_at":
                     raise ClosedAtBeforeOpenedAtError
+                case "check_exit_price_and_closed_at_consistency":
+                    raise TradeClosedFieldsMismatchError
                 case _:
                     raise
 
