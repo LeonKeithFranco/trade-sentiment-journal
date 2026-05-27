@@ -2,7 +2,6 @@ import random
 import uuid
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from pprint import pp
 
 import pytest
 from app.models import Trade
