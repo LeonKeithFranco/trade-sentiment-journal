@@ -409,6 +409,8 @@ class TestGetTrade:
     def test_get_all(
         self, client: TestClient, access_token: str, num_trades: int
     ) -> None:
+        random.seed(0)
+
         payloads = [
             {
                 "ticker": "JOOJL",
