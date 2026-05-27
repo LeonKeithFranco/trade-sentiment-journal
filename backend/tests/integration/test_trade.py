@@ -563,6 +563,45 @@ class TestDeleteTrade:
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json() == {"detail": "Trade(s) does not exist."}
 
+    def test_delete_from_multiple(self, client: TestClient, access_token: str) -> None:
+        payload = {
+            "ticker": "MAPPL",
+            "direction": "LONG",
+            "position_size": 3.33,
+            "entry_price": 50.51,
+            "exit_price": None,
+            "opened_at": _OPENED_AT,
+            "closed_at": None,
+        }
+
+        client.post(
+            "/trades",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
+        create_response = client.post(
+            "/trades",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
+        before_delete_get_response = client.get(
+            "/trades", headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        client.delete(
+            f"/trades/{create_response.json()['public_id']}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        after_delete_get_response = client.get(
+            "/trades", headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        assert len(before_delete_get_response.json()) == 2
+        assert len(after_delete_get_response.json()) == 1
+
 
 class TestUpdateTrade:
     def test_update_trade(self, client: TestClient, access_token: str) -> None:
