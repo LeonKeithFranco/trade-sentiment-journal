@@ -70,6 +70,18 @@ class JournalEntryService:
 
         return JournalEntryResponse.model_validate(journal_entry)
 
+    async def get_all(self, user_id: int) -> list[JournalEntryResponse]:
+        journal_entries = (
+            await self.journal_entry_repo.get_all_journal_entries_by_user_id(user_id)
+        )
+
+        journal_entry_reponses = [
+            JournalEntryResponse.model_validate(journal_entry)
+            for journal_entry in journal_entries
+        ]
+
+        return journal_entry_reponses
+
 
 JournalEntryServiceDependency = Annotated[
     JournalEntryService, Depends(JournalEntryService)
