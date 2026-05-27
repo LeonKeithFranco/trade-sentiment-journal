@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import APIRouter, status
 
 from app.domains.journal_entries.schemas import (
@@ -21,3 +23,12 @@ async def create(
     return await journal_entry_service.create(
         journal_entry_create_request, current_user.id
     )
+
+
+@router.get("/{journal_entry_public_id}", response_model=JournalEntryResponse)
+async def get(
+    journal_entry_public_id: uuid.UUID,
+    current_user: CurrentUserDependency,
+    journal_entry_service: JournalEntryServiceDependency,
+) -> JournalEntryResponse:
+    return await journal_entry_service.get(journal_entry_public_id, current_user.id)
