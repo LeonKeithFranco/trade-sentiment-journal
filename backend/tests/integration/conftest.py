@@ -1,5 +1,4 @@
 import asyncio
-import uuid
 from collections.abc import AsyncIterator, Iterator
 from datetime import UTC, datetime
 

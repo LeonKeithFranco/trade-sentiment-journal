@@ -1,8 +1,6 @@
 import uuid
-from pprint import pp
 
 import pytest
-from app.core.constants import MAX_TITLE_LENGTH
 from fastapi import status
 from fastapi.testclient import TestClient
 
