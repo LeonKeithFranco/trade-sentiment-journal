@@ -16,8 +16,8 @@ router = APIRouter(prefix="/journal-entries", tags=["journal-entries"])
 async def create(
     journal_entry_create_request: JournalEntryCreateRequest,
     current_user: CurrentUserDependency,
-    journal_entry_serivce: JournalEntryServiceDependency,
+    journal_entry_service: JournalEntryServiceDependency,
 ) -> JournalEntryResponse:
-    return await journal_entry_serivce.create(
+    return await journal_entry_service.create(
         journal_entry_create_request, current_user.id
     )
