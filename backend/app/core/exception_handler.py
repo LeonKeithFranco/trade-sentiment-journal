@@ -5,6 +5,7 @@ from app.exceptions import (
     ClosedAtBeforeOpenedAtError,
     DatabaseError,
     InvalidAccessTokenError,
+    JournalEntryDoesNotExistError,
     TradeClosedFieldsMismatchError,
     TradeDoesNotExistError,
     UserAlreadyExistsError,
@@ -85,6 +86,15 @@ def attach_exception_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"detail": "Trade(s) does not exist."},
+        )
+
+    @app.exception_handler(JournalEntryDoesNotExistError)
+    async def journal_entry_does_not_exist_error_handler(
+        request: Request, exc: JournalEntryDoesNotExistError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"detail": "Journal entry or entries do not exist."},
         )
 
     @app.exception_handler(Exception)

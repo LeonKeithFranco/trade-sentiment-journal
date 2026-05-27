@@ -3,6 +3,7 @@ from app.domains.auth.exceptions import (
     UserAlreadyExistsError,
     UserInvalidCredentialsError,
 )
+from app.domains.journal_entries.exceptions import JournalEntryDoesNotExistError
 from app.domains.trades.exceptions import (
     ClosedAtBeforeOpenedAtError,
     TradeClosedFieldsMismatchError,
@@ -18,4 +19,5 @@ __all__ = [
     "TradeDoesNotExistError",
     "ClosedAtBeforeOpenedAtError",
     "TradeClosedFieldsMismatchError",
+    "JournalEntryDoesNotExistError",
 ]
