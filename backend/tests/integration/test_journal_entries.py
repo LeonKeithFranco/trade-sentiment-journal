@@ -1,8 +1,11 @@
+import random
 import uuid
 
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
+
+random.seed(0)
 
 
 class TestCreateJournalEntry:
@@ -152,3 +155,46 @@ class TestGetJournalEntry:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json()["detail"] == "Journal entry or entries do not exist."
+
+    @pytest.mark.parametrize(
+        "num_entries",
+        [0, 1, 3],
+    )
+    def test_get_all_entires(
+        self,
+        client: TestClient,
+        access_token: str,
+        trade_public_id: str,
+        num_entries: int,
+    ) -> None:
+        payloads = [
+            {
+                "title": f"{random.randint(1, 1_000_000)}",
+                "entry": "This is a journal message. This is a journal message.",
+                "trade_public_id": trade_public_id,
+            }
+            for _ in range(num_entries)
+        ]
+
+        journal_entry_response_data = []
+
+        for payload in payloads:
+            create_response = client.post(
+                "/journal-entries",
+                headers={"Authorization": f"Bearer {access_token}"},
+                json=payload,
+            )
+            journal_entry_response_data.append(create_response.json())
+
+        get_all_response = client.get(
+            "/journal-entries", headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        assert get_all_response.status_code == status.HTTP_200_OK, (
+            get_all_response.json()
+        )
+
+        for journal_entry_response_datum, get_all_journal_entry_response_datum in zip(
+            journal_entry_response_data, get_all_response.json()
+        ):
+            assert journal_entry_response_datum == get_all_journal_entry_response_datum
