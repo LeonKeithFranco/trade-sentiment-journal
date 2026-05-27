@@ -82,12 +82,14 @@ class TradeRepository(Repository):
         trade: Trade,
         /,
         **update_info,
-    ) -> None:
+    ) -> Trade:
         for key, val in update_info.items():
             setattr(trade, key, val)
 
         await self.db.flush()
         await self.db.refresh(trade)
+
+        return trade
 
 
 TradeRepoDependency = Annotated[TradeRepository, Depends(TradeRepository)]
