@@ -746,6 +746,49 @@ class TestUpdateTrade:
             "detail": "closed_at cannot be set before opened_at and vice versa."
         }
 
+    @pytest.mark.parametrize(
+        "update_payload",
+        (
+            {
+                "exit_price": 11.11,
+            },
+            {
+                "closed_at": (datetime.now(UTC) + timedelta(days=1)).isoformat(),
+            },
+        ),
+    )
+    def test_exit_price_closed_at_mismatch(
+        self, client: TestClient, access_token: str, update_payload: dict
+    ) -> None:
+        create_payload = {
+            "ticker": "MAPPL",
+            "direction": "LONG",
+            "position_size": 3.33,
+            "entry_price": 50.51,
+            "exit_price": None,
+            "opened_at": _OPENED_AT,
+            "closed_at": None,
+        }
+
+        create_response = client.post(
+            "/trades",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=create_payload,
+        )
+
+        create_data = create_response.json()
+
+        update_response = client.patch(
+            f"/trades/{create_data['public_id']}",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=update_payload,
+        )
+
+        assert update_response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+        assert update_response.json() == {
+            "detail": "exit_price and closed_at must both be None or must both have values."
+        }
+
     def test_update_direction(self, client: TestClient, access_token: str) -> None:
         create_payload = {
             "ticker": "MAPPL",
