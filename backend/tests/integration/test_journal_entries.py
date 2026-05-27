@@ -198,3 +198,36 @@ class TestGetJournalEntry:
             journal_entry_response_data, get_all_response.json()
         ):
             assert journal_entry_response_datum == get_all_journal_entry_response_datum
+
+    def test_get_all_trade_of_another_user(
+        self,
+        client: TestClient,
+        access_token: str,
+        trade_public_id: str,
+        other_access_token: str,
+    ) -> None:
+        payload = {
+            "title": "My Journal Entry",
+            "entry": "This is a journal message. This is a journal message.",
+            "trade_public_id": trade_public_id,
+        }
+
+        client.post(
+            "/journal-entries",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
+        client.post(
+            "/journal-entries",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
+        response = client.get(
+            "/journal-entries",
+            headers={"Authorization": f"Bearer {other_access_token}"},
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == []
