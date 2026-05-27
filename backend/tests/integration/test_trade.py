@@ -599,7 +599,7 @@ class TestUpdateTrade:
         update_data = update_response.json()
 
         assert (update_data["ticker"] != create_data["ticker"]) and (
-            update_data["ticker"] == "GNG"
+            update_data["ticker"] == update_payload["ticker"]
         )
         assert update_data["direction"] == create_data["direction"]
         assert update_data["position_size"] == create_data["position_size"]
@@ -608,6 +608,63 @@ class TestUpdateTrade:
         assert update_data["opened_at"] == create_data["opened_at"]
         assert update_data["closed_at"] == create_data["closed_at"]
         assert update_data["profit_and_loss"] == create_data["profit_and_loss"]
+        assert update_data["public_id"] == create_data["public_id"]
+        assert update_data["created_on"] == create_data["created_on"]
+        assert datetime.fromisoformat(
+            update_data["updated_on"]
+        ) > datetime.fromisoformat(create_data["updated_on"])
+
+    def test_update_closed_trade(self, client: TestClient, access_token: str) -> None:
+        create_payload = {
+            "ticker": "MAPPL",
+            "direction": "LONG",
+            "position_size": 3.33,
+            "entry_price": 50.51,
+            "exit_price": 22.22,
+            "opened_at": _OPENED_AT,
+            "closed_at": _CLOSED_AT,
+        }
+
+        create_response = client.post(
+            "/trades",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=create_payload,
+        )
+
+        create_data = create_response.json()
+
+        update_payload = {
+            "exit_price": 55.55,
+            "closed_at": (datetime.now(UTC) + timedelta(days=10))
+            .isoformat()
+            .removesuffix("+00:00")
+            + "Z",
+        }
+
+        update_response = client.patch(
+            f"/trades/{create_data['public_id']}",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=update_payload,
+        )
+
+        assert update_response.status_code == status.HTTP_200_OK
+
+        update_data = update_response.json()
+
+        assert update_data["ticker"] == create_data["ticker"]
+        assert update_data["direction"] == create_data["direction"]
+        assert update_data["position_size"] == create_data["position_size"]
+        assert update_data["entry_price"] == create_data["entry_price"]
+        assert (update_data["exit_price"] != create_data["exit_price"]) and (
+            update_data["exit_price"] == str(update_payload["exit_price"])
+        )
+        assert update_data["opened_at"] == create_data["opened_at"]
+        assert (update_data["closed_at"] != create_data["closed_at"]) and (
+            update_data["closed_at"] == update_payload["closed_at"]
+        )
+        assert (update_data["profit_and_loss"] != create_data["profit_and_loss"]) and (
+            update_data["profit_and_loss"] == "16.78"
+        )
         assert update_data["public_id"] == create_data["public_id"]
         assert update_data["created_on"] == create_data["created_on"]
         assert datetime.fromisoformat(
