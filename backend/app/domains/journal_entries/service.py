@@ -1,7 +1,9 @@
+import uuid
 from typing import Annotated
 
 from fastapi import Depends
 
+from app.domains.journal_entries.exceptions import JournalEntryDoesNotExistError
 from app.domains.journal_entries.repository import (
     JournalEntryRepoDependency,
     JournalEntryRepository,
@@ -11,6 +13,7 @@ from app.domains.journal_entries.schemas import (
     JournalEntryResponse,
 )
 from app.domains.trades.service import TradeService, TradeServiceDependency
+from app.models import JournalEntry
 
 
 class JournalEntryService:
@@ -43,6 +46,29 @@ class JournalEntryService:
         await self.journal_entry_repo.commit()
 
         return JournalEntryResponse.model_validate(new_journal_entry)
+
+    async def get_journal_entry(
+        self, journal_entry_public_id: uuid.UUID, user_id: int
+    ) -> JournalEntry:
+        journal_entry = (
+            await self.journal_entry_repo.get_journal_entry_by_public_id_for_user(
+                journal_entry_public_id, user_id
+            )
+        )
+
+        if journal_entry is None:
+            raise JournalEntryDoesNotExistError(
+                f"There is no journal entry with public_id {journal_entry_public_id} for user with id {user_id}"
+            )
+
+        return journal_entry
+
+    async def get(
+        self, journal_entry_public_id: uuid.UUID, user_id: int
+    ) -> JournalEntryResponse:
+        journal_entry = await self.get_journal_entry(journal_entry_public_id, user_id)
+
+        return JournalEntryResponse.model_validate(journal_entry)
 
 
 JournalEntryServiceDependency = Annotated[
