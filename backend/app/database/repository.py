@@ -2,6 +2,7 @@ from typing import cast
 
 from sqlalchemy import ColumnElement, CursorResult, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.base import ExecutableOption
 
 from app.database import Base
 
@@ -26,9 +27,14 @@ class Repository[T: Base]:
         return record
 
     async def get_from_table_by(
-        self, model: type[T], *where_clauses: ColumnElement[bool]
+        self,
+        model: type[T],
+        *where_clauses: ColumnElement[bool],
+        options: list[ExecutableOption] | None = None,
     ) -> T | None:
         query = select(model).where(*where_clauses)
+        if options:
+            query = query.options(*options)
         results = await self.db.execute(query)
 
         return results.scalar_one_or_none()

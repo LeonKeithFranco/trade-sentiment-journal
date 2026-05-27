@@ -1,9 +1,9 @@
 import uuid
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, cast
 
 from fastapi import Depends
-from sqlalchemy import ColumnElement, select, update
+from sqlalchemy import ColumnElement
 from sqlalchemy.orm import selectinload
 
 from app.database import DbDependency
@@ -34,42 +34,29 @@ class UserRepository(Repository[User]):
 UserRepoDependency = Annotated[UserRepository, Depends(UserRepository)]
 
 
-class RefreshTokenRepository(Repository):
+class RefreshTokenRepository(Repository[RefreshToken]):
     def __init__(self, db: DbDependency) -> None:
         super().__init__(db)
 
     async def get_refresh_token(self, token: str) -> MaybeRefreshToken:
-        query = (
-            select(RefreshToken)
-            .where(RefreshToken.token == token)
-            .options(selectinload(RefreshToken.user))
+        return await self.get_from_table_by(
+            RefreshToken,
+            RefreshToken.token == token,
+            options=[selectinload(RefreshToken.user)],
         )
-        results = await self.db.execute(query)
-
-        return results.scalar_one_or_none()
 
     async def revoke_refresh_token(self, token: str) -> None:
-        query = (
-            update(RefreshToken)
-            .where(RefreshToken.token == token)
-            .values({RefreshToken.revoked: True})
+        token_record = await self.get_from_table_by(
+            RefreshToken, RefreshToken.token == token
         )
-        await self.db.execute(query)
+        await self.update_record(cast(RefreshToken, token_record), revoked=True)
 
     async def insert_refresh_token(
         self, user_id: int, refresh_token: str, expire: datetime
     ) -> RefreshToken:
-        # don't forget to flush and refresh
-        new_refresh_token = RefreshToken()
-        new_refresh_token.token = refresh_token
-        new_refresh_token.expires_on = expire
-        new_refresh_token.user_id = user_id
-
-        self.db.add(new_refresh_token)
-        await self.db.flush()
-        await self.db.refresh(new_refresh_token)
-
-        return new_refresh_token
+        return await self.insert_into_table(
+            RefreshToken, token=refresh_token, expires_on=expire, user_id=user_id
+        )
 
 
 RefreshTokenRepoDependency = Annotated[
