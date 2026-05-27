@@ -75,12 +75,12 @@ class JournalEntryService:
             await self.journal_entry_repo.get_all_journal_entries_by_user_id(user_id)
         )
 
-        journal_entry_reponses = [
+        journal_entry_responses = [
             JournalEntryResponse.model_validate(journal_entry)
             for journal_entry in journal_entries
         ]
 
-        return journal_entry_reponses
+        return journal_entry_responses
 
 
 JournalEntryServiceDependency = Annotated[

@@ -176,7 +176,7 @@ class TestGetJournalEntry:
         "num_entries",
         [0, 1, 3],
     )
-    def test_get_all_entires(
+    def test_get_all_entries(
         self,
         client: TestClient,
         access_token: str,
