@@ -24,6 +24,16 @@ class Trade(PublicIdMixin, TimestampMixin, Base):
             "closed_at IS NULL OR closed_at >= opened_at",
             name="check_closed_at_after_opened_at",
         ),
+        CheckConstraint(
+            "(exit_price IS NULL AND closed_at IS NULL) OR "
+            "(exit_price IS NOT NULL AND closed_at IS NOT NULL)",
+            name="check_exit_price_and_closed_at_consistency",
+        ),
+        CheckConstraint(
+            "(exit_price IS NULL AND profit_and_loss IS NULL) OR "
+            "(exit_price IS NOT NULL AND profit_and_loss IS NOT NULL)",
+            name="check_profit_and_loss_consistency",
+        ),
     )
 
     ticker: Mapped[str] = mapped_column(
