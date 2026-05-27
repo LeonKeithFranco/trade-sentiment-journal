@@ -130,3 +130,25 @@ class TestGetJournalEntry:
 
         assert get_response.status_code == status.HTTP_200_OK
         assert get_response.json() == create_response.json()
+
+    def test_get_non_existent_journal_entry(
+        self, client: TestClient, access_token: str
+    ) -> None:
+        response = client.get(
+            f"/journal-entries/{uuid.uuid4()}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json()["detail"] == "Journal entry or entries do not exist."
+
+    def test_get_journal_entry_of_another_user(
+        self, client: TestClient, trade_public_id: str, other_access_token: str
+    ) -> None:
+        response = client.get(
+            f"/journal-entries/{trade_public_id}",
+            headers={"Authorization": f"Bearer {other_access_token}"},
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json()["detail"] == "Journal entry or entries do not exist."
