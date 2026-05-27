@@ -10,3 +10,11 @@ UserIDColumn = Annotated[
         index=True,
     ),
 ]
+
+TradeIDColumn = Annotated[
+    int,
+    mapped_column(
+        ForeignKey("trades.id", ondelete="CASCADE"),
+        index=True,
+    ),
+]

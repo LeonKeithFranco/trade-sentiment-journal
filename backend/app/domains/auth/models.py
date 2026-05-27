@@ -9,7 +9,7 @@ from app.database.columns import UserIDColumn
 from app.database.mixins import PublicIdMixin, TimestampMixin
 
 if TYPE_CHECKING:
-    from app.models import Trade
+    from app.models import JournalEntry, Trade
 
 
 class User(PublicIdMixin, TimestampMixin, Base):
@@ -29,6 +29,11 @@ class User(PublicIdMixin, TimestampMixin, Base):
     )
 
     trades: Mapped[list["Trade"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
+    journal_entries: Mapped[list["JournalEntry"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
     )
