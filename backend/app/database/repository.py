@@ -18,3 +18,11 @@ class Repository[T: Base]:
         results = await self.db.execute(query)
 
         return results.scalar_one_or_none()
+
+    async def get_all_from_table(
+        self, model: type[T], *where_clauses: ColumnElement[bool]
+    ) -> list[T]:
+        query = select(model).where(*where_clauses)
+        results = await self.db.execute(query)
+
+        return list(results.scalars().all())

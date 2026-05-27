@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import Annotated, cast
 
 from fastapi import Depends
-from sqlalchemy import CursorResult, delete, select
+from sqlalchemy import CursorResult, delete
 
 from app.database import DbDependency
 from app.database.repository import Repository
@@ -53,11 +53,7 @@ class TradeRepository(Repository[Trade]):
         )
 
     async def get_all_trades_by_user_id(self, user_id: int) -> list[Trade]:
-        query = select(Trade).where(Trade.user_id == user_id)
-        results = await self.db.execute(query)
-        trades = results.scalars().all()
-
-        return list(trades)
+        return await self.get_all_from_table(Trade, Trade.user_id == user_id)
 
     async def delete_trade_by_public_id_for_user(
         self, trade_public_id: uuid.UUID, user_id: int
