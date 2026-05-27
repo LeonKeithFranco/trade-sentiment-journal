@@ -10,5 +10,5 @@ class JournalEntryBase(BaseModel):
         max_length=MAX_TITLE_LENGTH,
     )
     text: str = Field(
-        min_length=100,
+        min_length=50,
     )
