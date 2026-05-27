@@ -31,14 +31,9 @@ class TradeRepository(Repository[Trade]):
     async def delete_trade_by_public_id_for_user(
         self, trade_public_id: uuid.UUID, user_id: int
     ) -> int:
-        query = (
-            delete(Trade)
-            .where(Trade.public_id == trade_public_id)
-            .where(Trade.user_id == user_id)
+        return await self.delete_from_table_by(
+            Trade, Trade.public_id == trade_public_id, Trade.user_id == user_id
         )
-        results = cast(CursorResult, await self.db.execute(query))
-
-        return results.rowcount
 
     async def update_trade(
         self,

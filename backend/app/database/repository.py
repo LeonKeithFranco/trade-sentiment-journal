@@ -1,4 +1,6 @@
-from sqlalchemy import ColumnElement, select
+from typing import cast
+
+from sqlalchemy import ColumnElement, CursorResult, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import Base
@@ -38,3 +40,11 @@ class Repository[T: Base]:
         results = await self.db.execute(query)
 
         return list(results.scalars().all())
+
+    async def delete_from_table_by(
+        self, model: type[T], *where_clauses: ColumnElement[bool]
+    ) -> int:
+        query = delete(model).where(*where_clauses)
+        results = cast(CursorResult, await self.db.execute(query))
+
+        return results.rowcount
