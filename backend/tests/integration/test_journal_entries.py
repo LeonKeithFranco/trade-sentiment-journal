@@ -146,10 +146,26 @@ class TestGetJournalEntry:
         assert response.json()["detail"] == "Journal entry or entries do not exist."
 
     def test_get_journal_entry_of_another_user(
-        self, client: TestClient, trade_public_id: str, other_access_token: str
+        self,
+        client: TestClient,
+        access_token: str,
+        trade_public_id: str,
+        other_access_token: str,
     ) -> None:
+        payload = {
+            "title": None,
+            "entry": "This is a journal message. This is a journal message.",
+            "trade_public_id": trade_public_id,
+        }
+
+        create_response = client.post(
+            "/journal-entries",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
         response = client.get(
-            f"/journal-entries/{trade_public_id}",
+            f"/journal-entries/{create_response.json()['public_id']}",
             headers={"Authorization": f"Bearer {other_access_token}"},
         )
 
