@@ -12,7 +12,7 @@ from app.database.mixins import PublicIdMixin, TimestampMixin
 from app.domains.trades.constants import Direction
 
 if TYPE_CHECKING:
-    from app.models import User
+    from app.models import JournalEntry, User
 
 
 class Trade(PublicIdMixin, TimestampMixin, Base):
@@ -77,6 +77,11 @@ class Trade(PublicIdMixin, TimestampMixin, Base):
 
     user: Mapped["User"] = relationship(
         back_populates="trades",
+    )
+
+    journal_entries: Mapped[list["JournalEntry"]] = relationship(
+        back_populates="trade",
+        cascade="all, delete-orphan",
     )
 
     def _update_pnl(self) -> None:
