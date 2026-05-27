@@ -4,8 +4,10 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.exc import IntegrityError
 
-from app.database.exceptions import ClosedAtBeforeOpenedAtError
-from app.domains.trades.exceptions import TradeDoesNotExistError
+from app.domains.trades.exceptions import (
+    ClosedAtBeforeOpenedAtError,
+    TradeDoesNotExistError,
+)
 from app.domains.trades.repository import TradeRepoDependency, TradeRepository
 from app.domains.trades.schemas import (
     TradeCreateRequest,

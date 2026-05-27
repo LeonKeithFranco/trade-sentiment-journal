@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
-from app.database.exceptions import ClosedAtBeforeOpenedAtError
 from app.exceptions import (
+    ClosedAtBeforeOpenedAtError,
     DatabaseError,
     InvalidAccessTokenError,
     TradeDoesNotExistError,
