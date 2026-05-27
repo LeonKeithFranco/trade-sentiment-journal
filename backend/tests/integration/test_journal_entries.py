@@ -105,3 +105,28 @@ class TestCreateJournalEntry:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json() == {"detail": "Trade(s) does not exist."}
+
+
+class TestGetJournalEntry:
+    def test_get_journal_entry(
+        self, client: TestClient, access_token: str, trade_public_id: str
+    ) -> None:
+        payload = {
+            "title": None,
+            "entry": "This is a journal message. This is a journal message.",
+            "trade_public_id": trade_public_id,
+        }
+
+        create_response = client.post(
+            "/journal-entries",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
+        get_response = client.get(
+            f"/journal-entries/{create_response.json()['public_id']}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        assert get_response.status_code == status.HTTP_200_OK
+        assert get_response.json() == create_response.json()
