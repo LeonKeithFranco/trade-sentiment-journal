@@ -18,11 +18,11 @@ class JournalEntryRepository(Repository[JournalEntry]):
         return await self.insert_into_table(JournalEntry, **create_info)
 
     async def get_journal_entry_by_public_id_for_user(
-        self, trade_public_id: uuid.UUID, user_id: int
+        self, journal_public_id: uuid.UUID, user_id: int
     ) -> MaybeJournalEntry:
         return await self.get_from_table_by(
             JournalEntry,
-            JournalEntry.public_id == trade_public_id,
+            JournalEntry.public_id == journal_public_id,
             JournalEntry.user_id == user_id,
         )
 
