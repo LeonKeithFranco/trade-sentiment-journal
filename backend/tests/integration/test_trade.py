@@ -213,6 +213,32 @@ class TestCreateTrade:
             "ctx": {"error": {}},
         }
 
+    def test_invalid_direction(self, client: TestClient, access_token: str) -> None:
+        payload = {
+            "ticker": "BSLA",
+            "direction": "FAKE",
+            "position_size": 1,
+            "entry_price": 1,
+            "exit_price": 2,
+            "opened_at": _OPENED_AT,
+            "closed_at": _CLOSED_AT,
+        }
+
+        response = client.post(
+            "/trades",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+        assert response.json()["detail"][0] == {
+            "ctx": {"expected": "'LONG' or 'SHORT'"},
+            "input": payload["direction"],
+            "loc": ["body", "direction"],
+            "msg": "Input should be 'LONG' or 'SHORT'",
+            "type": "enum",
+        }
+
     def test_direction_constraint(
         self,
         db_engine: Engine,
