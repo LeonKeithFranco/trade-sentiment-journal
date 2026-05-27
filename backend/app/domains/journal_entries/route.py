@@ -5,7 +5,6 @@ from app.domains.journal_entries.schemas import (
     JournalEntryResponse,
 )
 from app.domains.journal_entries.service import JournalEntryServiceDependency
-from app.domains.trades.service import TradeServiceDependency
 from app.security import CurrentUserDependency
 
 router = APIRouter(prefix="/journal-entries", tags=["journal-entries"])
@@ -17,13 +16,8 @@ router = APIRouter(prefix="/journal-entries", tags=["journal-entries"])
 async def create(
     journal_entry_create_request: JournalEntryCreateRequest,
     current_user: CurrentUserDependency,
-    trade_service: TradeServiceDependency,
     journal_entry_serivce: JournalEntryServiceDependency,
 ) -> JournalEntryResponse:
-    trade = await trade_service.get_trade(
-        journal_entry_create_request.trade_public_id, current_user.id
-    )
-
     return await journal_entry_serivce.create(
-        journal_entry_create_request, current_user.id, trade.id
+        journal_entry_create_request, current_user.id
     )
