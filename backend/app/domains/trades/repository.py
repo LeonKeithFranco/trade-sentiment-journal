@@ -1,8 +1,7 @@
 import uuid
-from typing import Annotated, cast
+from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import CursorResult, delete
 
 from app.database import DbDependency
 from app.database.repository import Repository
@@ -38,16 +37,9 @@ class TradeRepository(Repository[Trade]):
     async def update_trade(
         self,
         trade: Trade,
-        /,
         **update_info,
     ) -> Trade:
-        for key, val in update_info.items():
-            setattr(trade, key, val)
-
-        await self.db.flush()
-        await self.db.refresh(trade)
-
-        return trade
+        return await self.update_record(trade, **update_info)
 
 
 TradeRepoDependency = Annotated[TradeRepository, Depends(TradeRepository)]

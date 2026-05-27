@@ -48,3 +48,12 @@ class Repository[T: Base]:
         results = cast(CursorResult, await self.db.execute(query))
 
         return results.rowcount
+
+    async def update_record(self, record: T, **update_info) -> T:
+        for key, val in update_info.items():
+            setattr(record, key, val)
+
+        await self.db.flush()
+        await self.db.refresh(record)
+
+        return record
