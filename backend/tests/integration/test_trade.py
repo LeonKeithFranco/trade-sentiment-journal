@@ -12,6 +12,8 @@ from sqlalchemy import Engine, insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+random.seed(0)
+
 _OPENED_AT = datetime.now(UTC).isoformat().removesuffix("+00:00") + "Z"
 _CLOSED_AT = (
     datetime.now(UTC) + timedelta(days=1)  # noqa
@@ -409,8 +411,6 @@ class TestGetTrade:
     def test_get_all(
         self, client: TestClient, access_token: str, num_trades: int
     ) -> None:
-        random.seed(0)
-
         payloads = [
             {
                 "ticker": "JOOJL",
