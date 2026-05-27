@@ -25,6 +25,14 @@ async def create(
     )
 
 
+@router.get("", response_model=list[JournalEntryResponse])
+async def get_all(
+    current_user: CurrentUserDependency,
+    journal_entry_service: JournalEntryServiceDependency,
+) -> list[JournalEntryResponse]:
+    return await journal_entry_service.get_all(current_user.id)
+
+
 @router.get("/{journal_entry_public_id}", response_model=JournalEntryResponse)
 async def get(
     journal_entry_public_id: uuid.UUID,
