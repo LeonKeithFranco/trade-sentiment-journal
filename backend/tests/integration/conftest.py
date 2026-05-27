@@ -1,5 +1,7 @@
 import asyncio
+import uuid
 from collections.abc import AsyncIterator, Iterator
+from datetime import UTC, datetime
 
 import pytest
 from app.core.app_factory import create_app
@@ -118,3 +120,24 @@ def other_access_token(client: TestClient, default_password: str) -> str:
     )
 
     return login_response.json()["access_token"]
+
+
+@pytest.fixture
+def trade_public_id(client: TestClient, access_token: str) -> uuid.UUID:
+    payload = {
+        "ticker": "MAPPL",
+        "direction": "LONG",
+        "position_size": 3.33,
+        "entry_price": 50.51,
+        "exit_price": None,
+        "opened_at": datetime.now(UTC).isoformat(),
+        "closed_at": None,
+    }
+
+    response = client.post(
+        "/trades",
+        headers={"Authorization": f"Bearer {access_token}"},
+        json=payload,
+    )
+
+    return response.json()["public_id"]
