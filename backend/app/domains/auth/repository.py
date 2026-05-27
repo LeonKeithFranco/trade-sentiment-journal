@@ -14,15 +14,12 @@ type MaybeUser = User | None
 type MaybeRefreshToken = RefreshToken | None
 
 
-class UserRepository(Repository):
+class UserRepository(Repository[User]):
     def __init__(self, db: DbDependency) -> None:
         super().__init__(db)
 
-    async def _get_user_by(self, where_clause: ColumnElement[bool]) -> MaybeUser:
-        query = select(User).where(where_clause)
-        results = await self.db.execute(query)
-
-        return results.scalar_one_or_none()
+    async def _get_user_by(self, *where_clauses: ColumnElement[bool]) -> MaybeUser:
+        return await self.get_from_table_by(User, *where_clauses)
 
     async def get_user_by_email(self, email: str) -> MaybeUser:
         return await self._get_user_by(User.email == email)
@@ -30,16 +27,8 @@ class UserRepository(Repository):
     async def get_user_by_public_id(self, public_id: uuid.UUID) -> MaybeUser:
         return await self._get_user_by(User.public_id == public_id)
 
-    async def insert_user(self, email: str, hashed_password: str) -> User:
-        new_user = User()
-        new_user.email = email
-        new_user.hashed_password = hashed_password
-
-        self.db.add(new_user)
-        await self.db.flush()
-        await self.db.refresh(new_user)
-
-        return new_user
+    async def insert_user(self, **create_info) -> User:
+        return await self.insert_into_table(User, **create_info)
 
 
 UserRepoDependency = Annotated[UserRepository, Depends(UserRepository)]
