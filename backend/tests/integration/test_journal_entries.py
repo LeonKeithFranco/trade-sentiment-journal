@@ -271,9 +271,7 @@ class TestDeleteJournalEntry:
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
-        assert delete_response.status_code == status.HTTP_204_NO_CONTENT, (
-            delete_response.json()
-        )
+        assert delete_response.status_code == status.HTTP_204_NO_CONTENT
 
         get_response = client.get(
             f"/journal-entries/{create_response.json()['public_id']}",
@@ -282,7 +280,7 @@ class TestDeleteJournalEntry:
 
         assert get_response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_delete_non_existent_trade(
+    def test_delete_non_existent_journal_entry(
         self, client: TestClient, access_token: str
     ) -> None:
         response = client.delete(
@@ -293,7 +291,7 @@ class TestDeleteJournalEntry:
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json() == {"detail": "Journal entry or entries do not exist."}
 
-    def test_delete_trade_of_another_user(
+    def test_delete_journal_entry_of_another_user(
         self,
         client: TestClient,
         access_token: str,
@@ -361,7 +359,7 @@ class TestDeleteJournalEntry:
 
 
 class TestUpdateJournalEntry:
-    def test_update_trade(
+    def test_update_journal_entry(
         self, client: TestClient, access_token: str, trade_public_id: str
     ) -> None:
         create_payload = {
@@ -415,7 +413,7 @@ class TestUpdateJournalEntry:
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json() == {"detail": "Journal entry or entries do not exist."}
 
-    def test_update_trade_of_another_user(
+    def test_update_journal_entry_of_another_user(
         self,
         client: TestClient,
         access_token: str,
@@ -439,7 +437,7 @@ class TestUpdateJournalEntry:
         response = client.patch(
             f"/journal-entries/{journal_entry_public_id}",
             headers={"Authorization": f"Bearer {other_access_token}"},
-            json={"ticker": "ASDF"},
+            json={"title": "New Title"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND

@@ -108,13 +108,13 @@ class JournalEntryService:
             exclude_unset=True
         )
 
-        updated_trade = await self.journal_entry_repo.update_journal_entry(
+        updated_journal_entry = await self.journal_entry_repo.update_journal_entry(
             journal_entry, **journal_entry_update_info_dict
         )
 
         await self.journal_entry_repo.commit()
 
-        return JournalEntryResponse.model_validate(updated_trade)
+        return JournalEntryResponse.model_validate(updated_journal_entry)
 
 
 JournalEntryServiceDependency = Annotated[
