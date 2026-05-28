@@ -280,3 +280,80 @@ class TestDeleteJournalEntry:
         )
 
         assert get_response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_delete_non_existent_trade(
+        self, client: TestClient, access_token: str
+    ) -> None:
+        response = client.delete(
+            f"/journal-entries/{uuid.uuid4()}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json() == {"detail": "Journal entry or entries do not exist."}
+
+    def test_delete_trade_of_another_user(
+        self,
+        client: TestClient,
+        access_token: str,
+        trade_public_id: str,
+        other_access_token: str,
+    ) -> None:
+        payload = {
+            "title": None,
+            "entry": "This is a journal message. This is a journal message.",
+            "trade_public_id": trade_public_id,
+        }
+
+        create_response = client.post(
+            "/journal-entries",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
+        trade_public_id = create_response.json()["public_id"]
+
+        response = client.delete(
+            f"/journal-entries/{trade_public_id}",
+            headers={"Authorization": f"Bearer {other_access_token}"},
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json() == {"detail": "Journal entry or entries do not exist."}
+
+    def test_delete_from_multiple(
+        self, client: TestClient, trade_public_id: str, access_token: str
+    ) -> None:
+        payload = {
+            "title": "Title",
+            "entry": "This is a journal message. This is a journal message.",
+            "trade_public_id": trade_public_id,
+        }
+
+        client.post(
+            "/journal-entries",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
+        create_response = client.post(
+            "/journal-entries",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
+        before_delete_get_response = client.get(
+            "/journal-entries", headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        client.delete(
+            f"/journal-entries/{create_response.json()['public_id']}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        after_delete_get_response = client.get(
+            "/journal-entries", headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        assert len(before_delete_get_response.json()) == 2
+        assert len(after_delete_get_response.json()) == 1
