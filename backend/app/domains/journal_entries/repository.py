@@ -42,6 +42,13 @@ class JournalEntryRepository(Repository[JournalEntry]):
             JournalEntry.user_id == user_id,
         )
 
+    async def update_journal_entry(
+        self,
+        journal_entry: JournalEntry,
+        **update_info,
+    ) -> JournalEntry:
+        return await self.update_record(journal_entry, **update_info)
+
 
 JournalEntryRepoDependency = Annotated[
     JournalEntryRepository, Depends(JournalEntryRepository)
