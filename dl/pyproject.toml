@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 dependencies = [
     "datasets>=4.8.5",
     "marimo>=0.23.8",
+    "nltk>=3.9.4",
     "torch>=2.12.0",
 ]
 
