@@ -40,3 +40,12 @@ async def get(
     journal_entry_service: JournalEntryServiceDependency,
 ) -> JournalEntryResponse:
     return await journal_entry_service.get(journal_entry_public_id, current_user.id)
+
+
+@router.delete("/{journal_entry_public_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete(
+    journal_entry_public_id: uuid.UUID,
+    current_user: CurrentUserDependency,
+    journal_entry_service: JournalEntryServiceDependency,
+) -> None:
+    await journal_entry_service.delete(journal_entry_public_id, current_user.id)
