@@ -21,6 +21,19 @@ class JournalEntryCreateRequest(JournalEntryBase):
     trade_public_id: uuid.UUID
 
 
+class JournalEntryUpdateRequest(BaseModel):
+    title: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=MAX_TITLE_LENGTH,
+    )
+    entry: str | None = Field(
+        default=None,
+        min_length=50,
+        max_length=4096,
+    )
+
+
 class JournalEntryResponse(JournalEntryBase):
     model_config = ConfigDict(
         from_attributes=True,
