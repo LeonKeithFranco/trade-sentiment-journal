@@ -1,5 +1,6 @@
 import random
 import uuid
+from datetime import datetime
 
 import pytest
 from fastapi import status
@@ -357,3 +358,45 @@ class TestDeleteJournalEntry:
 
         assert len(before_delete_get_response.json()) == 2
         assert len(after_delete_get_response.json()) == 1
+
+
+class TestUpdateJournalEntry:
+    def test_update_trade(
+        self, client: TestClient, access_token: str, trade_public_id: str
+    ) -> None:
+        create_payload = {
+            "title": None,
+            "entry": "This is a journal message. This is a journal message.",
+            "trade_public_id": trade_public_id,
+        }
+
+        create_response = client.post(
+            "/journal-entries",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=create_payload,
+        )
+
+        create_data = create_response.json()
+
+        update_payload = {
+            "title": "New Title",
+        }
+
+        update_response = client.patch(
+            f"/journal-entries/{create_data['public_id']}",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=update_payload,
+        )
+
+        assert update_response.status_code == status.HTTP_200_OK, create_response.json()
+
+        update_data = update_response.json()
+
+        assert (update_data["title"] != create_data["title"]) and (
+            update_data["title"] == update_payload["title"]
+        )
+        assert update_data["entry"] == create_data["entry"]
+        assert update_data["created_on"] == create_data["created_on"]
+        assert datetime.fromisoformat(
+            update_data["updated_on"]
+        ) > datetime.fromisoformat(create_data["updated_on"])
