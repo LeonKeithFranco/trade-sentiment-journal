@@ -247,3 +247,36 @@ class TestGetJournalEntry:
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == []
+
+
+class TestDeleteJournalEntry:
+    def test_delete_journal_entry(
+        self, client: TestClient, access_token: str, trade_public_id: str
+    ) -> None:
+        payload = {
+            "title": None,
+            "entry": "This is a journal message. This is a journal message.",
+            "trade_public_id": trade_public_id,
+        }
+
+        create_response = client.post(
+            "/journal-entries",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
+        delete_response = client.delete(
+            f"/journal-entries/{create_response.json()['public_id']}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        assert delete_response.status_code == status.HTTP_204_NO_CONTENT, (
+            delete_response.json()
+        )
+
+        get_response = client.get(
+            f"/journal-entries/{create_response.json()['public_id']}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        assert get_response.status_code == status.HTTP_404_NOT_FOUND
