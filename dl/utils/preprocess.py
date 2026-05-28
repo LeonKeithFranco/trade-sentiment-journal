@@ -1,6 +1,8 @@
 import string
 
 import nltk
+from datasets.arrow_dataset import Dataset
+from datasets.dataset_dict import DatasetDict
 from nltk.tokenize import word_tokenize
 
 _TOKENIZER_FILE = "punkt_tab"
@@ -19,3 +21,13 @@ def process_sentence(sentence: str) -> str:
     ]
 
     return " ".join(tokens)
+
+
+def process_dataset_sentences(dataset: Dataset) -> Dataset:
+    return dataset.map(lambda data: {"sentence": process_sentence(data["sentence"])})
+
+
+def process_full_dataset_sentences(full_dataset: DatasetDict) -> DatasetDict:
+    return DatasetDict(
+        {split: process_dataset_sentences(data) for split, data in full_dataset.items()}
+    )
