@@ -3,7 +3,12 @@ import string
 import nltk
 from nltk.tokenize import word_tokenize
 
-nltk.download("punkt_tab")
+_TOKENIZER_FILE = "punkt_tab"
+
+try:
+    nltk.data.find(f"tokenizers/{_TOKENIZER_FILE}")
+except LookupError:
+    nltk.download(_TOKENIZER_FILE)
 
 
 def process_sentence(sentence: str) -> str:
