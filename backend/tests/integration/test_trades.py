@@ -592,6 +592,62 @@ class TestDeleteTrade:
         assert len(before_delete_get_response.json()) == 2
         assert len(after_delete_get_response.json()) == 1
 
+    def test_delete_trade_deletes_all_journal_entries(
+        self, client: TestClient, access_token: str
+    ) -> None:
+        trade_payload = {
+            "ticker": "MAPPL",
+            "direction": "LONG",
+            "position_size": 3.33,
+            "entry_price": 50.51,
+            "exit_price": None,
+            "opened_at": _OPENED_AT,
+            "closed_at": None,
+        }
+
+        create_trade_response = client.post(
+            "/trades",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=trade_payload,
+        )
+
+        trade_public_id = create_trade_response.json()["public_id"]
+
+        journal_entry_payload = {
+            "title": None,
+            "entry": "This is a journal message. This is a journal message.",
+            "trade_public_id": trade_public_id,
+        }
+
+        client.post(
+            "/journal-entries",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=journal_entry_payload,
+        )
+
+        client.post(
+            "/journal-entries",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=journal_entry_payload,
+        )
+
+        get_all_journal_entries_response = client.get(
+            "/journal-entries", headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        assert len(get_all_journal_entries_response.json()) == 2
+
+        client.delete(
+            f"/trades/{trade_public_id}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        get_all_journal_entries_response2 = client.get(
+            "/journal-entries", headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        assert len(get_all_journal_entries_response2.json()) == 0
+
 
 class TestUpdateTrade:
     def test_update_trade(self, client: TestClient, access_token: str) -> None:
