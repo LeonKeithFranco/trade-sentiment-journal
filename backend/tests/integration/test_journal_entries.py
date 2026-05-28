@@ -400,3 +400,47 @@ class TestUpdateJournalEntry:
         assert datetime.fromisoformat(
             update_data["updated_on"]
         ) > datetime.fromisoformat(create_data["updated_on"])
+
+    def test_update_non_existent_journal_entry(
+        self,
+        client: TestClient,
+        access_token: str,
+    ) -> None:
+        response = client.patch(
+            f"/journal-entries/{uuid.uuid4()}",
+            json={"title": "New Title"},
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json() == {"detail": "Journal entry or entries do not exist."}
+
+    def test_update_trade_of_another_user(
+        self,
+        client: TestClient,
+        access_token: str,
+        trade_public_id: str,
+        other_access_token: str,
+    ) -> None:
+        create_payload = {
+            "title": "Title",
+            "entry": "This is a journal message. This is a journal message.",
+            "trade_public_id": trade_public_id,
+        }
+
+        create_response = client.post(
+            "/journal-entries",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=create_payload,
+        )
+
+        journal_entry_public_id = create_response.json()["public_id"]
+
+        response = client.patch(
+            f"/journal-entries/{journal_entry_public_id}",
+            headers={"Authorization": f"Bearer {other_access_token}"},
+            json={"ticker": "ASDF"},
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json() == {"detail": "Journal entry or entries do not exist."}
