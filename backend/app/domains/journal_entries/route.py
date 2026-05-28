@@ -5,6 +5,7 @@ from fastapi import APIRouter, status
 from app.domains.journal_entries.schemas import (
     JournalEntryCreateRequest,
     JournalEntryResponse,
+    JournalEntryUpdateRequest,
 )
 from app.domains.journal_entries.service import JournalEntryServiceDependency
 from app.security import CurrentUserDependency
@@ -49,3 +50,15 @@ async def delete(
     journal_entry_service: JournalEntryServiceDependency,
 ) -> None:
     await journal_entry_service.delete(journal_entry_public_id, current_user.id)
+
+
+@router.patch("/{journal_entry_public_id}", response_model=JournalEntryResponse)
+async def update(
+    journal_entry_public_id: uuid.UUID,
+    journal_entry_update_request: JournalEntryUpdateRequest,
+    current_user: CurrentUserDependency,
+    journal_entry_service: JournalEntryServiceDependency,
+) -> JournalEntryResponse:
+    return await journal_entry_service.update(
+        journal_entry_update_request, journal_entry_public_id, current_user.id
+    )
