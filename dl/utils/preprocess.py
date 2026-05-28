@@ -27,7 +27,7 @@ def process_sentence(sentence: str) -> str:
 
     initial = cast(list[str], word_tokenize(sentence.lower()))
     for token in initial:
-        if token in string.punctuation:
+        if all(char in string.punctuation for char in token):
             continue
 
         if _is_number(token):
