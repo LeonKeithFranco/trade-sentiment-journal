@@ -13,3 +13,6 @@ wheels/
 .zed
 .vscode
 .env
+
+dl/data/*
+!dl/data/.gitkeep
