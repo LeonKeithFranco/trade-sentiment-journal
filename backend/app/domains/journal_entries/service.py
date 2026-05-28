@@ -11,6 +11,7 @@ from app.domains.journal_entries.repository import (
 from app.domains.journal_entries.schemas import (
     JournalEntryCreateRequest,
     JournalEntryResponse,
+    JournalEntryUpdateRequest,
 )
 from app.domains.trades.service import TradeService, TradeServiceDependency
 from app.models import JournalEntry
@@ -95,6 +96,25 @@ class JournalEntryService:
             )
 
         await self.journal_entry_repo.commit()
+
+    async def update(
+        self,
+        journal_entry_update_info: JournalEntryUpdateRequest,
+        journal_entry_public_id: uuid.UUID,
+        user_id: int,
+    ) -> JournalEntryResponse:
+        journal_entry = await self.get_journal_entry(journal_entry_public_id, user_id)
+        journal_entry_update_info_dict = journal_entry_update_info.model_dump(
+            exclude_unset=True
+        )
+
+        updated_trade = await self.journal_entry_repo.update_journal_entry(
+            journal_entry, **journal_entry_update_info_dict
+        )
+
+        await self.journal_entry_repo.commit()
+
+        return JournalEntryResponse.model_validate(updated_trade)
 
 
 JournalEntryServiceDependency = Annotated[
