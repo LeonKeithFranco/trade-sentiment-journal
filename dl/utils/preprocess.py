@@ -1,4 +1,5 @@
 import string
+from typing import cast
 
 import nltk
 from datasets.arrow_dataset import Dataset
@@ -13,12 +14,26 @@ except LookupError:
     nltk.download(_TOKENIZER_FILE)
 
 
+def _is_number(s: str) -> bool:
+    try:
+        float(s.replace(",", ""))
+        return True
+    except ValueError:
+        return False
+
+
 def process_sentence(sentence: str) -> str:
-    tokens = [
-        token
-        for token in word_tokenize(sentence.lower())
-        if token not in string.punctuation
-    ]
+    tokens = []
+
+    initial = cast(list[str], word_tokenize(sentence.lower()))
+    for token in initial:
+        if token in string.punctuation:
+            continue
+
+        if _is_number(token):
+            token = "<NUM>"
+
+        tokens.append(token)
 
     return " ".join(tokens)
 
