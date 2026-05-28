@@ -563,7 +563,7 @@ wheels = [
 [[package]]
 name = "dl"
 version = "0.1.0"
-source = { virtual = "dl" }
+source = { editable = "dl" }
 dependencies = [
     { name = "datasets" },
     { name = "marimo" },
