@@ -17,6 +17,10 @@ from utils.preprocess import process_sentence
             "The Americas represents 25 % of Gemalto 's billing , and Latin America is one of the fastest growing regions for the company .",
             "the americas represents <NUM> of gemalto 's billing and latin america is one of the fastest growing regions for the company",
         ),
+        (
+            "Dubai Nokia has announced the launch of `` Comes with Music '' , its ground-breaking service which introduces a new way for people to enjoy music .",
+            "dubai nokia has announced the launch of comes with music its ground-breaking service which introduces a new way for people to enjoy music",
+        ),
     ],
 )
 def test_sentence_processing(sentence: str, expected_output: str) -> None:
