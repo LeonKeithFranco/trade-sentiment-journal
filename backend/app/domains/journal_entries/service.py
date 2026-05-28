@@ -82,6 +82,20 @@ class JournalEntryService:
 
         return journal_entry_responses
 
+    async def delete(self, journal_entry_public_id: uuid.UUID, user_id: int) -> None:
+        journal_entries_deleted = (
+            await self.journal_entry_repo.delete_journal_entry_by_public_id_for_user(
+                journal_entry_public_id, user_id
+            )
+        )
+
+        if not journal_entries_deleted:
+            raise JournalEntryDoesNotExistError(
+                f"There is no journal entry with public_id {journal_entry_public_id} for user with id {user_id}"
+            )
+
+        await self.journal_entry_repo.commit()
+
 
 JournalEntryServiceDependency = Annotated[
     JournalEntryService, Depends(JournalEntryService)
