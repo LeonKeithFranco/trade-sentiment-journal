@@ -33,6 +33,15 @@ class JournalEntryRepository(Repository[JournalEntry]):
             JournalEntry, JournalEntry.user_id == user_id
         )
 
+    async def delete_journal_entry_by_public_id_for_user(
+        self, journal_entry_public_id: uuid.UUID, user_id: int
+    ) -> int:
+        return await self.delete_from_table_by(
+            JournalEntry,
+            JournalEntry.public_id == journal_entry_public_id,
+            JournalEntry.user_id == user_id,
+        )
+
 
 JournalEntryRepoDependency = Annotated[
     JournalEntryRepository, Depends(JournalEntryRepository)
