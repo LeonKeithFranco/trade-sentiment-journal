@@ -6,17 +6,24 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
+    import itertools
+    import json
+    import random
+
+    import numpy as np
     from datasets import load_dataset, load_from_disk
     from utils import constants
     from utils.preprocess import process_full_dataset_sentences
-    import itertools
 
     return (
         constants,
         itertools,
+        json,
         load_dataset,
         load_from_disk,
+        np,
         process_full_dataset_sentences,
+        random,
     )
 
 
@@ -36,139 +43,99 @@ def _(constants, load_dataset, load_from_disk, process_full_dataset_sentences):
 
 
 @app.cell
+def _(full_dataset):
+    train_vocab = set()
+
+    for data in full_dataset["train"]:
+        for part in data["sentence"].split(" "):
+            train_vocab.add(part)
+
+    train_vocab
+    return (train_vocab,)
+
+
+@app.cell
 def _(constants):
-    from datasets.arrow_dataset import Dataset
-    import json
+    with open(constants.GLOVE_EMBEDDINGS_FILE_PATH, "r") as f:
+        glove_file_contents = f.readlines()
 
-
-    def map_vocab(dataset: Dataset) -> dict[str, int]:
-        if constants.VOCAB_MAPPING_FILE_PATH.exists():
-            with open(constants.VOCAB_MAPPING_FILE_PATH, "r") as f:
-                return json.load(f)
-
-        mapping = {
-            "<PAD>": 0,
-            "<UNK>": 1,
-            "<NUM>": 2,
-        }
-
-        index_tracker = 3
-
-        for data in dataset:
-            for word in data["sentence"].split(" "):
-                if mapping.get(word):
-                    continue
-
-                mapping[word] = index_tracker
-                index_tracker += 1
-
-        with open(constants.VOCAB_MAPPING_FILE_PATH, "w") as f:
-            json.dump(mapping, f, indent=2)
-
-        return mapping
-
-    return json, map_vocab
+    glove_file_contents[0:5]
+    return (glove_file_contents,)
 
 
 @app.cell
-def _(full_dataset, map_vocab):
-    mapping = map_vocab(full_dataset["train"])
-    mapping
-    return (mapping,)
+def _(glove_file_contents, itertools):
+    glove_words = set()
+
+    for line in glove_file_contents:
+        glove_words.add(line.split(" ")[0])
+
+    set(itertools.islice(glove_words, 5))
+    return (glove_words,)
 
 
 @app.cell
-def _(constants, json):
-    def parse_glove_embeddings(
-        vocab_mapping: dict[str, int],
-    ) -> dict[str, list[float]]:
-        if constants.GLOVE_EMBEDDINGS_PARSED_FILE_PATH.exists():
-            with open(constants.GLOVE_EMBEDDINGS_PARSED_FILE_PATH, "r") as f:
-                return json.load(f)
-
-        embeddings = {}
-
-        with open(constants.GLOVE_EMBEDDINGS_FILE_PATH, "r") as f:
-            for idx, line in enumerate(f):
-                if idx % 1000 == 0:
-                    print(f"{idx} lines processed")
-
-                parts = line.split(" ")
-
-                word = parts[0]
-                if vocab_mapping.get(word, None) is None:
-                    continue
-
-                dimensions = parts[1:]
-
-                embeddings[word] = [float(dim) for dim in dimensions]
-
-        with open(constants.GLOVE_EMBEDDINGS_PARSED_FILE_PATH, "w") as f:
-            json.dump(embeddings, f, indent=2)
-
-        return embeddings
-
-    return (parse_glove_embeddings,)
+def _(glove_words, train_vocab):
+    vocab = train_vocab & glove_words
+    vocab
+    return (vocab,)
 
 
 @app.cell
-def _(itertools, mapping, parse_glove_embeddings):
-    glove_embeddings = parse_glove_embeddings(mapping)
-    dict(itertools.islice(glove_embeddings.items(), 5))
-    return (glove_embeddings,)
+def _(vocab):
+    vocab_mapping = {
+        "<PAD>": 0,
+        "<UNK>": 1,
+        "<NUM>": 2,
+    }
+
+    num_special_tokens = len(vocab_mapping)
+
+    for i, word in enumerate(vocab):
+        vocab_mapping[word] = i + num_special_tokens
+
+    vocab_mapping
+    return (vocab_mapping,)
 
 
 @app.cell
-def _(glove_embeddings):
-    glove_embeddings.get('the', None)
+def _(constants, json, vocab_mapping):
+    if not constants.VOCAB_MAPPING_FILE_PATH.exists():
+        with open(constants.VOCAB_MAPPING_FILE_PATH, "w") as ff:
+            json.dump(vocab_mapping, ff, indent=4)
+
+    constants.VOCAB_MAPPING_FILE_PATH.exists()
     return
 
 
 @app.cell
-def _(constants, json):
-    import random
+def _(constants, glove_file_contents, np, random, vocab_mapping):
+    random.seed(42)
 
+    vectors = [[] for _ in range(len(vocab_mapping))]
+    embedding_length = len(glove_file_contents[0].split(" ")[1:])
 
-    def create_embeddings_matrix(
-        vocab_mapping: dict[str, int],
-        glove_embeddings: dict[str, list[float]],
-    ) -> dict[int, list[float]]:
-        if constants.MATRIX_EMBEDDINGS_FILE_PATH.exists():
-            with open(constants.MATRIX_EMBEDDINGS_FILE_PATH, "r") as f:
-                return json.load(f)
+    vectors[0] = ["0.0"] * embedding_length
+    vectors[1] = [str(random.uniform(-1, 1)) for _ in range(embedding_length)]
+    vectors[2] = [str(random.uniform(-1, 1)) for _ in range(embedding_length)]
 
-        random.seed(42)
+    for lline in glove_file_contents:
+        parts = lline.split(" ")
 
-        matrix = {
-            0: [0.0] * 100,
-            1: [random.uniform(-1, 1) for _ in range(100)],
-            2: [random.uniform(-1, 1) for _ in range(100)],
-        }
+        wword = parts[0]
 
-        for vocab, idx in vocab_mapping.items():
-            if vocab.startswith("<") and vocab.endswith(">"):
-                continue
+        if wword not in vocab_mapping:
+            continue
 
-            if vocab in glove_embeddings:
-                matrix[idx] = glove_embeddings[vocab]
+        embedding = parts[1:]
 
-        with open(constants.MATRIX_EMBEDDINGS_FILE_PATH, "w") as f:
-            json.dump(matrix, f, indent=2)
+        vectors[vocab_mapping[wword]] = embedding
 
-        return matrix
+    vectors = np.array(vectors, dtype=np.float32)
 
-    return (create_embeddings_matrix,)
+    np.save(constants.MATRIX_EMBEDDINGS_FILE_PATH, vectors)
 
-
-@app.cell
-def _(create_embeddings_matrix, glove_embeddings, itertools, mapping):
-    matrix_embeddings = create_embeddings_matrix(mapping, glove_embeddings)
-    dict(itertools.islice(matrix_embeddings.items(), 5))
-    return
-
-
-@app.cell
-def _():
+    vectors[:5]
     return
 
 
