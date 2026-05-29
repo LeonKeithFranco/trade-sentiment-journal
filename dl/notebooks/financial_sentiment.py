@@ -78,15 +78,14 @@ def _(glove_file_contents):
 
 
 @app.cell
-def _(get_glove_words, get_train_vocab):
-    vocab = get_train_vocab() & get_glove_words()
-    vocab
-    return (vocab,)
-
-
-@app.cell
-def _(vocab):
+def _(constants, get_glove_words, get_train_vocab, json):
     def get_vocab_mapping() -> dict[str, int]:
+        if constants.VOCAB_MAPPING_FILE_PATH.exists():
+            with open(constants.VOCAB_MAPPING_FILE_PATH, "r") as f:
+                return json.load(f)
+
+        vocab = get_train_vocab() & get_glove_words()
+
         vocab_mapping = {
             "<PAD>": 0,
             "<UNK>": 1,
@@ -98,6 +97,9 @@ def _(vocab):
         for i, word in enumerate(sorted(vocab)):
             vocab_mapping[word] = i + num_special_tokens
 
+        with open(constants.VOCAB_MAPPING_FILE_PATH, "w") as f:
+            json.dump(vocab_mapping, f, indent=4)
+
         return vocab_mapping
 
     return (get_vocab_mapping,)
@@ -106,22 +108,14 @@ def _(vocab):
 @app.cell
 def _(get_vocab_mapping):
     vocab_mapping = get_vocab_mapping()
+    vocab_mapping
     return (vocab_mapping,)
 
 
 @app.cell
-def _(constants, json, vocab_mapping):
-    if not constants.VOCAB_MAPPING_FILE_PATH.exists():
-        with open(constants.VOCAB_MAPPING_FILE_PATH, "w") as ff:
-            json.dump(vocab_mapping, ff, indent=4)
-
-    constants.VOCAB_MAPPING_FILE_PATH.exists()
-    return
-
-
-@app.cell
 def _(NDArray, constants, glove_file_contents, np, random, vocab_mapping):
-    EXPECTED_GLOVE_EMEDDING_LENGTH = 100
+    EXPECTED_GLOVE_EMBEDDING_LENGTH = 100
+
 
     def get_matrix_embeddings() -> NDArray[np.float32]:
         if constants.MATRIX_EMBEDDINGS_FILE_PATH.exists():
@@ -132,7 +126,7 @@ def _(NDArray, constants, glove_file_contents, np, random, vocab_mapping):
         vectors = [[] for _ in range(len(vocab_mapping))]
         embedding_length = len(glove_file_contents[0].split(" ")[1:])
 
-        assert embedding_length == EXPECTED_GLOVE_EMEDDING_LENGTH
+        assert embedding_length == EXPECTED_GLOVE_EMBEDDING_LENGTH
 
         vectors[0] = ["0.0"] * embedding_length
         vectors[1] = [str(random.uniform(-1, 1)) for _ in range(embedding_length)]
@@ -153,6 +147,8 @@ def _(NDArray, constants, glove_file_contents, np, random, vocab_mapping):
         vectors = np.array(vectors, dtype=np.float32)
 
         np.save(constants.MATRIX_EMBEDDINGS_FILE_PATH, vectors)
+
+        return vectors
 
     return (get_matrix_embeddings,)
 
