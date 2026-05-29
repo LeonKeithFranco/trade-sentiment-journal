@@ -21,6 +21,14 @@ from utils.preprocess import process_sentence
             "Dubai Nokia has announced the launch of `` Comes with Music '' , its ground-breaking service which introduces a new way for people to enjoy music .",
             "dubai nokia has announced the launch of comes with music its ground-breaking service which introduces a new way for people to enjoy music",
         ),
+        (
+            "A local waste management company , Turun Seudun J+Ætehuolto , has planned to set up a 150,000 tonne waste-burning facility .",
+            "a local waste management company turun seudun has planned to set up a <NUM> tonne waste-burning facility",
+        ),
+        (
+            "www.countryelements.co.uk Designed by Patricia Burt , this is just one of a selection of distinctive hooked rugs created with recycled materials and dyed natural dyes .",
+            "designed by patricia burt this is just one of a selection of distinctive hooked rugs created with recycled materials and dyed natural dyes",
+        ),
     ],
 )
 def test_sentence_processing(sentence: str, expected_output: str) -> None:
