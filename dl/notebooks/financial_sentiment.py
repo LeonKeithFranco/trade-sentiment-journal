@@ -80,10 +80,6 @@ def _(glove_file_contents):
 @app.cell
 def _(constants, get_glove_words, get_train_vocab, json):
     def get_vocab_mapping() -> dict[str, int]:
-        if constants.VOCAB_MAPPING_FILE_PATH.exists():
-            with open(constants.VOCAB_MAPPING_FILE_PATH, "r") as f:
-                return json.load(f)
-
         vocab = get_train_vocab() & get_glove_words()
 
         vocab_mapping = {
@@ -118,9 +114,6 @@ def _(NDArray, constants, glove_file_contents, np, random, vocab_mapping):
 
 
     def get_matrix_embeddings() -> NDArray[np.float32]:
-        if constants.MATRIX_EMBEDDINGS_FILE_PATH.exists():
-            return np.load(constants.MATRIX_EMBEDDINGS_FILE_PATH)
-
         random.seed(42)
 
         vectors = [[] for _ in range(len(vocab_mapping))]
