@@ -6,10 +6,8 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
-    import itertools
     import json
     import random
-    from datasets.arrow_dataset import Dataset
     import numpy as np
     from numpy.typing import NDArray
     from datasets import load_dataset, load_from_disk
@@ -123,6 +121,8 @@ def _(constants, json, vocab_mapping):
 
 @app.cell
 def _(NDArray, constants, glove_file_contents, np, random, vocab_mapping):
+    EXPECTED_GLOVE_EMEDDING_LENGTH = 100
+
     def get_matrix_embeddings() -> NDArray[np.float32]:
         if constants.MATRIX_EMBEDDINGS_FILE_PATH.exists():
             return np.load(constants.MATRIX_EMBEDDINGS_FILE_PATH)
@@ -131,6 +131,8 @@ def _(NDArray, constants, glove_file_contents, np, random, vocab_mapping):
 
         vectors = [[] for _ in range(len(vocab_mapping))]
         embedding_length = len(glove_file_contents[0].split(" ")[1:])
+
+        assert embedding_length == EXPECTED_GLOVE_EMEDDING_LENGTH
 
         vectors[0] = ["0.0"] * embedding_length
         vectors[1] = [str(random.uniform(-1, 1)) for _ in range(embedding_length)]
