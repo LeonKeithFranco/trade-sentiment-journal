@@ -110,30 +110,31 @@ def _(constants, json, vocab_mapping):
 
 @app.cell
 def _(constants, glove_file_contents, np, random, vocab_mapping):
-    random.seed(42)
+    if not constants.MATRIX_EMBEDDINGS_FILE_PATH.exists():
+        random.seed(42)
 
-    vectors = [[] for _ in range(len(vocab_mapping))]
-    embedding_length = len(glove_file_contents[0].split(" ")[1:])
+        vectors = [[] for _ in range(len(vocab_mapping))]
+        embedding_length = len(glove_file_contents[0].split(" ")[1:])
 
-    vectors[0] = ["0.0"] * embedding_length
-    vectors[1] = [str(random.uniform(-1, 1)) for _ in range(embedding_length)]
-    vectors[2] = [str(random.uniform(-1, 1)) for _ in range(embedding_length)]
+        vectors[0] = ["0.0"] * embedding_length
+        vectors[1] = [str(random.uniform(-1, 1)) for _ in range(embedding_length)]
+        vectors[2] = [str(random.uniform(-1, 1)) for _ in range(embedding_length)]
 
-    for lline in glove_file_contents:
-        parts = lline.split(" ")
+        for lline in glove_file_contents:
+            parts = lline.split(" ")
 
-        wword = parts[0]
+            wword = parts[0]
 
-        if wword not in vocab_mapping:
-            continue
+            if wword not in vocab_mapping:
+                continue
 
-        embedding = parts[1:]
+            embedding = parts[1:]
 
-        vectors[vocab_mapping[wword]] = embedding
+            vectors[vocab_mapping[wword]] = embedding
 
-    vectors = np.array(vectors, dtype=np.float32)
+        vectors = np.array(vectors, dtype=np.float32)
 
-    np.save(constants.MATRIX_EMBEDDINGS_FILE_PATH, vectors)
+        np.save(constants.MATRIX_EMBEDDINGS_FILE_PATH, vectors)
 
     vectors[:5]
     return
