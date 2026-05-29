@@ -92,10 +92,10 @@ def _(vocab):
             "<UNK>": 1,
             "<NUM>": 2,
         }
-    
+
         num_special_tokens = len(vocab_mapping)
-    
-        for i, word in enumerate(vocab):
+
+        for i, word in enumerate(sorted(vocab)):
             vocab_mapping[word] = i + num_special_tokens
 
         return vocab_mapping
@@ -126,7 +126,7 @@ def _(NDArray, constants, glove_file_contents, np, random, vocab_mapping):
     def get_matrix_embeddings() -> NDArray[np.float32]:
         if constants.MATRIX_EMBEDDINGS_FILE_PATH.exists():
             return np.load(constants.MATRIX_EMBEDDINGS_FILE_PATH)
-        
+
         random.seed(42)
 
         vectors = [[] for _ in range(len(vocab_mapping))]
