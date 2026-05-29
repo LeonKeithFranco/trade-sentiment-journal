@@ -30,6 +30,12 @@ def process_sentence(sentence: str) -> str:
         if all(char in string.punctuation for char in token):
             continue
 
+        if "www." in token:
+            continue
+
+        if any(ord(char) > 127 for char in token):
+            continue
+
         if _is_number(token):
             token = "<NUM>"
 
