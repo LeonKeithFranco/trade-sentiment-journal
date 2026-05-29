@@ -9,15 +9,16 @@ def _():
     import itertools
     import json
     import random
-
+    from datasets.arrow_dataset import Dataset
     import numpy as np
+    from numpy.typing import NDArray
     from datasets import load_dataset, load_from_disk
     from utils import constants
     from utils.preprocess import process_full_dataset_sentences
 
     return (
+        NDArray,
         constants,
-        itertools,
         json,
         load_dataset,
         load_from_disk,
@@ -43,18 +44,6 @@ def _(constants, load_dataset, load_from_disk, process_full_dataset_sentences):
 
 
 @app.cell
-def _(full_dataset):
-    train_vocab = set()
-
-    for data in full_dataset["train"]:
-        for part in data["sentence"].split(" "):
-            train_vocab.add(part)
-
-    train_vocab
-    return (train_vocab,)
-
-
-@app.cell
 def _(constants):
     with open(constants.GLOVE_EMBEDDINGS_FILE_PATH, "r") as f:
         glove_file_contents = f.readlines()
@@ -64,37 +53,61 @@ def _(constants):
 
 
 @app.cell
-def _(glove_file_contents, itertools):
-    glove_words = set()
+def _(full_dataset):
+    def get_train_vocab() -> set[str]:
+        train_vocab = set()
 
-    for line in glove_file_contents:
-        glove_words.add(line.split(" ")[0])
+        for data in full_dataset["train"]:
+            for part in data["sentence"].split(" "):
+                train_vocab.add(part)
 
-    set(itertools.islice(glove_words, 5))
-    return (glove_words,)
+        return train_vocab
+
+    return (get_train_vocab,)
 
 
 @app.cell
-def _(glove_words, train_vocab):
-    vocab = train_vocab & glove_words
+def _(glove_file_contents):
+    def get_glove_words() -> set[str]:
+        glove_words = set()
+
+        for line in glove_file_contents:
+            glove_words.add(line.split(" ")[0])
+
+        return glove_words
+
+    return (get_glove_words,)
+
+
+@app.cell
+def _(get_glove_words, get_train_vocab):
+    vocab = get_train_vocab() & get_glove_words()
     vocab
     return (vocab,)
 
 
 @app.cell
 def _(vocab):
-    vocab_mapping = {
-        "<PAD>": 0,
-        "<UNK>": 1,
-        "<NUM>": 2,
-    }
+    def get_vocab_mapping() -> dict[str, int]:
+        vocab_mapping = {
+            "<PAD>": 0,
+            "<UNK>": 1,
+            "<NUM>": 2,
+        }
+    
+        num_special_tokens = len(vocab_mapping)
+    
+        for i, word in enumerate(vocab):
+            vocab_mapping[word] = i + num_special_tokens
 
-    num_special_tokens = len(vocab_mapping)
+        return vocab_mapping
 
-    for i, word in enumerate(vocab):
-        vocab_mapping[word] = i + num_special_tokens
+    return (get_vocab_mapping,)
 
-    vocab_mapping
+
+@app.cell
+def _(get_vocab_mapping):
+    vocab_mapping = get_vocab_mapping()
     return (vocab_mapping,)
 
 
@@ -109,8 +122,11 @@ def _(constants, json, vocab_mapping):
 
 
 @app.cell
-def _(constants, glove_file_contents, np, random, vocab_mapping):
-    if not constants.MATRIX_EMBEDDINGS_FILE_PATH.exists():
+def _(NDArray, constants, glove_file_contents, np, random, vocab_mapping):
+    def get_matrix_embeddings() -> NDArray[np.float32]:
+        if constants.MATRIX_EMBEDDINGS_FILE_PATH.exists():
+            return np.load(constants.MATRIX_EMBEDDINGS_FILE_PATH)
+        
         random.seed(42)
 
         vectors = [[] for _ in range(len(vocab_mapping))]
@@ -120,23 +136,29 @@ def _(constants, glove_file_contents, np, random, vocab_mapping):
         vectors[1] = [str(random.uniform(-1, 1)) for _ in range(embedding_length)]
         vectors[2] = [str(random.uniform(-1, 1)) for _ in range(embedding_length)]
 
-        for lline in glove_file_contents:
-            parts = lline.split(" ")
+        for line in glove_file_contents:
+            parts = line.split(" ")
 
-            wword = parts[0]
+            word = parts[0]
 
-            if wword not in vocab_mapping:
+            if word not in vocab_mapping:
                 continue
 
             embedding = parts[1:]
 
-            vectors[vocab_mapping[wword]] = embedding
+            vectors[vocab_mapping[word]] = embedding
 
         vectors = np.array(vectors, dtype=np.float32)
 
         np.save(constants.MATRIX_EMBEDDINGS_FILE_PATH, vectors)
 
-    vectors[:5]
+    return (get_matrix_embeddings,)
+
+
+@app.cell
+def _(get_matrix_embeddings):
+    vectors = get_matrix_embeddings()
+    vectors
     return
 
 
