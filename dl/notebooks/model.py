@@ -29,8 +29,7 @@ def _(datasets, map_sentence, torch):
                 for data in dataset
             ]
             self.labels: list[torch.Tensor] = [
-                torch.tensor(data["label"])  #
-                for data in dataset
+                torch.tensor(data["label"], dtype=torch.long) for data in dataset
             ]
 
         def __len__(self) -> int:
