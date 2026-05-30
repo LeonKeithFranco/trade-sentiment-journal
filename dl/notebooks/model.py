@@ -25,10 +25,12 @@ def _(datasets, map_sentence, torch):
     class SentenceDataset(torch.utils.data.Dataset):
         def __init__(self, dataset: datasets.arrow_dataset.Dataset) -> None:
             self.mapped_sentences: list[torch.Tensor] = [
-                torch.tensor(map_sentence(data["sentence"])) for data in dataset
+                torch.tensor(map_sentence(data["sentence"]), dtype=torch.long)
+                for data in dataset
             ]
             self.labels: list[torch.Tensor] = [
-                torch.tensor(data["label"]) for data in dataset
+                torch.tensor(data["label"])  #
+                for data in dataset
             ]
 
         def __len__(self) -> int:
