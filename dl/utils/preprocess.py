@@ -1,5 +1,6 @@
 import json
 import string
+from functools import lru_cache
 from typing import cast
 
 import nltk
@@ -57,17 +58,30 @@ def process_full_dataset_sentences(full_dataset: DatasetDict) -> DatasetDict:
     )
 
 
-def map_sentence(sentence: str) -> list[int]:
+@lru_cache
+def get_vocab_mapping() -> dict[str, int]:
     if not constants.VOCAB_MAPPING_FILE_PATH.exists():
         raise FileNotFoundError(
             f"{constants.VOCAB_MAPPING_FILE_PATH.name} not found. Please run get_and_cache_data.py to generate the file"
         )
 
     with open(constants.VOCAB_MAPPING_FILE_PATH, "r") as f:
-        mappings = cast(dict[str, int], json.load(f))
+        return cast(dict[str, int], json.load(f))
+
+
+def map_sentence(sentence: str) -> list[int]:
+    mapping = get_vocab_mapping()
 
     tokens = sentence.split(" ")
 
-    mapped_sentence = [mappings.get(token, mappings["<UNK>"]) for token in tokens]
+    if (len(tokens) == 1) and (tokens[0] == ""):
+        return []
+
+    mapped_sentence = [mapping.get(token, mapping["<UNK>"]) for token in tokens]
 
     return mapped_sentence
+
+
+def process_and_map_sentence(sentence: str) -> list[int]:
+    sentence = process_sentence(sentence)
+    return map_sentence(sentence)
