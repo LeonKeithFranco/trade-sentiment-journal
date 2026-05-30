@@ -1,3 +1,4 @@
+import json
 import string
 from typing import cast
 
@@ -5,6 +6,8 @@ import nltk
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from nltk.tokenize import word_tokenize
+
+from utils import constants
 
 _TOKENIZER_FILE = "punkt_tab"
 
@@ -52,3 +55,19 @@ def process_full_dataset_sentences(full_dataset: DatasetDict) -> DatasetDict:
     return DatasetDict(
         {split: process_dataset_sentences(data) for split, data in full_dataset.items()}
     )
+
+
+def map_sentence(sentence: str) -> list[int]:
+    if not constants.VOCAB_MAPPING_FILE_PATH.exists():
+        raise FileNotFoundError(
+            f"{constants.VOCAB_MAPPING_FILE_PATH.name} not found. Please run get_and_cache_data.py to generate the file"
+        )
+
+    with open(constants.VOCAB_MAPPING_FILE_PATH, "r") as f:
+        mappings = cast(dict[str, int], json.load(f))
+
+    tokens = sentence.split(" ")
+
+    mapped_sentence = [mappings.get(token, mappings["<UNK>"]) for token in tokens]
+
+    return mapped_sentence
