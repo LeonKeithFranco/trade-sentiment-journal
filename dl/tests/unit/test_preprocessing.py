@@ -2,7 +2,12 @@ from pathlib import Path
 
 import pytest
 from pytest_mock import MockFixture
-from utils.preprocess import map_sentence, process_sentence
+from utils.preprocess import (
+    get_vocab_mapping,
+    map_sentence,
+    process_and_map_sentence,
+    process_sentence,
+)
 
 
 @pytest.mark.parametrize(
@@ -192,13 +197,19 @@ def test_sentence_processing(sentence: str, expected_output: str) -> None:
                 1984,
             ],
         ),
+        (
+            "",
+            [],
+        ),
     ],
 )
 def test_sentence_mapping(sentence: str, expected_output: list[int]) -> None:
-    assert map_sentence(process_sentence(sentence)) == expected_output
+    assert process_and_map_sentence(sentence) == expected_output
 
 
 def test_sentence_mapping_no_file(mocker: MockFixture) -> None:
+    get_vocab_mapping.cache_clear()
+
     fake_file = Path("/not-real-directory/not-real-file.json")
 
     mocker.patch("utils.constants.VOCAB_MAPPING_FILE_PATH", new=fake_file)
