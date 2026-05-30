@@ -8,11 +8,10 @@ app = marimo.App(width="medium")
 def _():
     import json
     import random
+
     import numpy as np
     from numpy.typing import NDArray
-    from datasets import load_dataset, load_from_disk
     from utils import constants
-    from utils.preprocess import process_full_dataset_sentences
     from utils.get_dataset import get_dataset
 
     return NDArray, constants, get_dataset, json, np, random
@@ -94,7 +93,6 @@ def _(get_vocab_mapping):
 @app.cell
 def _(NDArray, constants, glove_file_contents, np, random, vocab_mapping):
     EXPECTED_GLOVE_EMBEDDING_LENGTH = 100
-
 
     def get_matrix_embeddings() -> NDArray[np.float32]:
         random.seed(42)
