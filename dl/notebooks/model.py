@@ -80,7 +80,7 @@ def _(torch):
 
             labels.append(label)
 
-            padded_data = torch.zeros(max_length)
+            padded_data = torch.zeros(max_length, dtype=torch.long)
             padded_data[:length] = data
             padded_batch.append(padded_data)
 
@@ -96,6 +96,11 @@ def _(torch):
 @app.cell
 def _(collate, test_dataset):
     collate(test_dataset)
+    return
+
+
+@app.cell
+def _():
     return
 
 
