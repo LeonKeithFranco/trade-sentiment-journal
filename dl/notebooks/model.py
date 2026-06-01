@@ -7,11 +7,12 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import torch
+    from torch.utils.data import DataLoader
     import datasets
     from utils.get_dataset import get_dataset
     from utils.preprocess import map_sentence
 
-    return datasets, get_dataset, map_sentence, torch
+    return DataLoader, datasets, get_dataset, map_sentence, torch
 
 
 @app.cell
@@ -46,14 +47,14 @@ def _(datasets, map_sentence, torch):
 def _(SentenceDataset, full_dataset):
     train_dataset = SentenceDataset(full_dataset["train"])
     train_dataset[0]
-    return
+    return (train_dataset,)
 
 
 @app.cell
 def _(SentenceDataset, full_dataset):
     val_dataset = SentenceDataset(full_dataset["validation"])
     val_dataset[0]
-    return
+    return (val_dataset,)
 
 
 @app.cell
@@ -94,13 +95,23 @@ def _(torch):
 
 
 @app.cell
-def _(collate, test_dataset):
-    collate(test_dataset)
+def _(DataLoader, collate, train_dataset):
+    train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True, collate_fn=collate)
+    next(iter(train_dataloader))
     return
 
 
 @app.cell
-def _():
+def _(DataLoader, collate, val_dataset):
+    val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False, collate_fn=collate)
+    next(iter(val_dataloader))
+    return
+
+
+@app.cell
+def _(DataLoader, collate, test_dataset):
+    test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False, collate_fn=collate)
+    next(iter(test_dataloader))
     return
 
 
