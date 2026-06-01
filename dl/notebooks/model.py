@@ -17,6 +17,7 @@ def _():
 @app.cell
 def _(get_dataset):
     full_dataset = get_dataset()
+    full_dataset
     return (full_dataset,)
 
 
@@ -49,7 +50,52 @@ def _(SentenceDataset, full_dataset):
 
 
 @app.cell
-def _():
+def _(SentenceDataset, full_dataset):
+    val_dataset = SentenceDataset(full_dataset["validation"])
+    val_dataset[0]
+    return
+
+
+@app.cell
+def _(SentenceDataset, full_dataset):
+    test_dataset = SentenceDataset(full_dataset["test"])
+    test_dataset[0]
+    return (test_dataset,)
+
+
+@app.cell
+def _(torch):
+    def collate(
+        batch: list[tuple[torch.Tensor, torch.Tensor]],
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        max_length = max(len(data) for data, _ in batch)
+
+        padded_batch = []
+        labels = []
+        true_length = []
+
+        for data, label in batch:
+            length = len(data)
+            true_length.append(length)
+
+            labels.append(label)
+
+            padded_data = torch.zeros(max_length)
+            padded_data[:length] = data
+            padded_batch.append(padded_data)
+
+        return (
+            torch.stack(padded_batch),
+            torch.stack(labels),
+            torch.tensor(true_length),
+        )
+
+    return (collate,)
+
+
+@app.cell
+def _(collate, test_dataset):
+    collate(test_dataset)
     return
 
 
