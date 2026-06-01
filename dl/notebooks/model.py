@@ -97,21 +97,20 @@ def _(torch):
 @app.cell
 def _(DataLoader, collate, train_dataset):
     train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True, collate_fn=collate)
-    next(iter(train_dataloader))
+    sample_batch = next(iter(train_dataloader))
+    sample_batch[0].shape, sample_batch[1].shape, sample_batch[2].shape
     return
 
 
 @app.cell
 def _(DataLoader, collate, val_dataset):
     val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False, collate_fn=collate)
-    next(iter(val_dataloader))
     return
 
 
 @app.cell
 def _(DataLoader, collate, test_dataset):
     test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False, collate_fn=collate)
-    next(iter(test_dataloader))
     return
 
 
