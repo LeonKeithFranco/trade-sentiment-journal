@@ -32,7 +32,6 @@ def _():
 @app.cell
 def _(get_dataset):
     full_dataset = get_dataset()
-    full_dataset
     return (full_dataset,)
 
 
@@ -60,22 +59,9 @@ def _(datasets, map_sentence, torch):
 @app.cell
 def _(SentenceDataset, full_dataset):
     train_dataset = SentenceDataset(full_dataset["train"])
-    train_dataset[0]
-    return (train_dataset,)
-
-
-@app.cell
-def _(SentenceDataset, full_dataset):
     val_dataset = SentenceDataset(full_dataset["validation"])
-    val_dataset[0]
-    return (val_dataset,)
-
-
-@app.cell
-def _(SentenceDataset, full_dataset):
     test_dataset = SentenceDataset(full_dataset["test"])
-    test_dataset[0]
-    return (test_dataset,)
+    return test_dataset, train_dataset, val_dataset
 
 
 @app.cell
@@ -109,17 +95,10 @@ def _(torch):
 
 
 @app.cell
-def _(DataLoader, collate, train_dataset):
+def _(DataLoader, collate, test_dataset, train_dataset, val_dataset):
     train_dataloader = DataLoader(
         train_dataset, batch_size=32, shuffle=True, collate_fn=collate
     )
-    sample_batch = next(iter(train_dataloader))
-    sample_batch[0].shape, sample_batch[1].shape, sample_batch[2].shape
-    return (sample_batch,)
-
-
-@app.cell
-def _(DataLoader, collate, test_dataset, val_dataset):
     val_dataloader = DataLoader(
         val_dataset, batch_size=32, shuffle=False, collate_fn=collate
     )
@@ -132,8 +111,7 @@ def _(DataLoader, collate, test_dataset, val_dataset):
 @app.cell
 def _(constants, np, torch):
     matrix_embedding = torch.tensor(np.load(constants.MATRIX_EMBEDDINGS_FILE_PATH))
-    matrix_embedding
-    return (matrix_embedding,)
+    return
 
 
 @app.cell
@@ -173,19 +151,6 @@ def _(nn, pack_padded_sequence, torch):
 
             return self.linear(concatenated_hn)
 
-    return (Model,)
-
-
-@app.cell
-def _(Model, matrix_embedding, sample_batch):
-    model = Model(matrix_embedding)
-    test = model(sample_batch[0], sample_batch[2])
-    test.shape
-    return
-
-
-@app.cell
-def _():
     return
 
 
