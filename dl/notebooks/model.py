@@ -8,15 +8,14 @@ app = marimo.App(width="medium")
 def _():
     import datasets
     import torch
+    from sklearn.metrics import confusion_matrix
     from torch import nn
-    from torch.utils.data import DataLoader
     from torch.optim import Optimizer
+    from torch.utils.data import DataLoader
     from utils import constants
     from utils.get_dataset import get_dataset
-    from utils.model import get_untrained_model, EpochResults
+    from utils.model import EpochResults, get_untrained_model
     from utils.preprocess import map_sentence
-    from sklearn.metrics import confusion_matrix
-    import copy
 
     return (
         DataLoader,
@@ -190,9 +189,7 @@ def _(DataLoader, EpochResults, device, nn, torch):
 
 @app.cell
 def _(confusion_matrix):
-    def print_metrics(
-        predictions: list[int], labels: list[int], split: str
-    ) -> None:
+    def print_metrics(predictions: list[int], labels: list[int], split: str) -> None:
         print(f"===== {split} Confusion Matrix =====")
         print(confusion_matrix(labels, predictions))
 
@@ -258,9 +255,7 @@ def _(
         model.to(device)
 
         for epoch in range(1, num_epochs + 1):
-            train_results = train_epoch(
-                model, train_dataloader, criterion, optimizer
-            )
+            train_results = train_epoch(model, train_dataloader, criterion, optimizer)
             scheduler.step()
 
             val_results = validation_epoch(model, val_dataloader, criterion)
@@ -275,16 +270,12 @@ def _(
             print_metrics(train_results.predictions, train_results.actual, "Train")
             print("\n")
 
-            print_metrics(
-                val_results.predictions, val_results.actual, "Validation"
-            )
+            print_metrics(val_results.predictions, val_results.actual, "Validation")
             print("\n")
 
             if val_results.average_loss < best_val_loss:
                 best_val_loss = val_results.average_loss
-                best_model_dict = {
-                    k: v.cpu() for k, v in model.state_dict().items()
-                }
+                best_model_dict = {k: v.cpu() for k, v in model.state_dict().items()}
 
         torch.save(best_model_dict, constants.MODEL_FILE_PATH)
 
