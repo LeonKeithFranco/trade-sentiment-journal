@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from functools import lru_cache
 
 import numpy as np
@@ -6,6 +7,13 @@ from torch import nn
 from torch.nn.utils.rnn import pack_padded_sequence
 
 from utils import constants
+
+
+@dataclass(slots=True, frozen=True)
+class EpochResults:
+    average_loss: float
+    predictions: list[int]
+    actual: list[int]
 
 
 class Model(nn.Module):
