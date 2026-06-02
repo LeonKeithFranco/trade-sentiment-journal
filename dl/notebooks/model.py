@@ -24,7 +24,6 @@ def _():
         Optimizer,
         confusion_matrix,
         constants,
-        copy,
         datasets,
         get_dataset,
         get_untrained_model,
@@ -171,10 +170,10 @@ def _(DataLoader, EpochResults, device, nn, torch):
 
         with torch.no_grad():
             for sequence, labels, lengths in dataloader:
-                sequences = sequence.to(device)
+                sequence = sequence.to(device)
                 labels = labels.to(device)
 
-                logits = model(sequence, labels)
+                logits = model(sequence, lengths)
                 loss = criterion(logits, labels)
 
                 results.average_loss += loss.item()
@@ -227,7 +226,6 @@ def _(get_untrained_model):
 def _(
     compute_class_weights,
     constants,
-    copy,
     device,
     model,
     nn,
@@ -284,7 +282,9 @@ def _(
 
             if val_results.average_loss < best_val_loss:
                 best_val_loss = val_results.average_loss
-                best_model_dict = copy.deepcopy(model.cpu().state_dict())
+                best_model_dict = {
+                    k: v.cpu() for k, v in model.state_dict().items()
+                }
 
         torch.save(best_model_dict, constants.MODEL_FILE_PATH)
 
