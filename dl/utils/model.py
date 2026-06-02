@@ -43,7 +43,9 @@ class Model(nn.Module):
 
 
 @lru_cache
-def get_model() -> nn.Module:
-    matrix_embedding = torch.tensor(np.load(constants.MATRIX_EMBEDDINGS_FILE_PATH))
+def _get_matrix_embedding() -> torch.Tensor:
+    return torch.tensor(np.load(constants.MATRIX_EMBEDDINGS_FILE_PATH))
 
-    return Model(matrix_embedding)
+
+def get_untrained_model() -> nn.Module:
+    return Model(_get_matrix_embedding())
