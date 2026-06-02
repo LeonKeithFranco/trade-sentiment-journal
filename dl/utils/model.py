@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 
 import numpy as np
@@ -12,8 +12,8 @@ from utils import constants
 @dataclass(slots=True, frozen=True)
 class EpochResults:
     average_loss: float
-    predictions: list[int]
-    actual: list[int]
+    predictions: list[int] = field(default_factory=list)
+    actual: list[int] = field(default_factory=list)
 
 
 class Model(nn.Module):
