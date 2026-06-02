@@ -8,12 +8,34 @@ app = marimo.App(width="medium")
 def _():
     import datasets
     import torch
+    from torch import nn
     from torch.utils.data import DataLoader
+    from torch.optim import Optimizer
+    from utils import constants
     from utils.get_dataset import get_dataset
-    from utils.model import get_model
+    from utils.model import get_untrained_model, EpochResults
     from utils.preprocess import map_sentence
+    from sklearn.metrics import confusion_matrix
 
-    return DataLoader, datasets, get_dataset, get_model, map_sentence, torch
+    return (
+        DataLoader,
+        EpochResults,
+        Optimizer,
+        confusion_matrix,
+        constants,
+        datasets,
+        get_dataset,
+        get_untrained_model,
+        map_sentence,
+        nn,
+        torch,
+    )
+
+
+@app.cell
+def _():
+    CLASSES = ["negative", "neutral", "positive"]
+    return (CLASSES,)
 
 
 @app.cell
@@ -92,17 +114,174 @@ def _(DataLoader, collate, test_dataset, train_dataset, val_dataset):
     test_dataloader = DataLoader(
         test_dataset, batch_size=32, shuffle=False, collate_fn=collate
     )
-    return
+    return train_dataloader, val_dataloader
 
 
 @app.cell
-def _(get_model):
-    model = get_model()
-    return
+def _(torch):
+    device = torch.device("cude" if torch.cuda.is_available() else "cpu")
+    device
+    return (device,)
 
 
 @app.cell
-def _():
+def _(DataLoader, EpochResults, Optimizer, device, nn):
+    def train_epoch(
+        model: nn.Module,
+        dataloader: DataLoader,
+        criterion: nn.CrossEntropyLoss,
+        optimizer: Optimizer,
+    ) -> EpochResults:
+        model.train()
+
+        results = EpochResults()
+
+        for sequence, labels, lengths in dataloader:
+            sequences = sequence.to(device)
+            labels = labels.to(device)
+
+            optimizer.zero_grad()
+            logits = model(sequence, labels)
+            loss = criterion(logits, labels)
+            loss.backward()
+            optimizer.step()
+
+            results.average_loss += loss.item()
+            preds = logits.argmax(dim=1)
+            results.predictions.extend(preds.cpu().tolist())
+            results.actual(labels.cup().tolist())
+
+        results.average_loss /= len(dataloader)
+
+        return results
+
+    return (train_epoch,)
+
+
+@app.cell
+def _(DataLoader, EpochResults, device, nn, torch):
+    def validation_epoch(
+        model: nn.Module, dataloader: DataLoader, criterion: nn.CrossEntropyLoss
+    ) -> EpochResults:
+        model.eval()
+
+        results = EpochResults()
+
+        with torch.no_grad():
+            for sequence, labels, lengths in dataloader:
+                sequences = sequence.to(device)
+                labels = labels.to(device)
+
+                logits = model(sequence, labels)
+                loss = criterion(logits, labels)
+
+                results.average_loss += loss.item()
+                preds = logits.argmax(dim=1)
+                results.predictions.extend(preds.cpu().tolist())
+                results.actual(labels.cup().tolist())
+
+        results.average_loss /= len(dataloader)
+
+        return results
+
+    return (validation_epoch,)
+
+
+@app.cell
+def _(confusion_matrix):
+    def print_metrics(
+        predictions: list[int], labels: list[int], split: str
+    ) -> None:
+        print(f"===== {split} Confusion Matrix =====")
+        print(confusion_matrix(labels, predictions))
+
+    return (print_metrics,)
+
+
+@app.cell
+def _(CLASSES, device, torch, train_dataset):
+    def compute_class_weights() -> torch.Tensor:
+        num_classes = len(CLASSES)
+        counts = torch.ones(num_classes)
+
+        for _, label, _ in train_dataset:
+            counts[label] += 1
+
+        weights = 1.0 / counts
+        weights /= weights.sum() * num_classes
+
+        return weights.to(device)
+
+    return (compute_class_weights,)
+
+
+@app.cell
+def _(get_untrained_model):
+    model = get_untrained_model()
+    return (model,)
+
+
+@app.cell
+def _(
+    compute_class_weights,
+    constants,
+    model,
+    nn,
+    print_metrics,
+    torch,
+    train_dataloader,
+    train_epoch,
+    val_dataloader,
+    validation_epoch,
+):
+    def train() -> None:
+        num_epochs = 16
+
+        optimizer = torch.optim.AdamW(
+            model.parameters(),
+            lr=1e-3,
+        )
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer,
+            num_epochs,
+            eta_min=1e-7,
+        )
+        criterion = nn.CrossEntropyLoss(
+            weight=compute_class_weights(),
+        )
+
+        best_val_loss = float("inf")
+        best_model_dict = {}
+
+        for epoch in range(1, num_epochs + 1):
+            train_results = train_epoch(
+                model, train_dataloader, criterion, optimizer
+            )
+            scheduler.step()
+
+            val_results = validation_epoch(model, val_dataloader, criterion)
+
+            print(
+                f"Epoch {epoch + 1}/{num_epochs} |"
+                " train loss: {train_results.average_loss:.4f} |"
+                " val loss: {val_results.average_loss:.4f}"
+            )
+            print("\n")
+
+            print_metrics(train_results.predictions, train_results.actual, "Train")
+            print("\n")
+
+            print_metrics(
+                val_results.predictions, val_results.actual, "Validation"
+            )
+            print("\n")
+
+            if val_results.average_loss < best_val_loss:
+                best_val_loss = val_results.average_loss
+                best_model_dict = model.state_dict()
+
+        torch.save(best_model_dict, constants.MODEL_FILE_PATH)
+
     return
 
 
