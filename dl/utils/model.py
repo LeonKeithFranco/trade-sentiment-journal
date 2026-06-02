@@ -11,7 +11,7 @@ from utils import constants
 
 @dataclass(slots=True, frozen=True)
 class EpochResults:
-    average_loss: float
+    average_loss: float = 0.0
     predictions: list[int] = field(default_factory=list)
     actual: list[int] = field(default_factory=list)
 
