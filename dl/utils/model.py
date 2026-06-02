@@ -9,7 +9,7 @@ from torch.nn.utils.rnn import pack_padded_sequence
 from utils import constants
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(slots=True)
 class EpochResults:
     average_loss: float = 0.0
     predictions: list[int] = field(default_factory=list)

@@ -16,6 +16,7 @@ def _():
     from utils.model import get_untrained_model, EpochResults
     from utils.preprocess import map_sentence
     from sklearn.metrics import confusion_matrix
+    import copy
 
     return (
         DataLoader,
@@ -23,6 +24,7 @@ def _():
         Optimizer,
         confusion_matrix,
         constants,
+        copy,
         datasets,
         get_dataset,
         get_untrained_model,
@@ -119,7 +121,7 @@ def _(DataLoader, collate, test_dataset, train_dataset, val_dataset):
 
 @app.cell
 def _(torch):
-    device = torch.device("cude" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     device
     return (device,)
 
@@ -137,11 +139,11 @@ def _(DataLoader, EpochResults, Optimizer, device, nn):
         results = EpochResults()
 
         for sequence, labels, lengths in dataloader:
-            sequences = sequence.to(device)
+            sequence = sequence.to(device)
             labels = labels.to(device)
 
             optimizer.zero_grad()
-            logits = model(sequence, labels)
+            logits = model(sequence, lengths)
             loss = criterion(logits, labels)
             loss.backward()
             optimizer.step()
@@ -149,7 +151,7 @@ def _(DataLoader, EpochResults, Optimizer, device, nn):
             results.average_loss += loss.item()
             preds = logits.argmax(dim=1)
             results.predictions.extend(preds.cpu().tolist())
-            results.actual(labels.cup().tolist())
+            results.actual.extend(labels.cpu().tolist())
 
         results.average_loss /= len(dataloader)
 
@@ -178,7 +180,7 @@ def _(DataLoader, EpochResults, device, nn, torch):
                 results.average_loss += loss.item()
                 preds = logits.argmax(dim=1)
                 results.predictions.extend(preds.cpu().tolist())
-                results.actual(labels.cup().tolist())
+                results.actual.extend(labels.cpu().tolist())
 
         results.average_loss /= len(dataloader)
 
@@ -204,7 +206,7 @@ def _(CLASSES, device, torch, train_dataset):
         num_classes = len(CLASSES)
         counts = torch.ones(num_classes)
 
-        for _, label, _ in train_dataset:
+        for _, label in train_dataset:
             counts[label] += 1
 
         weights = 1.0 / counts
@@ -225,6 +227,8 @@ def _(get_untrained_model):
 def _(
     compute_class_weights,
     constants,
+    copy,
+    device,
     model,
     nn,
     print_metrics,
@@ -253,6 +257,8 @@ def _(
         best_val_loss = float("inf")
         best_model_dict = {}
 
+        model.to(device)
+
         for epoch in range(1, num_epochs + 1):
             train_results = train_epoch(
                 model, train_dataloader, criterion, optimizer
@@ -262,9 +268,9 @@ def _(
             val_results = validation_epoch(model, val_dataloader, criterion)
 
             print(
-                f"Epoch {epoch + 1}/{num_epochs} |"
-                " train loss: {train_results.average_loss:.4f} |"
-                " val loss: {val_results.average_loss:.4f}"
+                f"Epoch {epoch}/{num_epochs} |"
+                f" train loss: {train_results.average_loss:.4f} |"
+                f" val loss: {val_results.average_loss:.4f}"
             )
             print("\n")
 
@@ -278,7 +284,7 @@ def _(
 
             if val_results.average_loss < best_val_loss:
                 best_val_loss = val_results.average_loss
-                best_model_dict = model.state_dict()
+                best_model_dict = copy.deepcopy(model.cpu().state_dict())
 
         torch.save(best_model_dict, constants.MODEL_FILE_PATH)
 
