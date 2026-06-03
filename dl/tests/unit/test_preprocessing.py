@@ -212,7 +212,7 @@ def test_sentence_mapping_no_file(mocker: MockFixture) -> None:
 
     fake_file = Path("/not-real-directory/not-real-file.json")
 
-    mocker.patch("utils.constants.VOCAB_MAPPING_FILE_PATH", new=fake_file)
+    mocker.patch("dl.constants.VOCAB_MAPPING_FILE_PATH", new=fake_file)
 
     with pytest.raises(
         FileNotFoundError,
