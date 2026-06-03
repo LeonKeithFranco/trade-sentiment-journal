@@ -31,10 +31,16 @@ class Model(nn.Module):
             batch_first=True,
             bidirectional=True,
         )
-        self.linear = nn.Linear(
+        self.linear1 = nn.Linear(
             self.lstm.hidden_size * 2,
+            64,
+        )
+        self.linear2 = nn.Linear(
+            self.linear1.out_features,
             3,
         )
+
+        self.relu = nn.ReLU()
 
     def forward(self, sequences: torch.Tensor, lengths: torch.Tensor) -> torch.Tensor:
         embedded = self.embedding(sequences)
@@ -47,7 +53,7 @@ class Model(nn.Module):
 
         concatenated_hn = torch.concat((hn[0], hn[1]), dim=1)
 
-        return self.linear(concatenated_hn)
+        return self.linear2(self.relu(self.linear1(concatenated_hn)))
 
 
 @lru_cache
