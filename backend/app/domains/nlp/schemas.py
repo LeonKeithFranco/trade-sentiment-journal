@@ -9,4 +9,4 @@ class NLPRequest(BaseModel):
 
 class NLPResponse(BaseModel):
     sentiment: SentimentEnum
-    confidence: float
+    confidence: float = Field(ge=0, le=1)
