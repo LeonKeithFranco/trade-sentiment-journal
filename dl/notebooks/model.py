@@ -27,7 +27,6 @@ def _():
         EpochResults,
         LRScheduler,
         Optimizer,
-        balanced_accuracy_score,
         classification_report,
         confusion_matrix,
         constants,
@@ -196,19 +195,20 @@ def _(DataLoader, EpochResults, device, nn, torch):
 
 
 @app.cell
-def _(balanced_accuracy_score, classification_report, confusion_matrix):
+def _(CLASSES, classification_report, confusion_matrix):
     def print_metrics(
         predictions: list[int], labels: list[int], split: str
     ) -> None:
         print(f"===== {split} Classification Report =====")
-        print(classification_report(labels, predictions))
+        print(
+            classification_report(
+                labels, predictions, target_names=CLASSES, zero_division=0
+            )
+        )
 
         print(f"===== {split} Confusion Matrix =====")
         print(confusion_matrix(labels, predictions))
         print("\n")
-
-        print(f"===== {split} Balanced Accuracy Score =====")
-        print(balanced_accuracy_score(labels, predictions))
 
     return (print_metrics,)
 
