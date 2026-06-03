@@ -78,7 +78,7 @@ def _load_trained_model() -> torch.nn.Module:
     return model
 
 
-def get_model(type_: Literal["trained", "untrained"]) -> nn.Module:
+def get_model(type_: Literal["trained", "untrained"] = "trained") -> nn.Module:
     match type_:
         case "untrained":
             return Model(_get_matrix_embedding())
