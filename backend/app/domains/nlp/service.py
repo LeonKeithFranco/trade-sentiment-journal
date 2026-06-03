@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import Depends
 
 
-class NLPSerive:
+class NLPService:
     pass
 
 
-NLPSeriveDependency = Annotated[NLPSerive, Depends(NLPSerive)]
+NLPServiceDependency = Annotated[NLPService, Depends(NLPService)]

@@ -1,3 +1,3 @@
 from fastapi import APIRouter
 
-router = router = APIRouter(prefix="/analyze", tags=["nlp"])
+router = APIRouter(prefix="/analyze", tags=["nlp"])
