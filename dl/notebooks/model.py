@@ -8,19 +8,20 @@ app = marimo.App(width="medium")
 def _():
     import datasets
     import torch
+    from sklearn.metrics import confusion_matrix
     from torch import nn
-    from torch.utils.data import DataLoader
     from torch.optim import Optimizer
+    from torch.optim.lr_scheduler import LRScheduler
+    from torch.utils.data import DataLoader
     from utils import constants
     from utils.get_dataset import get_dataset
-    from utils.model import get_untrained_model, EpochResults
+    from utils.model import EpochResults, get_untrained_model
     from utils.preprocess import map_sentence
-    from sklearn.metrics import confusion_matrix
-    import copy
 
     return (
         DataLoader,
         EpochResults,
+        LRScheduler,
         Optimizer,
         confusion_matrix,
         constants,
@@ -31,12 +32,6 @@ def _():
         nn,
         torch,
     )
-
-
-@app.cell
-def _(torch):
-    torch.manual_seed(42)
-    return
 
 
 @app.cell
@@ -121,7 +116,7 @@ def _(DataLoader, collate, test_dataset, train_dataset, val_dataset):
     test_dataloader = DataLoader(
         test_dataset, batch_size=32, shuffle=False, collate_fn=collate
     )
-    return train_dataloader, val_dataloader
+    return test_dataloader, train_dataloader, val_dataloader
 
 
 @app.cell
@@ -196,9 +191,7 @@ def _(DataLoader, EpochResults, device, nn, torch):
 
 @app.cell
 def _(confusion_matrix):
-    def print_metrics(
-        predictions: list[int], labels: list[int], split: str
-    ) -> None:
+    def print_metrics(predictions: list[int], labels: list[int], split: str) -> None:
         print(f"===== {split} Confusion Matrix =====")
         print(confusion_matrix(labels, predictions))
 
@@ -223,11 +216,34 @@ def _(CLASSES, device, torch, train_dataset):
 
 
 @app.cell
+def _(compute_class_weights, get_untrained_model, nn, torch):
+    torch.manual_seed(42)
+
+    NUM_EPOCHS = 16
+
+    model = get_untrained_model()
+
+    optimizer = torch.optim.AdamW(
+        model.parameters(),
+        lr=1e-3,
+    )
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer,
+        NUM_EPOCHS,
+        eta_min=1e-7,
+    )
+    criterion = nn.CrossEntropyLoss(
+        weight=compute_class_weights(),
+    )
+    return NUM_EPOCHS, criterion, model, optimizer, scheduler
+
+
+@app.cell
 def _(
-    compute_class_weights,
+    LRScheduler,
+    Optimizer,
     constants,
     device,
-    get_untrained_model,
     nn,
     print_metrics,
     torch,
@@ -236,32 +252,20 @@ def _(
     val_dataloader,
     validation_epoch,
 ):
-    def train() -> None:
-        num_epochs = 16
-        model = get_untrained_model()
-
-        optimizer = torch.optim.AdamW(
-            model.parameters(),
-            lr=1e-3,
-        )
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-            optimizer,
-            num_epochs,
-            eta_min=1e-7,
-        )
-        criterion = nn.CrossEntropyLoss(
-            weight=compute_class_weights(),
-        )
+    def train(
+        model: nn.Module,
+        optimizer: Optimizer,
+        scheduler: LRScheduler,
+        criterion: nn.CrossEntropyLoss,
+        num_epochs=16,
+    ) -> None:
+        model.to(device)
 
         best_val_loss = float("inf")
         best_model_dict = {}
 
-        model.to(device)
-
         for epoch in range(1, num_epochs + 1):
-            train_results = train_epoch(
-                model, train_dataloader, criterion, optimizer
-            )
+            train_results = train_epoch(model, train_dataloader, criterion, optimizer)
             scheduler.step()
 
             val_results = validation_epoch(model, val_dataloader, criterion)
@@ -276,9 +280,7 @@ def _(
             print_metrics(train_results.predictions, train_results.actual, "Train")
             print("\n")
 
-            print_metrics(
-                val_results.predictions, val_results.actual, "Validation"
-            )
+            print_metrics(val_results.predictions, val_results.actual, "Validation")
             print("\n")
 
             if val_results.average_loss < best_val_loss:
@@ -293,13 +295,16 @@ def _(
 
 
 @app.cell
-def _(train):
-    train()
+def _(NUM_EPOCHS, criterion, model, optimizer, scheduler, train):
+    train(model, optimizer, scheduler, criterion, num_epochs=NUM_EPOCHS)
     return
 
 
 @app.cell
-def _():
+def _(criterion, model, print_metrics, test_dataloader, validation_epoch):
+    test_results = validation_epoch(model, test_dataloader, criterion)
+
+    print_metrics(test_results.predictions, test_results.actual, "Test")
     return
 
 
