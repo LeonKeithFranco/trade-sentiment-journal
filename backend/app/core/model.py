@@ -6,6 +6,6 @@ from torch import nn
 
 async def get_model() -> nn.Module:
     try:
-        return await asyncio.to_thread(get_dl_model())
+        return await asyncio.to_thread(get_dl_model)
     except FileNotFoundError:
         raise FileNotFoundError("Model pth file could not be loaded")
