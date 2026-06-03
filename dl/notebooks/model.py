@@ -202,7 +202,11 @@ def _(CLASSES, classification_report, confusion_matrix):
         print(f"===== {split} Classification Report =====")
         print(
             classification_report(
-                labels, predictions, target_names=CLASSES, zero_division=0
+                labels,
+                predictions,
+                target_names=CLASSES,
+                zero_division=0,
+                digits=4,
             )
         )
 
