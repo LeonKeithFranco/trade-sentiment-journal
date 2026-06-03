@@ -9,9 +9,8 @@ def _():
     import datasets
     import torch
     from sklearn.metrics import (
-        confusion_matrix,
         classification_report,
-        balanced_accuracy_score,
+        confusion_matrix,
     )
     from torch import nn
     from torch.optim import Optimizer
@@ -196,9 +195,7 @@ def _(DataLoader, EpochResults, device, nn, torch):
 
 @app.cell
 def _(CLASSES, classification_report, confusion_matrix):
-    def print_metrics(
-        predictions: list[int], labels: list[int], split: str
-    ) -> None:
+    def print_metrics(predictions: list[int], labels: list[int], split: str) -> None:
         print(f"===== {split} Classification Report =====")
         print(
             classification_report(
@@ -284,9 +281,7 @@ def _(
         best_model_dict = {}
 
         for epoch in range(1, num_epochs + 1):
-            train_results = train_epoch(
-                model, train_dataloader, criterion, optimizer
-            )
+            train_results = train_epoch(model, train_dataloader, criterion, optimizer)
             scheduler.step()
 
             val_results = validation_epoch(model, val_dataloader, criterion)
@@ -311,9 +306,7 @@ def _(
             print(
                 "------------------------------ Validation Metrics ------------------------------\n"
             )
-            print_metrics(
-                val_results.predictions, val_results.actual, "Validation"
-            )
+            print_metrics(val_results.predictions, val_results.actual, "Validation")
             print("\n")
 
             if val_results.average_loss < best_val_loss:
