@@ -40,12 +40,6 @@ def _():
 
 
 @app.cell
-def _():
-    CLASSES = ["negative", "neutral", "positive"]
-    return (CLASSES,)
-
-
-@app.cell
 def _(get_dataset):
     full_dataset = get_dataset()
     return (full_dataset,)
@@ -195,14 +189,14 @@ def _(DataLoader, EpochResults, device, nn, torch):
 
 
 @app.cell
-def _(CLASSES, classification_report, confusion_matrix):
+def _(classification_report, confusion_matrix, constants):
     def print_metrics(predictions: list[int], labels: list[int], split: str) -> None:
         print(f"===== {split} Classification Report =====")
         print(
             classification_report(
                 labels,
                 predictions,
-                target_names=CLASSES,
+                target_names=constants.CLASSES,
                 zero_division=0,
                 digits=4,
             )
@@ -216,9 +210,9 @@ def _(CLASSES, classification_report, confusion_matrix):
 
 
 @app.cell
-def _(CLASSES, device, torch, train_dataset):
+def _(constants, device, torch, train_dataset):
     def compute_class_weights() -> torch.Tensor:
-        num_classes = len(CLASSES)
+        num_classes = len(constants.CLASSES)
         counts = torch.ones(num_classes)
 
         for _, label in train_dataset:
