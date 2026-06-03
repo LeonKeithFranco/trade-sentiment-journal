@@ -8,7 +8,11 @@ app = marimo.App(width="medium")
 def _():
     import datasets
     import torch
-    from sklearn.metrics import confusion_matrix
+    from sklearn.metrics import (
+        confusion_matrix,
+        classification_report,
+        balanced_accuracy_score,
+    )
     from torch import nn
     from torch.optim import Optimizer
     from torch.optim.lr_scheduler import LRScheduler
@@ -23,6 +27,8 @@ def _():
         EpochResults,
         LRScheduler,
         Optimizer,
+        balanced_accuracy_score,
+        classification_report,
         confusion_matrix,
         constants,
         datasets,
@@ -190,12 +196,19 @@ def _(DataLoader, EpochResults, device, nn, torch):
 
 
 @app.cell
-def _(confusion_matrix):
+def _(balanced_accuracy_score, classification_report, confusion_matrix):
     def print_metrics(
         predictions: list[int], labels: list[int], split: str
     ) -> None:
+        print(f"===== {split} Classification Report =====")
+        print(classification_report(labels, predictions))
+
         print(f"===== {split} Confusion Matrix =====")
         print(confusion_matrix(labels, predictions))
+        print("\n")
+
+        print(f"===== {split} Balanced Accuracy Score =====")
+        print(balanced_accuracy_score(labels, predictions))
 
     return (print_metrics,)
 
@@ -274,16 +287,26 @@ def _(
 
             val_results = validation_epoch(model, val_dataloader, criterion)
 
-            print(
+            epoch_msg = (
                 f"Epoch {epoch}/{num_epochs} |"
                 f" train loss: {train_results.average_loss:.4f} |"
                 f" val loss: {val_results.average_loss:.4f}"
             )
+
+            print("-" * len(epoch_msg))
+            print(epoch_msg)
+            print("-" * len(epoch_msg))
             print("\n")
 
+            print(
+                "------------------------------ Train Metrics ------------------------------\n"
+            )
             print_metrics(train_results.predictions, train_results.actual, "Train")
             print("\n")
 
+            print(
+                "------------------------------ Validation Metrics ------------------------------\n"
+            )
             print_metrics(
                 val_results.predictions, val_results.actual, "Validation"
             )
