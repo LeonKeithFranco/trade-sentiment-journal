@@ -1,4 +1,5 @@
 import asyncio
+from functools import lru_cache
 
 from dl.model import get_model as get_dl_model
 from torch import nn
@@ -6,6 +7,7 @@ from torch import nn
 from dl import constants
 
 
+@lru_cache
 async def get_model() -> nn.Module:
     try:
         return await asyncio.to_thread(get_dl_model)
