@@ -41,6 +41,7 @@ class Model(nn.Module):
         )
 
         self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(0.3)
 
     def forward(self, sequences: torch.Tensor, lengths: torch.Tensor) -> torch.Tensor:
         embedded = self.embedding(sequences)
@@ -53,7 +54,13 @@ class Model(nn.Module):
 
         concatenated_hn = torch.concat((hn[0], hn[1]), dim=1)
 
-        return self.linear2(self.relu(self.linear1(concatenated_hn)))
+        return self.linear2(
+            self.dropout(
+                self.relu(
+                    self.linear1(concatenated_hn),
+                ),
+            ),
+        )
 
 
 @lru_cache
