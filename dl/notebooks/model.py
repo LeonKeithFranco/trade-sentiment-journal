@@ -34,6 +34,12 @@ def _():
 
 
 @app.cell
+def _(torch):
+    torch.manual_seed(42)
+    return
+
+
+@app.cell
 def _():
     CLASSES = ["negative", "neutral", "positive"]
     return (CLASSES,)
