@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from app.exceptions import (
     ClosedAtBeforeOpenedAtError,
     DatabaseError,
+    EmptyTextError,
     InvalidAccessTokenError,
     JournalEntryDoesNotExistError,
     TradeClosedFieldsMismatchError,
@@ -49,6 +50,15 @@ def attach_exception_handlers(app: FastAPI) -> None:
             content={
                 "detail": "exit_price and closed_at must both be None or must both have values."
             },
+        )
+
+    @app.exception_handler(EmptyTextError)
+    async def empty_text_error_handler(
+        request: Request, exc: EmptyTextError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            content={"detail": "Cannot make predictions on empty text."},
         )
 
     @app.exception_handler(UserAlreadyExistsError)
