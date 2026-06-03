@@ -15,7 +15,7 @@ def _():
     from torch.utils.data import DataLoader
     from utils import constants
     from utils.get_dataset import get_dataset
-    from utils.model import EpochResults, get_untrained_model
+    from utils.model import EpochResults, get_model
     from utils.preprocess import map_sentence
 
     return (
@@ -27,7 +27,7 @@ def _():
         constants,
         datasets,
         get_dataset,
-        get_untrained_model,
+        get_model,
         map_sentence,
         nn,
         torch,
@@ -191,7 +191,9 @@ def _(DataLoader, EpochResults, device, nn, torch):
 
 @app.cell
 def _(confusion_matrix):
-    def print_metrics(predictions: list[int], labels: list[int], split: str) -> None:
+    def print_metrics(
+        predictions: list[int], labels: list[int], split: str
+    ) -> None:
         print(f"===== {split} Confusion Matrix =====")
         print(confusion_matrix(labels, predictions))
 
@@ -216,15 +218,15 @@ def _(CLASSES, device, torch, train_dataset):
 
 
 @app.cell
-def _(compute_class_weights, get_untrained_model, nn, torch):
+def _(compute_class_weights, get_model, nn, torch):
     torch.manual_seed(42)
 
     NUM_EPOCHS = 16
 
-    model = get_untrained_model()
+    untrained_model = get_model("untrained")
 
     optimizer = torch.optim.AdamW(
-        model.parameters(),
+        untrained_model.parameters(),
         lr=1e-3,
     )
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
@@ -235,7 +237,7 @@ def _(compute_class_weights, get_untrained_model, nn, torch):
     criterion = nn.CrossEntropyLoss(
         weight=compute_class_weights(),
     )
-    return NUM_EPOCHS, criterion, model, optimizer, scheduler
+    return NUM_EPOCHS, criterion, optimizer, scheduler, untrained_model
 
 
 @app.cell
@@ -265,7 +267,9 @@ def _(
         best_model_dict = {}
 
         for epoch in range(1, num_epochs + 1):
-            train_results = train_epoch(model, train_dataloader, criterion, optimizer)
+            train_results = train_epoch(
+                model, train_dataloader, criterion, optimizer
+            )
             scheduler.step()
 
             val_results = validation_epoch(model, val_dataloader, criterion)
@@ -280,7 +284,9 @@ def _(
             print_metrics(train_results.predictions, train_results.actual, "Train")
             print("\n")
 
-            print_metrics(val_results.predictions, val_results.actual, "Validation")
+            print_metrics(
+                val_results.predictions, val_results.actual, "Validation"
+            )
             print("\n")
 
             if val_results.average_loss < best_val_loss:
@@ -295,14 +301,16 @@ def _(
 
 
 @app.cell
-def _(NUM_EPOCHS, criterion, model, optimizer, scheduler, train):
-    train(model, optimizer, scheduler, criterion, num_epochs=NUM_EPOCHS)
+def _(NUM_EPOCHS, criterion, optimizer, scheduler, train, untrained_model):
+    train(untrained_model, optimizer, scheduler, criterion, num_epochs=NUM_EPOCHS)
     return
 
 
 @app.cell
-def _(criterion, model, print_metrics, test_dataloader, validation_epoch):
-    test_results = validation_epoch(model, test_dataloader, criterion)
+def _(criterion, get_model, print_metrics, test_dataloader, validation_epoch):
+    trained_model = get_model("trained")
+
+    test_results = validation_epoch(trained_model, test_dataloader, criterion)
 
     print_metrics(test_results.predictions, test_results.actual, "Test")
     return

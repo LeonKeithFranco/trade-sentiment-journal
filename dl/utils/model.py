@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from functools import lru_cache
+from typing import Literal
 
 import numpy as np
 import torch
@@ -68,5 +69,18 @@ def _get_matrix_embedding() -> torch.Tensor:
     return torch.tensor(np.load(constants.MATRIX_EMBEDDINGS_FILE_PATH))
 
 
-def get_untrained_model() -> nn.Module:
-    return Model(_get_matrix_embedding())
+@lru_cache
+def _load_trained_model() -> torch.nn.Module:
+    model = Model(_get_matrix_embedding())
+    model.load_state_dict(torch.load(constants.MODEL_FILE_PATH, weights_only=True))
+    model.eval()
+
+    return model
+
+
+def get_model(type_: Literal["trained", "untrained"]) -> nn.Module:
+    match type_:
+        case "untrained":
+            return Model(_get_matrix_embedding())
+        case "trained":
+            return _load_trained_model()
