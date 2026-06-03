@@ -1,13 +1,13 @@
 from pathlib import Path
 
 import pytest
-from pytest_mock import MockFixture
-from utils.preprocess import (
+from dl.preprocess import (
     get_vocab_mapping,
     map_sentence,
     process_and_map_sentence,
     process_sentence,
 )
+from pytest_mock import MockFixture
 
 
 @pytest.mark.parametrize(

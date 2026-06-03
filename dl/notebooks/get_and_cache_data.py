@@ -10,9 +10,10 @@ def _():
     import random
 
     import numpy as np
+    from dl.get_dataset import get_dataset
     from numpy.typing import NDArray
-    from utils import constants
-    from utils.get_dataset import get_dataset
+
+    from dl import constants
 
     return NDArray, constants, get_dataset, json, np, random
 

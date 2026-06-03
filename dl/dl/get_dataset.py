@@ -3,8 +3,8 @@ from typing import cast
 from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset, load_from_disk
 
-from utils import constants
-from utils.preprocess import process_full_dataset_sentences
+from dl import constants
+from dl.preprocess import process_full_dataset_sentences
 
 DATASET_NAME = "lmassaron/FinancialPhraseBank"
 

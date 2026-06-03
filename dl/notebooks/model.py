@@ -8,6 +8,9 @@ app = marimo.App(width="medium")
 def _():
     import datasets
     import torch
+    from dl.get_dataset import get_dataset
+    from dl.model import EpochResults, get_model
+    from dl.preprocess import map_sentence
     from sklearn.metrics import (
         classification_report,
         confusion_matrix,
@@ -16,10 +19,8 @@ def _():
     from torch.optim import Optimizer
     from torch.optim.lr_scheduler import LRScheduler
     from torch.utils.data import DataLoader
-    from utils import constants
-    from utils.get_dataset import get_dataset
-    from utils.model import EpochResults, get_model
-    from utils.preprocess import map_sentence
+
+    from dl import constants
 
     return (
         DataLoader,

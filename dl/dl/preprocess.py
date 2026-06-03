@@ -8,7 +8,7 @@ from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from nltk.tokenize import word_tokenize
 
-from utils import constants
+from dl import constants
 
 _TOKENIZER_FILE = "punkt_tab"
 
