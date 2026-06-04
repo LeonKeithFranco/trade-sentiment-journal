@@ -27,3 +27,14 @@ class TestAnalyze:
 
         assert data["sentiment"] == sentiment
         assert 0.5 < data["confidence"] < 1.0
+
+    def test_analyze_empty_text(self, client: TestClient, access_token: str) -> None:
+        response = client.post(
+            "/analyze",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json={"text": ""},
+        )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+        assert response.json()["detail"] == "Cannot make predictions on empty text."
