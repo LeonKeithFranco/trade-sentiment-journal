@@ -37,3 +37,16 @@ class TestAnalyze:
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
         assert response.json()["detail"] == "Cannot make predictions on empty text."
+
+    def test_not_registered_user_analyze(
+        self,
+        client: TestClient,
+    ) -> None:
+        response = client.post(
+            "/analyze",
+            json={"text": "Text"},
+        )
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+        assert response.json()["detail"] == "Not authenticated"
