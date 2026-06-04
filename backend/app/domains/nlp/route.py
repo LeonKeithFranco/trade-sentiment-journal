@@ -10,7 +10,7 @@ router = APIRouter(prefix="/analyze", tags=["nlp"])
 @router.post("", response_model=NLPResponse)
 async def analyze(
     nlp_request: NLPRequest,
-    current_user: CurrentUserDependency,  # used to make sure API caller is registers user
+    current_user: CurrentUserDependency,  # used to make sure API caller is registered user
     nlp_service: NLPServiceDependency,
 ) -> NLPResponse:
     return await nlp_service.inference(nlp_request.text)
