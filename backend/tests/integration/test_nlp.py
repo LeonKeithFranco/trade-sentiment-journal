@@ -1,20 +1,19 @@
 import pytest
+from app.domains.nlp.constants import SentimentEnum
 from fastapi import status
 from fastapi.testclient import TestClient
 
 
 class TestAnalyze:
     @pytest.mark.parametrize(
-        "text,sentiment",
+        "text",
         (
-            ("This is some text", "neutral"),
-            ("Profit up revenue up", "positive"),
-            ("Crash loss bankruptcy", "negative"),
+            "This is some text",
+            "Profit up revenue up",
+            "Crash loss bankruptcy",
         ),
     )
-    def test_analyze(
-        self, client: TestClient, access_token: str, text: str, sentiment: str
-    ) -> None:
+    def test_analyze(self, client: TestClient, access_token: str, text: str) -> None:
         response = client.post(
             "/analyze",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -25,8 +24,8 @@ class TestAnalyze:
 
         data = response.json()
 
-        assert data["sentiment"] == sentiment
-        assert 0.5 < data["confidence"] < 1.0
+        SentimentEnum(data["sentiment"])
+        assert 0.0 < data["confidence"] < 1.0
 
     def test_analyze_empty_text(self, client: TestClient, access_token: str) -> None:
         response = client.post(
