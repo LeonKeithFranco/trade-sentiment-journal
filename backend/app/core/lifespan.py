@@ -10,7 +10,7 @@ from app.database import check_db_connection, dispose_engine
 
 async def _start_up() -> None:
     await check_db_connection()
-    await get_model()
+    get_model()
 
 
 async def _tear_down() -> None:

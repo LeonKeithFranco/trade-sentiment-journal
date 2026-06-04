@@ -10,9 +10,9 @@ from dl import constants
 
 
 @lru_cache
-async def get_model() -> nn.Module:
+def get_model() -> nn.Module:
     try:
-        return await asyncio.to_thread(get_dl_model)
+        return get_dl_model()
     except FileNotFoundError as exc:
         raise FileNotFoundError(
             f"{constants.MODEL_FILE_PATH} file could not be loaded; file may not yet exist"
@@ -39,6 +39,6 @@ def _inference_runner(model: nn.Module, input: list[int]) -> tuple[str, float]:
 async def model_inference(input: list[int]) -> tuple[str, float]:
     return await asyncio.to_thread(
         _inference_runner,
-        model=await get_model(),
+        model=get_model(),
         input=input,
     )
