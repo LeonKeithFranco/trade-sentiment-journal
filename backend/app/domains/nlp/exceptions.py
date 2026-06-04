@@ -3,4 +3,4 @@ class NLPError(Exception):
 
 
 class EmptyTextError(NLPError):
-    """Attempted to pass and empty sequence to the model."""
+    """Attempted to pass an empty sequence to the model."""

@@ -3,5 +3,5 @@ from enum import StrEnum
 
 class SentimentEnum(StrEnum):
     NEGATIVE = "negative"
-    NUETRAL = "neutral"
+    NEUTRAL = "neutral"
     POSITIVE = "positive"

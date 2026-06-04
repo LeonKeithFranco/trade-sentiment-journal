@@ -19,9 +19,9 @@ def get_model() -> nn.Module:
         ) from exc
 
 
-def _inference_runner(model: nn.Module, input: list[int]) -> tuple[str, float]:
-    sequence = torch.tensor([input], dtype=torch.long)
-    length = torch.tensor([len(input)], dtype=torch.long)
+def _inference_runner(model: nn.Module, input_: list[int]) -> tuple[str, float]:
+    sequence = torch.tensor([input_], dtype=torch.long)
+    length = torch.tensor([len(input_)], dtype=torch.long)
 
     with torch.inference_mode():
         logits = model(sequence, length)
@@ -36,9 +36,9 @@ def _inference_runner(model: nn.Module, input: list[int]) -> tuple[str, float]:
     return class_, confidence
 
 
-async def model_inference(input: list[int]) -> tuple[str, float]:
+async def model_inference(input_: list[int]) -> tuple[str, float]:
     return await asyncio.to_thread(
         _inference_runner,
         model=get_model(),
-        input=input,
+        input_=input_,
     )
