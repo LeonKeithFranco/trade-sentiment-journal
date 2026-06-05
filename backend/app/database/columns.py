@@ -18,3 +18,11 @@ TradeIDColumn = Annotated[
         index=True,
     ),
 ]
+
+JournalEntryIDColumn = Annotated[
+    int,
+    mapped_column(
+        ForeignKey("journal_entries.id", ondelete="CASCADE"),
+        unique=True,
+    ),
+]
