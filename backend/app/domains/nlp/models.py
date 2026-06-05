@@ -21,9 +21,9 @@ class SentimentAnalysis(PublicIdMixin, TimestampMixin, Base):
     )
 
     @property
-    def direction(self) -> SentimentEnum:
+    def sentiment(self) -> SentimentEnum:
         return SentimentEnum(self._sentiment)
 
-    @direction.setter
-    def direction(self, sentiment: SentimentEnum) -> None:
+    @sentiment.setter
+    def sentiment(self, sentiment: SentimentEnum) -> None:
         self._sentiment = sentiment.value
