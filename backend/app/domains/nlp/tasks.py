@@ -31,5 +31,4 @@ async def analyze_and_store_journal_entry_sentiment(
             session.add(sentiment_analysis_record)
             await session.commit()
     except Exception as exc:
-        await session.rollback()
         print(f"Background task error: {exc}")
