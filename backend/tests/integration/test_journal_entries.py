@@ -1,7 +1,6 @@
 import random
-import time
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime
 
 import pytest
 from app.models import JournalEntry, SentimentAnalysis
