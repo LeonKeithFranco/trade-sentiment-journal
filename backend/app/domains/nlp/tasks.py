@@ -1,10 +1,10 @@
 import uuid
-from typing import cast
 
 from app.database.session import AsyncSessionFactory
 from app.domains.journal_entries.repository import JournalEntryRepository
 from app.domains.nlp.service import NLPService
-from app.models import JournalEntry, SentimentAnalysis
+from app.exceptions import EmptyTextError
+from app.models import SentimentAnalysis
 
 
 async def analyze_and_store_journal_entry_sentiment(
@@ -14,14 +14,12 @@ async def analyze_and_store_journal_entry_sentiment(
         async with AsyncSessionFactory() as session:
             nlp_response = await NLPService().inference(text)
 
-            journal_entry_record = cast(
-                JournalEntry,
-                await JournalEntryRepository(
-                    session
-                ).get_journal_entry_by_public_id_for_user(
-                    journal_entry_public_id, user_id
-                ),
-            )
+            journal_entry_record = await JournalEntryRepository(
+                session
+            ).get_journal_entry_by_public_id_for_user(journal_entry_public_id, user_id)
+
+            if journal_entry_record is None:
+                return
 
             sentiment_analysis_record = SentimentAnalysis()
             sentiment_analysis_record.sentiment = nlp_response.sentiment
@@ -30,5 +28,7 @@ async def analyze_and_store_journal_entry_sentiment(
 
             session.add(sentiment_analysis_record)
             await session.commit()
+    except EmptyTextError:
+        return
     except Exception as exc:
         print(f"Background task error: {exc}")
