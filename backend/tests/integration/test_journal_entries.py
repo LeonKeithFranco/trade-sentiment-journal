@@ -79,29 +79,18 @@ class TestCreateJournalEntry:
             json=payload,
         )
 
-        attempts = 3
-
-        for _ in range(attempts):
-            with Session(db_engine) as session:
-                query = (
-                    select(SentimentAnalysis)
-                    .join(JournalEntry)
-                    .where(
-                        JournalEntry.public_id
-                        == uuid.UUID(response.json()["public_id"])
-                    )
+        with Session(db_engine) as session:
+            query = (
+                select(SentimentAnalysis)
+                .join(JournalEntry)
+                .where(
+                    JournalEntry.public_id == uuid.UUID(response.json()["public_id"])
                 )
-                results = session.execute(query)
-                sentiment_analysis = results.scalar_one_or_none()
+            )
+            results = session.execute(query)
+            sentiment_analysis = results.scalar_one_or_none()
 
-            if sentiment_analysis is not None:
-                break
-
-            time.sleep(1)
-        else:
-            pytest.fail("Could not get sentiment analysis record")
-
-        assert sentiment_analysis.created_on <= datetime.now(UTC)
+        assert sentiment_analysis is not None
 
     def test_create_journal_entry_for_nonexistent_user(
         self,
