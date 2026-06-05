@@ -8,7 +8,7 @@ from app.domains.journal_entries.schemas import (
     JournalEntryUpdateRequest,
 )
 from app.domains.journal_entries.service import JournalEntryServiceDependency
-from app.domains.nlp import tasks as nlp_tasks
+from app.domains.nlp.tasks import analyze_and_store_journal_entry_sentiment
 from app.security import CurrentUserDependency
 
 router = APIRouter(prefix="/journal-entries", tags=["journal-entries"])
@@ -28,7 +28,7 @@ async def create(
     )
 
     background_tasks.add_task(
-        nlp_tasks.inference,
+        analyze_and_store_journal_entry_sentiment,
         journal_entry_response.public_id,
         current_user.id,
         journal_entry_response.entry,
