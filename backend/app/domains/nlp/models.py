@@ -19,6 +19,9 @@ class SentimentAnalysis(PublicIdMixin, TimestampMixin, Base):
         CheckConstraint(
             "sentiment in ('negative','neutral','positive')", name="check_sentiment"
         ),
+        CheckConstraint(
+            "confidence > 0.0 AND confidence < 1.0", name="check_confidence_range"
+        ),
     )
 
     _sentiment: Mapped[str] = mapped_column(
