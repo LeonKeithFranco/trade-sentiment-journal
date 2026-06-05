@@ -1,10 +1,16 @@
 import random
+import time
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
+from app.models import JournalEntry, SentimentAnalysis
 from fastapi import status
 from fastapi.testclient import TestClient
+from pytest_mock import MockerFixture
+from sqlalchemy import Engine, select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.orm import Session
 
 random.seed(0)
 
@@ -47,6 +53,55 @@ class TestCreateJournalEntry:
         assert "public_id" in data
         assert "created_on" in data
         assert "updated_on" in data
+
+    def test_create_journal_entry_and_sentiment(
+        self,
+        mocker: MockerFixture,
+        db_engine: Engine,
+        async_session_factory: async_sessionmaker[AsyncSession],
+        client: TestClient,
+        access_token: str,
+        trade_public_id: str,
+    ) -> None:
+        mocker.patch(
+            "app.domains.nlp.tasks.AsyncSessionFactory", new=async_session_factory
+        )
+
+        payload = {
+            "title": "Title",
+            "entry": "This is a journal message. This is a journal message.",
+            "trade_public_id": trade_public_id,
+        }
+
+        response = client.post(
+            "/journal-entries",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+        )
+
+        attempts = 3
+
+        for _ in range(attempts):
+            with Session(db_engine) as session:
+                query = (
+                    select(SentimentAnalysis)
+                    .join(JournalEntry)
+                    .where(
+                        JournalEntry.public_id
+                        == uuid.UUID(response.json()["public_id"])
+                    )
+                )
+                results = session.execute(query)
+                sentiment_analysis = results.scalar_one_or_none()
+
+            if sentiment_analysis is not None:
+                break
+
+            time.sleep(1)
+        else:
+            pytest.fail("Could not get sentiment analysis record")
+
+        assert sentiment_analysis.created_on <= datetime.now(UTC)
 
     def test_create_journal_entry_for_nonexistent_user(
         self,
