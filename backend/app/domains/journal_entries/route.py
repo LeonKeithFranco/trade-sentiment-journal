@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, BackgroundTasks, status
 
 from app.domains.journal_entries.schemas import (
     JournalEntryCreateRequest,
@@ -8,6 +8,7 @@ from app.domains.journal_entries.schemas import (
     JournalEntryUpdateRequest,
 )
 from app.domains.journal_entries.service import JournalEntryServiceDependency
+from app.domains.nlp import tasks as nlp_tasks
 from app.security import CurrentUserDependency
 
 router = APIRouter(prefix="/journal-entries", tags=["journal-entries"])
@@ -20,10 +21,20 @@ async def create(
     journal_entry_create_request: JournalEntryCreateRequest,
     current_user: CurrentUserDependency,
     journal_entry_service: JournalEntryServiceDependency,
+    background_tasks: BackgroundTasks,
 ) -> JournalEntryResponse:
-    return await journal_entry_service.create(
+    journal_entry_response = await journal_entry_service.create(
         journal_entry_create_request, current_user.id
     )
+
+    background_tasks.add_task(
+        nlp_tasks.inference,
+        journal_entry_response.public_id,
+        current_user.id,
+        journal_entry_response.entry,
+    )
+
+    return journal_entry_response
 
 
 @router.get("", response_model=list[JournalEntryResponse])
