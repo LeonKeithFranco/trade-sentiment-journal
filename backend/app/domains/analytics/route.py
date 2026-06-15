@@ -1,3 +1,3 @@
 from fastapi import APIRouter
 
-router = APIRouter(prefix="/analytics", tags=["analystics"])
+router = APIRouter(prefix="/analytics", tags=["analytics"])
