@@ -10,7 +10,7 @@ class AnalyticService:
         self,
         analytic_repo: AnalyticRepoDependency,
     ) -> None:
-        self.trade_repo: AnalyticRepository = analytic_repo
+        self.analytic_repo: AnalyticRepository = analytic_repo
 
 
 AnalyticServiceDependency = Annotated[AnalyticService, Depends(AnalyticService)]
