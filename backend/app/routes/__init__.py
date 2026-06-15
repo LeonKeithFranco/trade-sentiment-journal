@@ -1,3 +1,4 @@
+from app.domains.analytics.route import router as analytics_router
 from app.domains.auth.route import router as auth_router
 from app.domains.journal_entries.route import router as journal_entries_router
 from app.domains.nlp.route import router as nlp_router
@@ -8,6 +9,7 @@ routers = [
     trades_router,
     journal_entries_router,
     nlp_router,
+    analytics_router,
 ]
 
 __all__ = ["routers"]
