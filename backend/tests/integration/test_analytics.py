@@ -62,12 +62,12 @@ def seed_db(
         sa_pos.confidence = 0.85
         sa_pos.journal_entry_id = entry_pos.id
 
-        sa_pos = SentimentAnalysis()
-        sa_pos.sentiment = SentimentEnum.NEGATIVE
-        sa_pos.confidence = 0.6
-        sa_pos.journal_entry_id = entry_neg.id
+        sa_neg = SentimentAnalysis()
+        sa_neg.sentiment = SentimentEnum.NEGATIVE
+        sa_neg.confidence = 0.6
+        sa_neg.journal_entry_id = entry_neg.id
 
-        session.add_all((sa_pos, sa_pos))
+        session.add_all((sa_pos, sa_neg))
 
         session.commit()
 
