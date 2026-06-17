@@ -43,7 +43,7 @@ class AnalyticRepository(Repository):
     async def get_sentiment_vs_returns(self, user_id: int) -> list[RowMapping]:
         return await self._aggregate_helper(user_id, SentimentAnalysis._sentiment)
 
-    async def get_confidence_breakdown(self, user_id) -> list[RowMapping]:
+    async def get_confidence_breakdown(self, user_id: int) -> list[RowMapping]:
         confidence_bucket = case(
             (SentimentAnalysis.confidence < 0.5, "low"),
             (SentimentAnalysis.confidence < 0.75, "medium"),
