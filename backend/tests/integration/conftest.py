@@ -88,9 +88,12 @@ def client(
 
 
 @pytest.fixture
-def access_token(client: TestClient, default_password: str) -> str:
-    email = "user@test.com"
+def email() -> str:
+    return "user@test.com"
 
+
+@pytest.fixture
+def access_token(client: TestClient, default_password: str, email: str) -> str:
     client.post("/auth/register", json={"email": email, "password": default_password})
 
     login_response = client.post(
