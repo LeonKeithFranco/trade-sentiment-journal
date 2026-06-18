@@ -1,0 +1,37 @@
+from functools import lru_cache
+from pathlib import Path
+
+from pydantic import BaseModel, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class _AppSettings(BaseModel):
+    name: str = "App Name"
+    debug: bool = True
+
+
+class _APISettings(BaseModel):
+    base_url: str
+    time_out: float = 30.0
+
+
+class _Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=[
+            Path(__file__).parent.parent.parent.parent / ".env",
+            Path(__file__).parent.parent.parent / ".env",
+        ],
+        env_nested_delimiter="__",
+        env_ignore_empty=True,
+        env_file_encoding="utf-8",
+        extra="ignore",
+        case_sensitive=False,
+    )
+
+    app: _AppSettings = Field(default_factory=_AppSettings)
+    api: _APISettings = Field(default_factory=_APISettings)
+
+
+@lru_cache
+def get_settings() -> _Settings:
+    return _Settings()
