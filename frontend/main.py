@@ -20,4 +20,4 @@ with st.form(key="register_form"):
     st.text_input("Password", key="register_password", type="password")
     st.text_input("Confirm Password", key="register_confirm_password", type="password")
 
-    st.form_submit_button("Login")
+    st.form_submit_button("Register")
