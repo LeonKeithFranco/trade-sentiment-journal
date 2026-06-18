@@ -8,6 +8,7 @@ from app.database import Base
 from app.database.session import get_db
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from pytest_mock import MockerFixture
 from sqlalchemy import Engine, create_engine, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from testcontainers.postgres import PostgresContainer
@@ -67,7 +68,9 @@ def async_session_factory(
 
 
 @pytest.fixture
-def app() -> FastAPI:
+def app(mocker: MockerFixture) -> FastAPI:
+    mocker.patch("app.core.lifespan.check_db_connection")
+
     return create_app()
 
 
