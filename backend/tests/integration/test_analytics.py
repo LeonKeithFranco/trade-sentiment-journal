@@ -73,8 +73,8 @@ def seed_db(
         session.commit()
 
 
-class TestConfdienceBreakdown:
-    def test_confdience_breakdown(self, client: TestClient, access_token: str) -> None:
+class TestConfidenceBreakdown:
+    def test_confidence_breakdown(self, client: TestClient, access_token: str) -> None:
         response = client.get(
             "/analytics/confidence-breakdown",
             headers={"Authorization": f"Bearer {access_token}"},
