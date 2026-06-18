@@ -827,6 +827,7 @@ source = { virtual = "frontend" }
 dependencies = [
     { name = "httpx" },
     { name = "plotly" },
+    { name = "pydantic-settings" },
     { name = "streamlit" },
 ]
 
@@ -834,6 +835,7 @@ dependencies = [
 requires-dist = [
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "plotly", specifier = ">=6.8.0" },
+    { name = "pydantic-settings", specifier = ">=2.14.1" },
     { name = "streamlit", specifier = ">=1.58.0" },
 ]
 
