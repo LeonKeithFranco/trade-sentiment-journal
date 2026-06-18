@@ -32,6 +32,5 @@ class APIClient:
         self, method: Literal["GET", "POST", "PATCH", "DELETE"], endpoint: str, **kwargs
     ) -> httpx.Response:
         response = self._client.request(method, endpoint, **kwargs)
-        response.raise_for_status()
 
         return response
