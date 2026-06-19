@@ -1,4 +1,7 @@
+from http import HTTPStatus
+
 import streamlit as st
+from src.core.api import APIClient, convert_pydantic_error_to_human_readable_message
 from src.core.config import get_settings
 
 
@@ -56,3 +59,20 @@ with st.form(key="register_form"):
         if confirm_password != password:
             st.error("The passwords you entered don't match.")
             st.stop()
+
+        with APIClient() as client:
+            response = client.post_register(email=email, password=password)
+
+            if response.status_code == HTTPStatus.CREATED:
+                st.success("Registration was successful.")
+                st.stop()
+
+            match response.status_code:
+                case HTTPStatus.UNPROCESSABLE_ENTITY:
+                    err_detail = response.json()["detail"][0]
+
+                    st.error(
+                        convert_pydantic_error_to_human_readable_message(err_detail)
+                    )
+                case HTTPStatus.CONFLICT:
+                    st.error("User already exists.")

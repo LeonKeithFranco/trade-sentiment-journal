@@ -36,4 +36,28 @@ class APIClient:
         return response
 
     def post_register(self, email: str, password: str) -> httpx.Response:
-        return self._request("POST", "/auth/register", email=email, password=password)
+        return self._request(
+            "POST", "/auth/register", json={"email": email, "password": password}
+        )
+
+
+def convert_pydantic_error_to_human_readable_message(err_detail: dict) -> str:
+    msg = ""
+
+    match err_detail["type"]:
+        case "string_too_short":
+            field = str(err_detail["loc"][~0])
+
+            msg = str(err_detail["msg"]).replace("String", field.capitalize())
+        case "value_error":
+            msg = (
+                str(err_detail["msg"])
+                .replace("Value error,", "")
+                .replace("value is not a valid email address: ", "")
+            )
+        case _:
+            msg = "Unable to complete registerations. Please try again at a later time."
+
+    print(msg)
+
+    return msg + ("." if msg[~0] != "." else "")
