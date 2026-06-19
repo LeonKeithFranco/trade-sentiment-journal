@@ -34,6 +34,8 @@ with st.form(key="login_form"):
 
 st.divider()
 
+st.header("Register")
+
 
 with st.form(key="register_form"):
     email = st.text_input("Email", key="register_email")
