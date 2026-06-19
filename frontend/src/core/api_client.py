@@ -34,3 +34,6 @@ class APIClient:
         response = self._client.request(method, endpoint, **kwargs)
 
         return response
+
+    def post_register(self, email: str, password: str) -> httpx.Response:
+        return self._request("POST", "/auth/register", email=email, password=password)
