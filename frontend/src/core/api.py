@@ -56,6 +56,6 @@ def convert_pydantic_error_to_human_readable_message(err_detail: dict) -> str:
                 .replace("value is not a valid email address: ", "")
             )
         case _:
-            msg = "Unable to complete registerations. Please try again at a later time."
+            msg = "Unable to complete registration. Please try again at a later time."
 
     return msg + ("." if msg[-1] != "." else "")
