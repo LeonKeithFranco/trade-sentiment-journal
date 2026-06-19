@@ -58,4 +58,4 @@ def convert_pydantic_error_to_human_readable_message(err_detail: dict) -> str:
         case _:
             msg = "Unable to complete registerations. Please try again at a later time."
 
-    return msg + ("." if msg[~0] != "." else "")
+    return msg + ("." if msg[-1] != "." else "")
