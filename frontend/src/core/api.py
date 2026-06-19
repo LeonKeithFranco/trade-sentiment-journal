@@ -46,7 +46,7 @@ def convert_pydantic_error_to_human_readable_message(err_detail: dict) -> str:
 
     match err_detail["type"]:
         case "string_too_short":
-            field = str(err_detail["loc"][~0])
+            field = str(err_detail["loc"][-1])
 
             msg = str(err_detail["msg"]).replace("String", field.capitalize())
         case "value_error":
