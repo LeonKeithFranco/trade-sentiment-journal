@@ -35,10 +35,15 @@ class APIClient:
 
         return response
 
-    def post_register(self, email: str, password: str) -> httpx.Response:
+    def _login_register_helper(
+        self, email: str, password: str, endpoint: Literal["register", "login"]
+    ) -> httpx.Response:
         return self._request(
-            "POST", "/auth/register", json={"email": email, "password": password}
+            "POST", f"/auth/{endpoint}", json={"email": email, "password": password}
         )
+
+    def post_register(self, email: str, password: str) -> httpx.Response:
+        return self._login_register_helper(email, password, endpoint="login")
 
 
 def convert_pydantic_error_to_human_readable_message(err_detail: dict) -> str:
