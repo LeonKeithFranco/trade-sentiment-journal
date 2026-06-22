@@ -8,8 +8,8 @@ st.divider()
 auth_check()
 
 with st.form("trade_form"):
-    ticker = st.text_input("Ticker", placeholder="e.g. AABL")
-    direction = st.selectbox("Direction", options=["Long", "Short"])
+    ticker = st.text_input("Ticker", placeholder="e.g. AAPL")
+    direction = st.selectbox("Direction", options=["Long", "Short"]).upper()
     position_size = st.number_input(
         "Position Size", min_value=0.0, step=1.0, format="%.4f"
     )
