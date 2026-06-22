@@ -96,7 +96,9 @@ def register_form_section() -> None:
 st.title(get_settings().app.name)
 
 if "access_token" in st.session_state:
-    st.success("Login successful.")
+    if st.button("Logout"):
+        del st.session_state["access_token"]
+        st.rerun()
 else:
     login_form_section()
     register_form_section()
