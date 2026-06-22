@@ -78,6 +78,9 @@ def register_form_section() -> None:
                         )
                     case HTTPStatus.CONFLICT:
                         st.error("User already exists.")
+                    case _:
+                        st.error("Unable to register. Please try again.")
+                        print(response.json())
 
 
 st.title(get_settings().app.name)
