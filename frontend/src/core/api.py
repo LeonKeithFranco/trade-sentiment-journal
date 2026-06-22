@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, Literal, Self
 
 import httpx
@@ -47,6 +48,30 @@ class APIClient:
 
     def post_login(self, email: str, password: str) -> httpx.Response:
         return self._login_register_helper(email, password, endpoint="login")
+
+    def post_trade(
+        self,
+        ticker: str,
+        direction: str,
+        position_size: float,
+        entry_price: float,
+        opened_at: datetime,
+        exit_price: float | None,
+        closed_at: datetime | None,
+    ) -> httpx.Response:
+        return self._request(
+            "POST",
+            "/trades",
+            json={
+                "ticker": ticker,
+                "direction": direction,
+                "position_size": position_size,
+                "entry_price": entry_price,
+                "opened_at": opened_at.isoformat(),
+                "exit_price": exit_price,
+                "closed_at": closed_at.isoformat() if closed_at else None,
+            },
+        )
 
 
 def convert_pydantic_error_to_human_readable_message(
