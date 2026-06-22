@@ -88,7 +88,10 @@ def register_form_section() -> None:
                         err_detail = response.json()["detail"][0]
 
                         st.error(
-                            convert_pydantic_error_to_human_readable_message(err_detail)
+                            convert_pydantic_error_to_human_readable_message(
+                                err_detail,
+                                "Unable to complete registration. Please try again at a later time.",
+                            )
                         )
                     case HTTPStatus.CONFLICT:
                         st.error("User already exists.")

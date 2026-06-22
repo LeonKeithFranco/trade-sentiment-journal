@@ -49,7 +49,9 @@ class APIClient:
         return self._login_register_helper(email, password, endpoint="login")
 
 
-def convert_pydantic_error_to_human_readable_message(err_detail: dict) -> str:
+def convert_pydantic_error_to_human_readable_message(
+    err_detail: dict, general_err_msg: str
+) -> str:
     msg = ""
 
     match err_detail["type"]:
@@ -63,7 +65,13 @@ def convert_pydantic_error_to_human_readable_message(err_detail: dict) -> str:
                 .replace("Value error,", "")
                 .replace("value is not a valid email address: ", "")
             )
+        case "greater_than":
+            field = str(err_detail["loc"][-1])
+
+            msg = str(err_detail["msg"]).replace(
+                "Input", field.replace("_", " ").title()
+            )
         case _:
-            msg = "Unable to complete registration. Please try again at a later time."
+            msg = general_err_msg
 
     return msg + ("." if msg[-1] != "." else "")
