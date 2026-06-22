@@ -18,6 +18,10 @@ def _blank_fields_message(**kwargs) -> str | None:
     return ", ".join(f"{field}" for field in blank_fields)
 
 
+def _handle_logout() -> None:
+    del st.session_state["access_token"]
+
+
 @st.fragment
 def login_form_section() -> None:
     st.divider()
@@ -96,9 +100,8 @@ def register_form_section() -> None:
 st.title(get_settings().app.name)
 
 if "access_token" in st.session_state:
-    if st.button("Logout"):
-        del st.session_state["access_token"]
-        st.rerun()
+    st.button("Logout", on_click=_handle_logout)
+
 else:
     login_form_section()
     register_form_section()
