@@ -45,6 +45,9 @@ class APIClient:
     def post_register(self, email: str, password: str) -> httpx.Response:
         return self._login_register_helper(email, password, endpoint="register")
 
+    def post_login(self, email: str, password: str) -> httpx.Response:
+        return self._login_register_helper(email, password, endpoint="login")
+
 
 def convert_pydantic_error_to_human_readable_message(err_detail: dict) -> str:
     msg = ""

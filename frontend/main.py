@@ -35,6 +35,16 @@ def login_form_section() -> None:
                 st.error(f"The following fields were left blank: {blank_fields}")
                 st.stop()
 
+            with APIClient() as client:
+                response = client.post_login(email=email, password=password)
+
+                if response.status_code == HTTPStatus.OK:
+                    st.session_state["access_token"] = response.json()["access_token"]
+
+                    st.rerun()
+                else:
+                    st.info("Please try again.")
+
 
 @st.fragment
 def register_form_section() -> None:
@@ -85,5 +95,8 @@ def register_form_section() -> None:
 
 st.title(get_settings().app.name)
 
-login_form_section()
-register_form_section()
+if "access_token" in st.session_state:
+    st.success("Login successful.")
+else:
+    login_form_section()
+    register_form_section()
