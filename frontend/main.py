@@ -43,7 +43,7 @@ def login_form_section() -> None:
 
                     st.rerun()
                 else:
-                    st.info("Please try again.")
+                    st.error("Please try again.")
 
 
 @st.fragment
