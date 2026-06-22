@@ -53,7 +53,5 @@ with st.form("trade_form"):
                             err_detail, "Unable to create Trade."
                         )
                     )
-                case HTTPStatus.CONFLICT:
-                    pass
                 case _:
                     st.error(response.json())
