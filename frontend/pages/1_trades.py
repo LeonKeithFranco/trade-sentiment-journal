@@ -12,6 +12,8 @@ st.divider()
 auth_check()
 
 with st.form("trade_form"):
+    st.subheader("Create Trade")
+
     ticker = st.text_input("Ticker", placeholder="e.g. AAPL")
     direction = st.selectbox("Direction", options=["Long", "Short"]).upper()
     position_size = st.number_input(
