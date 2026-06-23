@@ -1,6 +1,8 @@
 from datetime import UTC, datetime, time
 from http import HTTPStatus
+from typing import Any, cast
 
+import pandas as pd
 import streamlit as st
 from src.core.api import APIClient, convert_pydantic_error_to_human_readable_message
 from src.core.auth import auth_check
@@ -65,5 +67,21 @@ st.header("All Trades")
 with st.spinner("Loading..."):
     with APIClient(token=st.session_state["access_token"]) as client:
         response = client.get_all_trades()
+        trades = cast(list[dict[str, Any]], response.json())
 
-    st.dataframe(response.json())
+        df_trade = pd.DataFrame(trades)
+        df_trade = df_trade.drop(["public_id", "created_on", "updated_on"], axis=1)
+
+        df_trade["opened_at"] = pd.to_datetime(df_trade["opened_at"]).dt.strftime(
+            "%b %d, %Y"
+        )
+        df_trade["closed_at"] = pd.to_datetime(df_trade["closed_at"]).dt.strftime(
+            "%b %d, %Y"
+        )
+
+        df_trade = df_trade.fillna("-")
+        df_trade = df_trade.rename(
+            columns={k: k.replace("_", " ").title() for k in trades[0].keys()}
+        )
+
+        st.dataframe(df_trade, use_container_width=True, hide_index=True)
