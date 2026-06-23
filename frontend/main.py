@@ -1,12 +1,19 @@
 from http import HTTPStatus
 
 import streamlit as st
-from src.core.api import APIClient, convert_pydantic_error_to_human_readable_message
+from src.core.api import (
+    convert_pydantic_error_to_human_readable_message,
+    make_api_request,
+)
 from src.core.config import get_settings
 
 _app_settings = get_settings().app
 
 st.set_page_config(page_title=_app_settings.name)
+
+if "access_token" not in st.session_state:
+    st.session_state["access_token"] = None
+    st.session_state["refresh_token"] = None
 
 
 def _blank_fields_message(**kwargs) -> str | None:
@@ -23,7 +30,8 @@ def _blank_fields_message(**kwargs) -> str | None:
 
 
 def _handle_logout() -> None:
-    del st.session_state["access_token"]
+    st.session_state["access_token"] = None
+    st.session_state["refresh_token"] = None
 
 
 @st.fragment
@@ -43,15 +51,17 @@ def login_form_section() -> None:
                 st.error(f"The following fields were left blank: {blank_fields}")
                 st.stop()
 
-            with APIClient() as client:
-                response = client.post_login(email=email, password=password)
+            response = make_api_request(
+                "POST", "/auth/login", json={"email": email, "password": password}
+            )
 
-                if response.status_code == HTTPStatus.OK:
-                    st.session_state["access_token"] = response.json()["access_token"]
+            if response.status_code == HTTPStatus.OK:
+                st.session_state["access_token"] = response.json()["access_token"]
+                st.session_state["refresh_token"] = response.json()["refresh_token"]
 
-                    st.rerun()
-                else:
-                    st.error("Please try again.")
+                st.rerun()
+            else:
+                st.error("Please try again.")
 
 
 @st.fragment
@@ -80,35 +90,35 @@ def register_form_section() -> None:
                 st.error("The passwords you entered don't match.")
                 st.stop()
 
-            with APIClient() as client:
-                response = client.post_register(email=email, password=password)
+            response = make_api_request(
+                "POST", "/auth/register", json={"email": email, "password": password}
+            )
 
-                if response.status_code == HTTPStatus.CREATED:
-                    st.success("Registration was successful.")
-                    st.stop()
+            if response.status_code == HTTPStatus.CREATED:
+                st.success("Registration was successful.")
+                st.stop()
 
-                match response.status_code:
-                    case HTTPStatus.UNPROCESSABLE_ENTITY:
-                        err_detail = response.json()["detail"][0]
+            match response.status_code:
+                case HTTPStatus.UNPROCESSABLE_ENTITY:
+                    err_detail = response.json()["detail"][0]
 
-                        st.error(
-                            convert_pydantic_error_to_human_readable_message(
-                                err_detail,
-                                "Unable to complete registration. Please try again at a later time.",
-                            )
+                    st.error(
+                        convert_pydantic_error_to_human_readable_message(
+                            err_detail,
+                            "Unable to complete registration. Please try again at a later time.",
                         )
-                    case HTTPStatus.CONFLICT:
-                        st.error("User already exists.")
-                    case _:
-                        st.error("Unable to register. Please try again.")
-                        print(response.json())
+                    )
+                case HTTPStatus.CONFLICT:
+                    st.error("User already exists.")
+                case _:
+                    st.error("Unable to register. Please try again.")
+                    print(response.json())
 
 
 st.title(_app_settings.name)
 
-if "access_token" in st.session_state:
+if st.session_state["access_token"]:
     st.button("Logout", on_click=_handle_logout)
-
 else:
     login_form_section()
     register_form_section()

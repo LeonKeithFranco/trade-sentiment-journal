@@ -1,14 +1,15 @@
-from datetime import datetime
+from http import HTTPStatus
 from typing import Any, Literal, Self
 
 import httpx
+import streamlit as st
 
 from src.core.config import get_settings
 
 _API_SETTINGS = get_settings().api
 
 
-class APIClient:
+class _APIClient:
     def __init__(self, token: str | None = None) -> None:
         headers: dict[str, str] = {"Accept": "application/json"}
 
@@ -29,52 +30,42 @@ class APIClient:
 
         return False
 
-    def _request(
+    def request(
         self, method: Literal["GET", "POST", "PATCH", "DELETE"], endpoint: str, **kwargs
     ) -> httpx.Response:
         response = self._client.request(method, endpoint, **kwargs)
 
         return response
 
-    def _login_register_helper(
-        self, email: str, password: str, endpoint: Literal["register", "login"]
-    ) -> httpx.Response:
-        return self._request(
-            "POST", f"/auth/{endpoint}", json={"email": email, "password": password}
-        )
 
-    def post_register(self, email: str, password: str) -> httpx.Response:
-        return self._login_register_helper(email, password, endpoint="register")
+def make_api_request(
+    method: Literal["GET", "POST", "PATCH", "DELETE"], endpoint: str, **kwargs
+) -> httpx.Response:
+    with _APIClient(token=st.session_state["access_token"]) as client:
+        response = client.request(method, endpoint, **kwargs)
 
-    def post_login(self, email: str, password: str) -> httpx.Response:
-        return self._login_register_helper(email, password, endpoint="login")
+        if (
+            response.status_code == HTTPStatus.UNAUTHORIZED
+            and st.session_state["refresh_token"]
+        ):
+            refresh_response = client.request(
+                "POST",
+                "/auth/refresh",
+                json={"refresh_token": st.session_state["refresh_token"]},
+            )
 
-    def post_trade(
-        self,
-        ticker: str,
-        direction: str,
-        position_size: float,
-        entry_price: float,
-        opened_at: datetime,
-        exit_price: float | None,
-        closed_at: datetime | None,
-    ) -> httpx.Response:
-        return self._request(
-            "POST",
-            "/trades",
-            json={
-                "ticker": ticker,
-                "direction": direction,
-                "position_size": position_size,
-                "entry_price": entry_price,
-                "opened_at": opened_at.isoformat(),
-                "exit_price": exit_price,
-                "closed_at": closed_at.isoformat() if closed_at else None,
-            },
-        )
+            if refresh_response.status_code == HTTPStatus.OK:
+                st.session_state["access_token"] = refresh_response.json()[
+                    "access_token"
+                ]
+                st.session_state["refresh_token"] = refresh_response.json()[
+                    "refresh_token"
+                ]
 
-    def get_all_trades(self) -> httpx.Response:
-        return self._request("GET", "/trades")
+                with _APIClient(token=st.session_state["access_token"]) as client:
+                    response = client.request(method, endpoint, **kwargs)
+
+        return response
 
 
 def convert_pydantic_error_to_human_readable_message(
