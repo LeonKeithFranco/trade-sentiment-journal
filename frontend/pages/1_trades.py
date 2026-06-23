@@ -69,6 +69,10 @@ with st.spinner("Loading..."):
         response = client.get_all_trades()
         trades = cast(list[dict[str, Any]], response.json())
 
+        if not trades:
+            st.info("There are no trades yet.")
+            st.stop()
+
         df_trade = pd.DataFrame(trades)
         df_trade = df_trade.drop(["public_id", "created_on", "updated_on"], axis=1)
 
