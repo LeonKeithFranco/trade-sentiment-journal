@@ -4,6 +4,10 @@ import streamlit as st
 from src.core.api import APIClient, convert_pydantic_error_to_human_readable_message
 from src.core.config import get_settings
 
+_app_settings = get_settings().app
+
+st.set_page_config(page_title=_app_settings.name)
+
 
 def _blank_fields_message(**kwargs) -> str | None:
     blank_fields: list[str] = []
@@ -100,7 +104,7 @@ def register_form_section() -> None:
                         print(response.json())
 
 
-st.title(get_settings().app.name)
+st.title(_app_settings.name)
 
 if "access_token" in st.session_state:
     st.button("Logout", on_click=_handle_logout)
