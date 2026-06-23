@@ -57,3 +57,13 @@ with st.form("trade_form"):
                     )
                 case _:
                     st.error(response.json())
+
+st.divider()
+
+st.header("All Trades")
+
+with st.spinner("Loading..."):
+    with APIClient(token=st.session_state["access_token"]) as client:
+        response = client.get_all_trades()
+
+    st.dataframe(response.json())

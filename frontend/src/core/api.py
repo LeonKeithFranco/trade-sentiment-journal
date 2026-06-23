@@ -73,6 +73,9 @@ class APIClient:
             },
         )
 
+    def get_all_trades(self) -> httpx.Response:
+        return self._request("GET", "/trades")
+
 
 def convert_pydantic_error_to_human_readable_message(
     err_detail: dict, general_err_msg: str
