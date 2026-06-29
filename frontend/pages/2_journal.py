@@ -22,7 +22,7 @@ def journal_form_and_table(trade_options: dict[str, Any]) -> None:
     with st.form("entry_form"):
         st.subheader("Create Journal Entry")
 
-        trade = st.selectbox("Trades", options=trade_options)
+        trade_option = st.selectbox("Trades", options=trade_options)
         title = st.text_input("Title (Optional)", value=None)
         entry = st.text_area("Entry")
 
@@ -30,7 +30,11 @@ def journal_form_and_table(trade_options: dict[str, Any]) -> None:
             response = make_api_request(
                 "POST",
                 "/journal-entries",
-                json={"title": title, "entry": entry, "trade_public_id": trade},
+                json={
+                    "title": title if title else None,
+                    "entry": entry,
+                    "trade_public_id": trade_options[trade_option],
+                },
             )
 
             match response.status_code:
