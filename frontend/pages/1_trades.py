@@ -1,6 +1,5 @@
 from datetime import UTC, datetime, time
 from http import HTTPStatus
-from typing import Any, cast
 
 import pandas as pd
 import streamlit as st
