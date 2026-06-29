@@ -1,7 +1,8 @@
 from datetime import datetime
 from http import HTTPStatus
-from typing import Any
+from typing import Any, cast
 
+import pandas as pd
 import streamlit as st
 from src.core.api import (
     convert_pydantic_error_to_human_readable_message,
@@ -40,6 +41,8 @@ def journal_form() -> None:
             match response.status_code:
                 case HTTPStatus.CREATED:
                     st.success("Journal entry created.")
+
+                    st.rerun()
                 case HTTPStatus.UNPROCESSABLE_ENTITY:
                     err_detail = response.json()["detail"][0]
 
@@ -50,6 +53,30 @@ def journal_form() -> None:
                     )
                 case _:
                     st.error(response.json())
+
+
+@st.fragment
+def journal_entries_table() -> None:
+    st.header("All Journal Entries")
+
+    response = make_api_request("GET", "/journal-entries")
+    journal_entries = cast(list[dict[str, Any]], response.json())
+
+    if not journal_entries:
+        st.info("There are no journal entries yet.")
+        st.stop()
+
+    df_journal_entries = pd.DataFrame(journal_entries)
+    df_journal_entries = df_journal_entries.drop(
+        ["public_id", "created_on", "updated_on"], axis=1
+    )
+
+    df_journal_entries = df_journal_entries.fillna("-")
+    df_journal_entries = df_journal_entries.rename(
+        columns={k: k.replace("_", " ").title() for k in journal_entries[0].keys()}
+    )
+
+    st.dataframe(df_journal_entries, use_container_width=True, hide_index=True)
 
 
 with st.spinner("Loading..."):
@@ -68,3 +95,5 @@ with st.spinner("Loading..."):
         }
 
 journal_form()
+st.divider()
+journal_entries_table()
