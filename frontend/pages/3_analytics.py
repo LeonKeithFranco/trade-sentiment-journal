@@ -2,10 +2,7 @@ from http import HTTPStatus
 
 import plotly.express as px
 import streamlit as st
-from src.core.api import (
-    convert_pydantic_error_to_human_readable_message,
-    make_api_request,
-)
+from src.core.api import make_api_request
 from src.core.auth import auth_check
 
 st.title("Analytics")
@@ -15,7 +12,6 @@ st.divider()
 auth_check()
 
 
-@st.fragment
 def sentiment_chart() -> None:
     sentiment_response = make_api_request("GET", "/analytics/sentiment-vs-returns")
 
@@ -28,7 +24,12 @@ def sentiment_chart() -> None:
             for sentiment in all_sentiments:
                 if sentiment not in existing:
                     data.append(
-                        {"sentiment": sentiment, "average_pnl": 0, "total_pnl": 0}
+                        {
+                            "sentiment": sentiment,
+                            "average_pnl": 0,
+                            "total_pnl": 0,
+                            "entry_count": 0,
+                        }
                     )
 
             st.plotly_chart(
