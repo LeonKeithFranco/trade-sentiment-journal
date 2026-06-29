@@ -59,6 +59,10 @@ with st.form("trade_form"):
         match response.status_code:
             case HTTPStatus.CREATED:
                 st.success("Trade created.")
+
+                if "trade_options" in st.session_state:
+                    del st.session_state["trade_options"]
+
             case HTTPStatus.UNPROCESSABLE_ENTITY:
                 err_detail = response.json()["detail"][0]
 

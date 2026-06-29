@@ -18,11 +18,11 @@ auth_check()
 
 
 @st.fragment
-def journal_form_and_table(trade_options: dict[str, Any]) -> None:
+def journal_form_and_table() -> None:
     with st.form("entry_form"):
         st.subheader("Create Journal Entry")
 
-        trade_option = st.selectbox("Trades", options=trade_options)
+        trade_option = st.selectbox("Trades", options=st.session_state["trade_options"])
         title = st.text_input("Title (Optional)", value=None)
         entry = st.text_area("Entry")
 
@@ -33,7 +33,7 @@ def journal_form_and_table(trade_options: dict[str, Any]) -> None:
                 json={
                     "title": title if title else None,
                     "entry": entry,
-                    "trade_public_id": trade_options[trade_option],
+                    "trade_public_id": st.session_state["trade_options"][trade_option],
                 },
             )
 
@@ -53,17 +53,18 @@ def journal_form_and_table(trade_options: dict[str, Any]) -> None:
 
 
 with st.spinner("Loading..."):
-    trades = get_all_trades()
+    if "trade_options" not in st.session_state:
+        trades = get_all_trades()
 
-    if not trades:
-        st.info("Create a trade first.")
-        st.stop()
+        if not trades:
+            st.info("Create a trade first.")
+            st.stop()
 
-    trade_options = {
-        f"{trade['ticker']}: {trade['direction']} - {datetime.fromisoformat(trade['opened_at']).strftime('%b %d, %Y')}": trade[
-            "public_id"
-        ]
-        for trade in trades
-    }
+        st.session_state["trade_options"] = {
+            f"{trade['ticker']}: {trade['direction']} - {datetime.fromisoformat(trade['opened_at']).strftime('%b %d, %Y')}": trade[
+                "public_id"
+            ]
+            for trade in trades
+        }
 
-journal_form_and_table(trade_options)
+journal_form_and_table()
