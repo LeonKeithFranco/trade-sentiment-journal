@@ -40,14 +40,6 @@ def sentiment_chart() -> None:
                 ),
                 width="stretch",
             )
-        case HTTPStatus.UNPROCESSABLE_ENTITY:
-            err_detail = sentiment_response.json()["detail"][0]
-
-            st.error(
-                convert_pydantic_error_to_human_readable_message(
-                    err_detail, "Unable to create Journal entry."
-                )
-            )
         case _:
             st.error(sentiment_response.json())
 
