@@ -100,4 +100,4 @@ with st.spinner("Loading..."):
         columns={k: k.replace("_", " ").title() for k in trades[0].keys()}
     )
 
-    st.dataframe(df_trade, use_container_width=True, hide_index=True)
+    st.dataframe(df_trade, width=True, hide_index=True)

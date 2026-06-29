@@ -76,7 +76,7 @@ def journal_entries_table() -> None:
         columns={k: k.replace("_", " ").title() for k in journal_entries[0].keys()}
     )
 
-    st.dataframe(df_journal_entries, use_container_width=True, hide_index=True)
+    st.dataframe(df_journal_entries, width=True, hide_index=True)
 
 
 with st.spinner("Loading..."):
