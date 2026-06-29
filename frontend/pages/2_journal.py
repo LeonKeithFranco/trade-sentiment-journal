@@ -18,7 +18,7 @@ auth_check()
 
 
 @st.fragment
-def journal_form_and_table() -> None:
+def journal_form() -> None:
     with st.form("entry_form"):
         st.subheader("Create Journal Entry")
 
@@ -67,4 +67,4 @@ with st.spinner("Loading..."):
             for trade in trades
         }
 
-journal_form_and_table()
+journal_form()
