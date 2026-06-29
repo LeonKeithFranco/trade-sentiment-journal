@@ -6,6 +6,7 @@ import pandas as pd
 import streamlit as st
 from src.core.api import (
     convert_pydantic_error_to_human_readable_message,
+    get_all_trades,
     make_api_request,
 )
 from src.core.auth import auth_check
@@ -75,8 +76,7 @@ st.divider()
 st.header("All Trades")
 
 with st.spinner("Loading..."):
-    response = make_api_request("GET", "/trades")
-    trades = cast(list[dict[str, Any]], response.json())
+    trades = get_all_trades()
 
     if not trades:
         st.info("There are no trades yet.")

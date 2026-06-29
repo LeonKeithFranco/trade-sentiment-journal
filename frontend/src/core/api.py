@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Literal, Self
+from typing import Any, Literal, Self, cast
 
 import httpx
 import streamlit as st
@@ -66,6 +66,13 @@ def make_api_request(
                     response = client.request(method, endpoint, **kwargs)
 
         return response
+
+
+def get_all_trades() -> list[dict[str, Any]]:
+    response = make_api_request("GET", "/trades")
+    trades = cast(list[dict[str, Any]], response.json())
+
+    return trades
 
 
 def convert_pydantic_error_to_human_readable_message(
