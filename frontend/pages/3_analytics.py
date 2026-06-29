@@ -59,7 +59,50 @@ def sentiment_chart() -> None:
 
 
 def confidence_chart() -> None:
+    st.subheader("Confidence Chart")
+
     confidence_response = make_api_request("GET", "/analytics/confidence-breakdown")
+
+    match confidence_response.status_code:
+        case HTTPStatus.OK:
+            data = cast(list[dict[str, Any]], confidence_response.json())
+            all_bands = ["low", "medium", "high"]
+            existing = {item["confidence_band"] for item in data}
+
+            for band in all_bands:
+                if band not in existing:
+                    data.append(
+                        {
+                            "confidence_band": band,
+                            "average_pnl": 0,
+                            "total_pnl": 0,
+                            "entry_count": 0,
+                        }
+                    )
+
+            st.plotly_chart(
+                px.bar(
+                    data,
+                    x="confidence_band",
+                    y="average_pnl",
+                    labels={
+                        "confidence_band": "Confidence Band",
+                        "average_pnl": "Average P&L",
+                    },
+                ),
+                width="stretch",
+            )
+
+            df_data = pd.DataFrame(data)
+            df_data = df_data.drop(["average_pnl"], axis=1)
+            df_data = df_data[["confidence_band", "total_pnl", "entry_count"]]
+            df_data = df_data.rename(
+                columns={k: k.replace("_", " ").title() for k in data[0].keys()}
+            )
+
+            st.dataframe(df_data, width="stretch", hide_index=True)
+        case _:
+            st.error(confidence_response.json())
 
 
 sentiment_chart()
