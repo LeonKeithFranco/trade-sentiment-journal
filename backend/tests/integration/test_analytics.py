@@ -15,6 +15,19 @@ from sqlalchemy.orm import Session
 def seed_db(
     client: TestClient, access_token: str, email: str, db_engine: Engine
 ) -> None:
+    """Seed the test database with a winning and a losing trade with journal sentiment.
+
+    Creates a LONG trade with a profit and a SHORT trade with a loss for the
+    authenticated user, each with a journal entry and an associated positive
+    or negative sentiment analysis, respectively. Runs automatically before
+    every test in this module.
+
+    Args:
+        client: The test client, used implicitly to ensure the user exists.
+        access_token: A valid access token for the seeded user.
+        email: The email address of the seeded user.
+        db_engine: The synchronous SQLAlchemy engine for the test database.
+    """
     with Session(db_engine) as session:
         user = session.execute(select(User).where(User.email == email)).scalar_one()
 
@@ -74,7 +87,10 @@ def seed_db(
 
 
 class TestConfidenceBreakdown:
+    """Integration tests for the GET /analytics/confidence-breakdown endpoint."""
+
     def test_confidence_breakdown(self, client: TestClient, access_token: str) -> None:
+        """Verify confidence buckets aggregate the seeded trades' profit and loss correctly."""
         response = client.get(
             "/analytics/confidence-breakdown",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -98,6 +114,7 @@ class TestConfidenceBreakdown:
         assert Decimal(confidence_bands["medium"]["total_pnl"]) == Decimal("-50.00")
 
     def test_no_data(self, client: TestClient, other_access_token: str) -> None:
+        """Verify a user with no seeded data gets an empty confidence breakdown."""
         response = client.get(
             "/analytics/confidence-breakdown",
             headers={"Authorization": f"Bearer {other_access_token}"},
@@ -107,6 +124,7 @@ class TestConfidenceBreakdown:
         assert response.json() == []
 
     def test_unauthorized(self, client: TestClient, fake_access_token: str) -> None:
+        """Verify an invalid access token returns 401 Unauthorized."""
         response = client.get(
             "/analytics/confidence-breakdown",
             headers={"Authorization": f"Bearer {fake_access_token}"},
@@ -116,7 +134,10 @@ class TestConfidenceBreakdown:
 
 
 class TestSentimentVsReturns:
+    """Integration tests for the GET /analytics/sentiment-vs-returns endpoint."""
+
     def test_sentiment_vs_returns(self, client: TestClient, access_token: str) -> None:
+        """Verify sentiment groups aggregate the seeded trades' profit and loss correctly."""
         response = client.get(
             "/analytics/sentiment-vs-returns",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -140,6 +161,7 @@ class TestSentimentVsReturns:
         assert Decimal(sentiments["negative"]["total_pnl"]) == Decimal("-50.00")
 
     def test_no_data(self, client: TestClient, other_access_token: str) -> None:
+        """Verify a user with no seeded data gets an empty sentiment-vs-returns breakdown."""
         response = client.get(
             "/analytics/sentiment-vs-returns",
             headers={"Authorization": f"Bearer {other_access_token}"},
@@ -149,6 +171,7 @@ class TestSentimentVsReturns:
         assert response.json() == []
 
     def test_unauthorized(self, client: TestClient, fake_access_token: str) -> None:
+        """Verify an invalid access token returns 401 Unauthorized."""
         response = client.get(
             "/analytics/sentiment-vs-returns",
             headers={"Authorization": f"Bearer {fake_access_token}"},

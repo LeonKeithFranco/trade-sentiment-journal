@@ -5,6 +5,8 @@ from fastapi.testclient import TestClient
 
 
 class TestAnalyze:
+    """Integration tests for the POST /analyze endpoint."""
+
     @pytest.mark.parametrize(
         "text",
         (
@@ -14,6 +16,7 @@ class TestAnalyze:
         ),
     )
     def test_analyze(self, client: TestClient, access_token: str, text: str) -> None:
+        """Verify analyzing text returns a valid sentiment and confidence score."""
         response = client.post(
             "/analyze",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -28,6 +31,7 @@ class TestAnalyze:
         assert 0.0 < data["confidence"] < 1.0
 
     def test_analyze_empty_text(self, client: TestClient, access_token: str) -> None:
+        """Verify analyzing empty text returns 422 Unprocessable Content."""
         response = client.post(
             "/analyze",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -42,6 +46,7 @@ class TestAnalyze:
         self,
         client: TestClient,
     ) -> None:
+        """Verify analyzing text without authentication returns 401 Unauthorized."""
         response = client.post(
             "/analyze",
             json={"text": "Text"},

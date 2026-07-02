@@ -15,6 +15,8 @@ random.seed(0)
 
 
 class TestCreateJournalEntry:
+    """Integration tests for the POST /journal-entries endpoint."""
+
     @pytest.mark.parametrize(
         "payload",
         [
@@ -35,6 +37,7 @@ class TestCreateJournalEntry:
         payload: dict,
         trade_public_id: str,
     ) -> None:
+        """Verify a journal entry can be created with or without a title."""
         payload = payload | {"trade_public_id": trade_public_id}
 
         response = client.post(
@@ -62,6 +65,7 @@ class TestCreateJournalEntry:
         access_token: str,
         trade_public_id: str,
     ) -> None:
+        """Verify creating a journal entry triggers a background sentiment analysis."""
         mocker.patch(
             "app.domains.nlp.tasks.AsyncSessionFactory", new=async_session_factory
         )
@@ -98,6 +102,7 @@ class TestCreateJournalEntry:
         trade_public_id: str,
         fake_access_token: str,
     ) -> None:
+        """Verify creating a journal entry with an invalid access token returns 401."""
         payload = {
             "title": None,
             "entry": "This is a journal message. This is a journal message.",
@@ -116,6 +121,7 @@ class TestCreateJournalEntry:
     def test_create_journal_entry_on_nonexistent_trade(
         self, client: TestClient, access_token: str
     ) -> None:
+        """Verify creating a journal entry for a nonexistent trade returns 404."""
         payload = {
             "title": None,
             "entry": "This is a journal message. This is a journal message.",
@@ -138,6 +144,7 @@ class TestCreateJournalEntry:
         other_access_token: str,
         trade_public_id: str,
     ) -> None:
+        """Verify a user cannot create a journal entry for another user's trade."""
         payload = {
             "title": None,
             "entry": "This is a journal message. This is a journal message.",
@@ -155,9 +162,12 @@ class TestCreateJournalEntry:
 
 
 class TestGetJournalEntry:
+    """Integration tests for the GET /journal-entries endpoints."""
+
     def test_get_journal_entry(
         self, client: TestClient, access_token: str, trade_public_id: str
     ) -> None:
+        """Verify a created journal entry can be fetched by its public ID."""
         payload = {
             "title": None,
             "entry": "This is a journal message. This is a journal message.",
@@ -181,6 +191,7 @@ class TestGetJournalEntry:
     def test_get_non_existent_journal_entry(
         self, client: TestClient, access_token: str
     ) -> None:
+        """Verify fetching a nonexistent journal entry returns 404."""
         response = client.get(
             f"/journal-entries/{uuid.uuid4()}",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -196,6 +207,7 @@ class TestGetJournalEntry:
         trade_public_id: str,
         other_access_token: str,
     ) -> None:
+        """Verify a user cannot fetch another user's journal entry."""
         payload = {
             "title": None,
             "entry": "This is a journal message. This is a journal message.",
@@ -227,6 +239,7 @@ class TestGetJournalEntry:
         trade_public_id: str,
         num_entries: int,
     ) -> None:
+        """Verify GET /journal-entries returns exactly the entries created for the user."""
         payloads = [
             {
                 "title": f"{random.randint(1, 1_000_000)}",
@@ -266,6 +279,7 @@ class TestGetJournalEntry:
         trade_public_id: str,
         other_access_token: str,
     ) -> None:
+        """Verify GET /journal-entries only returns entries belonging to the requesting user."""
         payload = {
             "title": "My Journal Entry",
             "entry": "This is a journal message. This is a journal message.",
@@ -294,9 +308,12 @@ class TestGetJournalEntry:
 
 
 class TestDeleteJournalEntry:
+    """Integration tests for the DELETE /journal-entries/{id} endpoint."""
+
     def test_delete_journal_entry(
         self, client: TestClient, access_token: str, trade_public_id: str
     ) -> None:
+        """Verify deleting a journal entry removes it and subsequent fetches return 404."""
         payload = {
             "title": None,
             "entry": "This is a journal message. This is a journal message.",
@@ -326,6 +343,7 @@ class TestDeleteJournalEntry:
     def test_delete_non_existent_journal_entry(
         self, client: TestClient, access_token: str
     ) -> None:
+        """Verify deleting a nonexistent journal entry returns 404."""
         response = client.delete(
             f"/journal-entries/{uuid.uuid4()}",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -341,6 +359,7 @@ class TestDeleteJournalEntry:
         trade_public_id: str,
         other_access_token: str,
     ) -> None:
+        """Verify a user cannot delete another user's journal entry."""
         payload = {
             "title": None,
             "entry": "This is a journal message. This is a journal message.",
@@ -366,6 +385,7 @@ class TestDeleteJournalEntry:
     def test_delete_from_multiple(
         self, client: TestClient, trade_public_id: str, access_token: str
     ) -> None:
+        """Verify deleting one journal entry leaves the user's other entries intact."""
         payload = {
             "title": "Title",
             "entry": "This is a journal message. This is a journal message.",
@@ -402,9 +422,12 @@ class TestDeleteJournalEntry:
 
 
 class TestUpdateJournalEntry:
+    """Integration tests for the PATCH /journal-entries/{id} endpoint."""
+
     def test_update_journal_entry(
         self, client: TestClient, access_token: str, trade_public_id: str
     ) -> None:
+        """Verify updating a journal entry's title changes only that field and bumps updated_on."""
         create_payload = {
             "title": None,
             "entry": "This is a journal message. This is a journal message.",
@@ -447,6 +470,7 @@ class TestUpdateJournalEntry:
         client: TestClient,
         access_token: str,
     ) -> None:
+        """Verify updating a nonexistent journal entry returns 404."""
         response = client.patch(
             f"/journal-entries/{uuid.uuid4()}",
             json={"title": "New Title"},
@@ -463,6 +487,7 @@ class TestUpdateJournalEntry:
         trade_public_id: str,
         other_access_token: str,
     ) -> None:
+        """Verify a user cannot update another user's journal entry."""
         create_payload = {
             "title": "Title",
             "entry": "This is a journal message. This is a journal message.",

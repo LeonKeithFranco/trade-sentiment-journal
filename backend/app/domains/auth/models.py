@@ -13,6 +13,24 @@ if TYPE_CHECKING:
 
 
 class User(PublicIdMixin, TimestampMixin, Base):
+    """ORM model representing a registered user.
+
+    Serves as the root entity in the data model, owning a user's refresh
+    tokens, trades, and journal entries.
+
+    Attributes:
+        id: Auto-incremented primary key inherited from Base.
+        public_id: A randomly generated, unique UUID for external references.
+        created_on: The UTC timestamp when the row was inserted.
+        updated_on: The UTC timestamp when the row was last updated.
+        email: The user's unique email address, used for login.
+        hashed_password: The user's password, hashed and peppered before storage.
+        refresh_tokens: The list of RefreshToken records issued to this user.
+        trades: The list of Trade records belonging to this user.
+        journal_entries: The list of JournalEntry records belonging to this
+            user.
+    """
+
     __tablename__ = "users"
 
     email: Mapped[str] = mapped_column(
@@ -40,6 +58,17 @@ class User(PublicIdMixin, TimestampMixin, Base):
 
 
 class RefreshToken(Base):
+    """ORM model representing a JWT refresh token issued to a user.
+
+    Attributes:
+        id: Auto-incremented primary key inherited from Base.
+        token: The unique refresh token string.
+        expires_on: The UTC timestamp after which the token is no longer valid.
+        revoked: Whether the token has been explicitly revoked before expiry.
+        user_id: The ID of the User this token was issued to.
+        user: The associated User record.
+    """
+
     __tablename__ = "refresh_tokens"
 
     token: Mapped[str] = mapped_column(

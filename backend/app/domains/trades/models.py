@@ -16,6 +16,35 @@ if TYPE_CHECKING:
 
 
 class Trade(PublicIdMixin, TimestampMixin, Base):
+    """ORM model representing a single stock trade.
+
+    Profit and loss is computed automatically from the entry price, exit
+    price, position size, and direction whenever the trade is inserted or
+    updated with an exit price set.
+
+    Attributes:
+        id: Auto-incremented primary key inherited from Base.
+        public_id: A randomly generated, unique UUID for external references.
+        created_on: The UTC timestamp when the row was inserted.
+        updated_on: The UTC timestamp when the row was last updated.
+        ticker: The stock's exchange ticker symbol.
+        direction: Whether the trade is LONG or SHORT.
+        position_size: The number of shares or units traded.
+        entry_price: The price per share or unit at which the position was
+            opened.
+        exit_price: The price per share or unit at which the position was
+            closed, or None if the trade is still open.
+        profit_and_loss: The realized profit or loss on the trade, or None
+            if the trade is still open.
+        opened_at: The timestamp at which the trade was opened.
+        closed_at: The timestamp at which the trade was closed, or None if
+            the trade is still open.
+        user_id: The ID of the User who made this trade.
+        user: The associated User record.
+        journal_entries: The list of JournalEntry records associated with
+            this trade.
+    """
+
     __tablename__ = "trades"
 
     __table_args__ = (
@@ -47,10 +76,20 @@ class Trade(PublicIdMixin, TimestampMixin, Base):
 
     @property
     def direction(self) -> Direction:
+        """Get the trade direction as a Direction enum.
+
+        Returns:
+            Direction: The parsed direction value.
+        """
         return Direction(self._direction)
 
     @direction.setter
     def direction(self, direction: Direction) -> None:
+        """Set the trade direction from a Direction enum.
+
+        Args:
+            direction: The direction value to store.
+        """
         self._direction = direction.value
 
     position_size: Mapped[Decimal] = mapped_column(
@@ -85,6 +124,10 @@ class Trade(PublicIdMixin, TimestampMixin, Base):
     )
 
     def _update_pnl(self) -> None:
+        """Recompute profit_and_loss from the entry price, exit price, position size, and direction.
+
+        Does nothing if the trade has not been closed (exit_price is None).
+        """
         if self.exit_price is None:
             return
 
@@ -99,6 +142,15 @@ class Trade(PublicIdMixin, TimestampMixin, Base):
 def _receive_before_insert(
     _mapper: Mapper[Trade], _connection: Connection, target: Trade
 ) -> None:
+    """Recompute a trade's profit and loss before it is inserted.
+
+    Registered as a SQLAlchemy "before_insert" event listener for Trade.
+
+    Args:
+        _mapper: The SQLAlchemy mapper for Trade, unused.
+        _connection: The active database connection, unused.
+        target: The Trade instance being inserted.
+    """
     target._update_pnl()
 
 
@@ -106,4 +158,13 @@ def _receive_before_insert(
 def _receive_before_update(
     _mapper: Mapper[Trade], _connection: Connection, target: Trade
 ) -> None:
+    """Recompute a trade's profit and loss before it is updated.
+
+    Registered as a SQLAlchemy "before_update" event listener for Trade.
+
+    Args:
+        _mapper: The SQLAlchemy mapper for Trade, unused.
+        _connection: The active database connection, unused.
+        target: The Trade instance being updated.
+    """
     target._update_pnl()

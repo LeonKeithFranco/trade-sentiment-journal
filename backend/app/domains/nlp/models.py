@@ -13,6 +13,21 @@ if TYPE_CHECKING:
 
 
 class SentimentAnalysis(PublicIdMixin, TimestampMixin, Base):
+    """ORM model representing the sentiment analysis of a journal entry.
+
+    Attributes:
+        id: Auto-incremented primary key inherited from Base.
+        public_id: A randomly generated, unique UUID for external references.
+        created_on: The UTC timestamp when the row was inserted.
+        updated_on: The UTC timestamp when the row was last updated.
+        sentiment: The predicted sentiment classification.
+        confidence: The model's confidence in the predicted sentiment,
+            strictly between 0.0 and 1.0.
+        journal_entry_id: The ID of the JournalEntry this analysis was
+            generated from.
+        journal_entry: The associated JournalEntry record.
+    """
+
     __tablename__ = "sentiment_analysis"
 
     __table_args__ = (
@@ -31,10 +46,20 @@ class SentimentAnalysis(PublicIdMixin, TimestampMixin, Base):
 
     @property
     def sentiment(self) -> SentimentEnum:
+        """Get the sentiment classification as a SentimentEnum.
+
+        Returns:
+            SentimentEnum: The parsed sentiment value.
+        """
         return SentimentEnum(self._sentiment)
 
     @sentiment.setter
     def sentiment(self, sentiment: SentimentEnum) -> None:
+        """Set the sentiment classification from a SentimentEnum.
+
+        Args:
+            sentiment: The sentiment value to store.
+        """
         self._sentiment = sentiment.value
 
     confidence: Mapped[float] = mapped_column(

@@ -10,7 +10,25 @@ from app.domains.nlp.schemas import NLPResponse
 
 
 class NLPService:
+    """Service layer for running sentiment analysis on text."""
+
     async def inference(self, text: str) -> NLPResponse:
+        """Run sentiment analysis on a piece of text.
+
+        Tokenizes and maps the text to model input IDs before running
+        inference.
+
+        Args:
+            text: The raw text to analyze.
+
+        Returns:
+            NLPResponse: The predicted sentiment classification and
+                confidence score.
+
+        Raises:
+            EmptyTextError: If the text is empty or reduces to no tokens
+                after preprocessing.
+        """
         processed = process_and_map_sentence(text)
 
         if not processed:

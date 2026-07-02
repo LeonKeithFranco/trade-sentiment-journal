@@ -13,6 +13,23 @@ if TYPE_CHECKING:
 
 
 class JournalEntry(PublicIdMixin, TimestampMixin, Base):
+    """ORM model representing a trader's journal entry for a trade.
+
+    Attributes:
+        id: Auto-incremented primary key inherited from Base.
+        public_id: A randomly generated, unique UUID for external references.
+        created_on: The UTC timestamp when the row was inserted.
+        updated_on: The UTC timestamp when the row was last updated.
+        title: An optional short title for the journal entry.
+        entry: The full text content of the journal entry.
+        user_id: The ID of the User who wrote this entry.
+        trade_id: The ID of the Trade this entry is about.
+        user: The associated User record.
+        trade: The associated Trade record.
+        sentiment_analysis: The SentimentAnalysis record derived from this
+            entry's text, if one has been generated.
+    """
+
     __tablename__ = "journal_entries"
 
     title: Mapped[str | None] = mapped_column(

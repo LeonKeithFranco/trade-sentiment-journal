@@ -12,6 +12,15 @@ from tests.utils import jwt_encode
 
 @pytest.fixture
 def registered_user_response(client: TestClient, default_password: str) -> Response:
+    """Register a default test user and return the raw registration response.
+
+    Args:
+        client: The test client to make requests with.
+        default_password: The password to register with.
+
+    Returns:
+        Response: The raw HTTP response from the registration request.
+    """
     response = client.post(
         "/auth/register", json={"email": "user@test.com", "password": default_password}
     )
@@ -20,7 +29,10 @@ def registered_user_response(client: TestClient, default_password: str) -> Respo
 
 
 class TestRegister:
+    """Integration tests for the POST /auth/register endpoint."""
+
     def test_register_user(self, registered_user_response: Response) -> None:
+        """Verify registering a new user returns the created user without sensitive fields."""
         assert registered_user_response.status_code == status.HTTP_201_CREATED
 
         data = registered_user_response.json()
@@ -37,6 +49,7 @@ class TestRegister:
         registered_user_response: Response,  # included to make sure first user is registered
         default_password: str,
     ) -> None:
+        """Verify registering with an already-used email returns 409 Conflict."""
         response = client.post(
             "/auth/register",
             json={"email": "user@test.com", "password": default_password},
@@ -46,6 +59,7 @@ class TestRegister:
         assert response.json() == {"detail": "User already exists."}
 
     def test_short_password(self, client: TestClient) -> None:
+        """Verify a password under the minimum length returns 422 Unprocessable Content."""
         # under character min but otherwise valid
         short_password = "Password1!"
 
@@ -91,6 +105,7 @@ class TestRegister:
     def test_invalid_password(
         self, invalid_password: str, message: str, client: TestClient
     ) -> None:
+        """Verify each password complexity rule is enforced with the expected error message."""
         response = client.post(
             "/auth/register",
             json={"email": "user@test.com", "password": invalid_password},
@@ -107,12 +122,15 @@ class TestRegister:
 
 
 class TestLogin:
+    """Integration tests for the POST /auth/login endpoint."""
+
     def test_login(
         self,
         client: TestClient,
         registered_user_response: Response,
         default_password: str,
     ) -> None:
+        """Verify logging in with correct credentials returns a valid token pair."""
         response = client.post(
             "/auth/login",
             json={
@@ -134,6 +152,7 @@ class TestLogin:
         client: TestClient,
         registered_user_response: Response,  # included to make sure first user is registered
     ) -> None:
+        """Verify logging in with an unregistered email returns 401 Unauthorized."""
         response = client.post(
             "/auth/login",
             json={
@@ -151,6 +170,7 @@ class TestLogin:
         registered_user_response: Response,
         default_password: str,
     ) -> None:
+        """Verify logging in with an incorrect password returns 401 Unauthorized."""
         response = client.post(
             "/auth/login",
             json={
@@ -164,12 +184,15 @@ class TestLogin:
 
 
 class TestMe:
+    """Integration tests for the GET /auth/me endpoint."""
+
     def test_get_current_user(
         self,
         client: TestClient,
         registered_user_response: Response,
         default_password: str,
     ) -> None:
+        """Verify a valid access token returns the matching authenticated user."""
         login_response = client.post(
             "/auth/login",
             json={
@@ -193,12 +216,14 @@ class TestMe:
         assert data["created_on"] == registered_user_response.json()["created_on"]
 
     def test_no_token(self, client: TestClient) -> None:
+        """Verify a request with no access token returns 401 Unauthorized."""
         response = client.get("/auth/me")
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         assert response.json() == {"detail": "Not authenticated"}
 
     def test_expired_token(self, client: TestClient) -> None:
+        """Verify an expired access token returns 401 Unauthorized."""
         expired_payload = {
             "sub": str(uuid.uuid4()),
             "type": "access",
@@ -215,6 +240,7 @@ class TestMe:
         assert response.json() == {"detail": "Token has expired"}
 
     def test_invalid_token(self, client: TestClient) -> None:
+        """Verify a malformed access token returns 401 Unauthorized."""
         response = client.get(
             "/auth/me", headers={"Authorization": "Bearer not.real.token"}
         )
@@ -223,6 +249,7 @@ class TestMe:
         assert response.json() == {"detail": "Token is invalid"}
 
     def test_not_real_user(self, client: TestClient) -> None:
+        """Verify a well-formed token for a non-existent user returns 401 Unauthorized."""
         payload = {
             "sub": str(uuid.uuid4()),
             "type": "access",
@@ -240,12 +267,15 @@ class TestMe:
 
 
 class TestRefresh:
+    """Integration tests for the POST /auth/refresh endpoint."""
+
     def test_refresh(
         self,
         client: TestClient,
         registered_user_response: Response,
         default_password: str,
     ) -> None:
+        """Verify a valid refresh token returns a new token pair with a rotated refresh token."""
         login_response = client.post(
             "/auth/login",
             json={
@@ -270,6 +300,7 @@ class TestRefresh:
         assert data["token_type"] == "bearer"
 
     def test_not_real_refresh_token(self, client: TestClient) -> None:
+        """Verify an unrecognized refresh token returns 401 Unauthorized."""
         response = client.post(
             "/auth/refresh",
             json={"refresh_token": secrets.token_urlsafe(64)},
@@ -285,6 +316,7 @@ class TestRefresh:
         default_password: str,
         db_engine: Engine,
     ) -> None:
+        """Verify an expired refresh token returns 401 Unauthorized."""
         login_response = client.post(
             "/auth/login",
             json={
@@ -319,6 +351,7 @@ class TestRefresh:
         registered_user_response: Response,
         default_password: str,
     ) -> None:
+        """Verify a refresh token that has already been used once cannot be reused."""
         login_response = client.post(
             "/auth/login",
             json={

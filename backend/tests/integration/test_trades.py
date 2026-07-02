@@ -20,6 +20,8 @@ _CLOSED_AT = (
 
 
 class TestCreateTrade:
+    """Integration tests for the POST /trades endpoint."""
+
     @pytest.mark.parametrize(
         "payload,pnl",
         [
@@ -76,6 +78,7 @@ class TestCreateTrade:
     def test_create_trade(
         self, client: TestClient, access_token: str, payload: dict, pnl: Decimal | None
     ) -> None:
+        """Verify a trade can be created open or closed, with profit and loss computed correctly."""
         response = client.post(
             "/trades",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -107,6 +110,7 @@ class TestCreateTrade:
     def test_add_trade_to_non_existent_user(
         self, client: TestClient, fake_access_token: str
     ) -> None:
+        """Verify creating a trade with an invalid access token returns 401."""
         payload = {
             "ticker": "MAPPL",
             "direction": "LONG",
@@ -155,6 +159,7 @@ class TestCreateTrade:
     def test_closed_at_or_exit_price_one_none(
         self, client: TestClient, access_token: str, payload: dict
     ) -> None:
+        """Verify setting only one of exit_price or closed_at returns a 422 validation error."""
         response = client.post(
             "/trades",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -177,6 +182,7 @@ class TestCreateTrade:
     def test_closed_at_before_opened_at(
         self, client: TestClient, access_token: str
     ) -> None:
+        """Verify creating a trade with closed_at earlier than opened_at returns a 422 error."""
         payload = {
             "ticker": "BSLA",
             "direction": "LONG",
@@ -206,6 +212,7 @@ class TestCreateTrade:
         }
 
     def test_invalid_direction(self, client: TestClient, access_token: str) -> None:
+        """Verify creating a trade with an invalid direction value returns a 422 error."""
         payload = {
             "ticker": "BSLA",
             "direction": "FAKE",
@@ -236,6 +243,7 @@ class TestCreateTrade:
         db_engine: Engine,
         access_token: str,  # here to make sure a use is in the db
     ) -> None:
+        """Verify the database check_direction constraint rejects an invalid direction value."""
         with pytest.raises(IntegrityError):
             with Session(db_engine) as session:
                 query = insert(Trade).values(
@@ -258,6 +266,7 @@ class TestCreateTrade:
         db_engine: Engine,
         access_token: str,  # here to make sure a use is in the db
     ) -> None:
+        """Verify the database check_closed_at_after_opened_at constraint rejects invalid rows."""
         with pytest.raises(IntegrityError):
             with Session(db_engine) as session:
                 query = insert(Trade).values(
@@ -313,6 +322,7 @@ class TestCreateTrade:
         values: dict,
         pnl: Decimal,
     ) -> None:
+        """Verify the before_insert event listener computes profit and loss on direct inserts."""
         with Session(db_engine) as session:
             trade = Trade(**values)
 
@@ -327,7 +337,10 @@ class TestCreateTrade:
 
 
 class TestGetTrade:
+    """Integration tests for the GET /trades endpoints."""
+
     def test_get_trade(self, client: TestClient, access_token: str) -> None:
+        """Verify a created trade can be fetched by its public ID."""
         payload = {
             "ticker": "MAPPL",
             "direction": "LONG",
@@ -357,6 +370,7 @@ class TestGetTrade:
     def test_get_non_existent_trade(
         self, client: TestClient, access_token: str
     ) -> None:
+        """Verify fetching a nonexistent trade returns 404."""
         response = client.get(
             f"/trades/{uuid.uuid4()}",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -368,6 +382,7 @@ class TestGetTrade:
     def test_get_trade_of_another_user(
         self, client: TestClient, access_token: str, other_access_token: str
     ) -> None:
+        """Verify a user cannot fetch another user's trade."""
         payload = {
             "ticker": "MAPPL",
             "direction": "LONG",
@@ -401,6 +416,7 @@ class TestGetTrade:
     def test_get_all(
         self, client: TestClient, access_token: str, num_trades: int
     ) -> None:
+        """Verify GET /trades returns exactly the trades created for the user."""
         payloads = [
             {
                 "ticker": "JOOJL",
@@ -438,6 +454,7 @@ class TestGetTrade:
             assert trade_response_datum == get_all_trade_response_datum
 
     def test_no_trades_get_all(self, client: TestClient, access_token: str) -> None:
+        """Verify GET /trades returns an empty list for a user with no trades."""
         response = client.get(
             "/trades", headers={"Authorization": f"Bearer {access_token}"}
         )
@@ -448,6 +465,7 @@ class TestGetTrade:
     def test_get_all_trade_of_another_user(
         self, client: TestClient, access_token: str, other_access_token: str
     ) -> None:
+        """Verify GET /trades only returns trades belonging to the requesting user."""
         payload = {
             "ticker": "MAPPL",
             "direction": "LONG",
@@ -480,7 +498,10 @@ class TestGetTrade:
 
 
 class TestDeleteTrade:
+    """Integration tests for the DELETE /trades/{id} endpoint."""
+
     def test_delete_trade(self, client: TestClient, access_token: str) -> None:
+        """Verify deleting a trade removes it and subsequent fetches return 404."""
         payload = {
             "ticker": "MAPPL",
             "direction": "LONG",
@@ -516,6 +537,7 @@ class TestDeleteTrade:
     def test_delete_non_existent_trade(
         self, client: TestClient, access_token: str
     ) -> None:
+        """Verify deleting a nonexistent trade returns 404."""
         response = client.delete(
             f"/trades/{uuid.uuid4()}",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -527,6 +549,7 @@ class TestDeleteTrade:
     def test_delete_trade_of_another_user(
         self, client: TestClient, access_token: str, other_access_token: str
     ) -> None:
+        """Verify a user cannot delete another user's trade."""
         payload = {
             "ticker": "MAPPL",
             "direction": "LONG",
@@ -554,6 +577,7 @@ class TestDeleteTrade:
         assert response.json() == {"detail": "Trade(s) does not exist."}
 
     def test_delete_from_multiple(self, client: TestClient, access_token: str) -> None:
+        """Verify deleting one trade leaves the user's other trades intact."""
         payload = {
             "ticker": "MAPPL",
             "direction": "LONG",
@@ -595,6 +619,7 @@ class TestDeleteTrade:
     def test_delete_trade_deletes_all_journal_entries(
         self, client: TestClient, access_token: str
     ) -> None:
+        """Verify deleting a trade cascades to delete its associated journal entries."""
         trade_payload = {
             "ticker": "MAPPL",
             "direction": "LONG",
@@ -650,7 +675,10 @@ class TestDeleteTrade:
 
 
 class TestUpdateTrade:
+    """Integration tests for the PATCH /trades/{id} endpoint."""
+
     def test_update_trade(self, client: TestClient, access_token: str) -> None:
+        """Verify updating a trade's ticker changes only that field and bumps updated_on."""
         create_payload = {
             "ticker": "MAPPL",
             "direction": "LONG",
@@ -700,6 +728,7 @@ class TestUpdateTrade:
         ) > datetime.fromisoformat(create_data["updated_on"])
 
     def test_update_closed_trade(self, client: TestClient, access_token: str) -> None:
+        """Verify updating exit_price and closed_at on a closed trade recomputes profit and loss."""
         create_payload = {
             "ticker": "MAPPL",
             "direction": "LONG",
@@ -830,6 +859,7 @@ class TestUpdateTrade:
         update_payload: dict,
         pnl: Decimal,
     ) -> None:
+        """Verify updating price, position size, or direction recomputes profit and loss correctly."""
         create_response = client.post(
             "/trades",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -859,6 +889,7 @@ class TestUpdateTrade:
     def test_update_closed_at_to_before_opened_at(
         self, client: TestClient, access_token: str, update_payload: dict
     ) -> None:
+        """Verify an update that would put closed_at before opened_at returns a 422 error."""
         create_payload = {
             "ticker": "MAPPL",
             "direction": "LONG",
@@ -902,6 +933,7 @@ class TestUpdateTrade:
     def test_exit_price_closed_at_mismatch(
         self, client: TestClient, access_token: str, update_payload: dict
     ) -> None:
+        """Verify updating only one of exit_price or closed_at on an open trade returns a 422 error."""
         create_payload = {
             "ticker": "MAPPL",
             "direction": "LONG",
@@ -932,6 +964,7 @@ class TestUpdateTrade:
         }
 
     def test_update_direction(self, client: TestClient, access_token: str) -> None:
+        """Verify updating a trade with an invalid direction value returns a 422 error."""
         create_payload = {
             "ticker": "MAPPL",
             "direction": "LONG",
@@ -970,6 +1003,7 @@ class TestUpdateTrade:
     def test_update_non_existent_trade(
         self, client: TestClient, access_token: str
     ) -> None:
+        """Verify updating a nonexistent trade returns 404."""
         response = client.patch(
             f"/trades/{uuid.uuid4()}",
             json={"ticker": "FAKE"},
@@ -982,6 +1016,7 @@ class TestUpdateTrade:
     def test_update_trade_of_another_user(
         self, client: TestClient, access_token: str, other_access_token: str
     ) -> None:
+        """Verify a user cannot update another user's trade."""
         payload = {
             "ticker": "MAPPL",
             "direction": "LONG",

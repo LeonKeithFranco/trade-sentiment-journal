@@ -23,6 +23,19 @@ async def create(
     journal_entry_service: JournalEntryServiceDependency,
     background_tasks: BackgroundTasks,
 ) -> JournalEntryResponse:
+    """Create a new journal entry and schedule sentiment analysis for it.
+
+    Args:
+        journal_entry_create_request: The request body containing the
+            journal entry's title, text, and associated trade.
+        current_user: The authenticated user making the request.
+        journal_entry_service: The injected JournalEntryService instance.
+        background_tasks: FastAPI BackgroundTasks instance used to schedule
+            the deferred sentiment analysis.
+
+    Returns:
+        JournalEntryResponse: The newly created journal entry.
+    """
     journal_entry_response = await journal_entry_service.create(
         journal_entry_create_request, current_user.id
     )
@@ -42,6 +55,16 @@ async def get_all(
     current_user: CurrentUserDependency,
     journal_entry_service: JournalEntryServiceDependency,
 ) -> list[JournalEntryResponse]:
+    """Return all journal entries belonging to the current user.
+
+    Args:
+        current_user: The authenticated user making the request.
+        journal_entry_service: The injected JournalEntryService instance.
+
+    Returns:
+        list[JournalEntryResponse]: All journal entries belonging to the
+            current user.
+    """
     return await journal_entry_service.get_all(current_user.id)
 
 
@@ -51,6 +74,20 @@ async def get(
     current_user: CurrentUserDependency,
     journal_entry_service: JournalEntryServiceDependency,
 ) -> JournalEntryResponse:
+    """Return a single journal entry belonging to the current user.
+
+    Args:
+        journal_entry_public_id: The public ID of the journal entry to fetch.
+        current_user: The authenticated user making the request.
+        journal_entry_service: The injected JournalEntryService instance.
+
+    Returns:
+        JournalEntryResponse: The matching journal entry.
+
+    Raises:
+        JournalEntryDoesNotExistError: If no journal entry with that public
+            ID exists for the current user.
+    """
     return await journal_entry_service.get(journal_entry_public_id, current_user.id)
 
 
@@ -60,6 +97,18 @@ async def delete(
     current_user: CurrentUserDependency,
     journal_entry_service: JournalEntryServiceDependency,
 ) -> None:
+    """Delete a journal entry belonging to the current user.
+
+    Args:
+        journal_entry_public_id: The public ID of the journal entry to
+            delete.
+        current_user: The authenticated user making the request.
+        journal_entry_service: The injected JournalEntryService instance.
+
+    Raises:
+        JournalEntryDoesNotExistError: If no journal entry with that public
+            ID exists for the current user.
+    """
     await journal_entry_service.delete(journal_entry_public_id, current_user.id)
 
 
@@ -70,6 +119,23 @@ async def update(
     current_user: CurrentUserDependency,
     journal_entry_service: JournalEntryServiceDependency,
 ) -> JournalEntryResponse:
+    """Update a journal entry belonging to the current user.
+
+    Args:
+        journal_entry_public_id: The public ID of the journal entry to
+            update.
+        journal_entry_update_request: The fields to update on the journal
+            entry.
+        current_user: The authenticated user making the request.
+        journal_entry_service: The injected JournalEntryService instance.
+
+    Returns:
+        JournalEntryResponse: The updated journal entry.
+
+    Raises:
+        JournalEntryDoesNotExistError: If no journal entry with that public
+            ID exists for the current user.
+    """
     return await journal_entry_service.update(
         journal_entry_update_request, journal_entry_public_id, current_user.id
     )

@@ -19,6 +19,16 @@ async def create(
     current_user: CurrentUserDependency,
     trade_service: TradeServiceDependency,
 ) -> TradeResponse:
+    """Create a new trade for the current user.
+
+    Args:
+        trade_request: The request body containing the trade's details.
+        current_user: The authenticated user making the request.
+        trade_service: The injected TradeService instance.
+
+    Returns:
+        TradeResponse: The newly created trade.
+    """
     return await trade_service.create(trade_request, current_user.id)
 
 
@@ -26,6 +36,15 @@ async def create(
 async def get_all(
     current_user: CurrentUserDependency, trade_service: TradeServiceDependency
 ) -> list[TradeResponse]:
+    """Return all trades belonging to the current user.
+
+    Args:
+        current_user: The authenticated user making the request.
+        trade_service: The injected TradeService instance.
+
+    Returns:
+        list[TradeResponse]: All trades belonging to the current user.
+    """
     return await trade_service.get_all(current_user.id)
 
 
@@ -35,6 +54,20 @@ async def get(
     current_user: CurrentUserDependency,
     trade_service: TradeServiceDependency,
 ) -> TradeResponse:
+    """Return a single trade belonging to the current user.
+
+    Args:
+        trade_public_id: The public ID of the trade to fetch.
+        current_user: The authenticated user making the request.
+        trade_service: The injected TradeService instance.
+
+    Returns:
+        TradeResponse: The matching trade.
+
+    Raises:
+        TradeDoesNotExistError: If no trade with that public ID exists for
+            the current user.
+    """
     return await trade_service.get(trade_public_id, current_user.id)
 
 
@@ -44,6 +77,17 @@ async def delete(
     current_user: CurrentUserDependency,
     trade_service: TradeServiceDependency,
 ) -> None:
+    """Delete a trade belonging to the current user.
+
+    Args:
+        trade_public_id: The public ID of the trade to delete.
+        current_user: The authenticated user making the request.
+        trade_service: The injected TradeService instance.
+
+    Raises:
+        TradeDoesNotExistError: If no trade with that public ID exists for
+            the current user.
+    """
     await trade_service.delete(trade_public_id, current_user.id)
 
 
@@ -54,6 +98,25 @@ async def update(
     current_user: CurrentUserDependency,
     trade_service: TradeServiceDependency,
 ) -> TradeResponse:
+    """Update a trade belonging to the current user.
+
+    Args:
+        trade_public_id: The public ID of the trade to update.
+        trade_update_request: The fields to update on the trade.
+        current_user: The authenticated user making the request.
+        trade_service: The injected TradeService instance.
+
+    Returns:
+        TradeResponse: The updated trade.
+
+    Raises:
+        TradeDoesNotExistError: If no trade with that public ID exists for
+            the current user.
+        ClosedAtBeforeOpenedAtError: If the update would set closed_at
+            earlier than opened_at.
+        TradeClosedFieldsMismatchError: If the update would leave exit_price
+            and closed_at inconsistent (one set without the other).
+    """
     return await trade_service.update(
         trade_update_request, trade_public_id, current_user.id
     )

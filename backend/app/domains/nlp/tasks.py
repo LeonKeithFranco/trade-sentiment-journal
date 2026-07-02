@@ -10,6 +10,20 @@ from app.models import SentimentAnalysis
 async def analyze_and_store_journal_entry_sentiment(
     journal_entry_public_id: uuid.UUID, user_id: int, text: str
 ) -> None:
+    """Background-task entry point for analyzing and persisting journal entry sentiment.
+
+    Creates its own database session so it can run independently of the
+    request that scheduled it. Intended to be passed to FastAPI's
+    BackgroundTasks. Silently returns if the journal entry no longer exists,
+    the text is empty, or any other error occurs, since this runs outside
+    the request/response cycle and has no caller to report failures to.
+
+    Args:
+        journal_entry_public_id: The public ID of the journal entry to
+            analyze.
+        user_id: The ID of the user the journal entry must belong to.
+        text: The journal entry's text content to run sentiment analysis on.
+    """
     try:
         async with AsyncSessionFactory() as session:
             nlp_response = await NLPService().inference(text)
