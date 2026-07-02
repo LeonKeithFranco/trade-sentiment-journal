@@ -7,6 +7,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class _DbSettings(BaseModel):
+    """Database connection settings loaded from environment variables.
+
+    Attributes:
+        host: The database server hostname.
+        user: The database username.
+        password: The database password.
+        name: The database name.
+        port: The database server port.
+    """
+
     host: str = "localhost"
     user: str
     password: str
@@ -16,6 +26,11 @@ class _DbSettings(BaseModel):
     @computed_field
     @property
     def url(self) -> PostgresDsn:
+        """Build the async PostgreSQL DSN from the individual connection settings.
+
+        Returns:
+            PostgresDSN: The fully assembled connection URL using the asyncpg driver.
+        """
         return PostgresDsn(
             MultiHostUrl.build(
                 scheme="postgresql+asyncpg",
@@ -29,11 +44,27 @@ class _DbSettings(BaseModel):
 
 
 class _AppSettings(BaseModel):
+    """General application settings.
+
+    Attributes:
+        name: The display name of the application.
+        debug: Wether to enable debug mode.
+    """
+
     name: str = "App Name"
     debug: bool = True
 
 
 class _SecuritySettings(BaseModel):
+    """Settings controlling password hashing and JWT token behaviour.
+
+    Attributes:
+        pepper_secret: The secret pepper appended to passwords before hashing.
+        token_secret: The secret key used to sign JTW tokens.
+        access_token_expire_minutes: The number of minutes before and acces token expires.
+        refresh_token_expire_days: The number of days before a refresh token expires.
+    """
+
     pepper_secret: str = Field(
         min_length=32,
     )
@@ -49,6 +80,14 @@ class _SecuritySettings(BaseModel):
 
 
 class _Settings(BaseSettings):
+    """Backend application settings loaded from environment variables of .env.
+
+    Attributes:
+        db: Database connection settings.
+        app: General application settings.
+        security: Password hashing and token settings.
+    """
+
     model_config = SettingsConfigDict(
         env_file=[
             Path(__file__).parent.parent.parent.parent / ".env",
@@ -68,4 +107,9 @@ class _Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> _Settings:
+    """Return the cached application settings singleton.
+
+    Returns:
+        _Settings: The backend settings instance.
+    """
     return _Settings()
