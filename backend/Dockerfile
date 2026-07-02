@@ -10,7 +10,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock .python-version ./
 COPY backend/pyproject.toml backend/pyproject.toml
 COPY frontend/pyproject.toml frontend/pyproject.toml
-COPY dl/pyproject.toml ml/pyproject.toml
+COPY dl/pyproject.toml dl/pyproject.toml
 
 RUN uv sync --frozen --no-dev --package backend
 
