@@ -26,6 +26,8 @@ services:
     env_file:
       - .env
       - backend/.env
+    environment:
+      - DB__HOST=db
     command: ["alembic", "upgrade", "head"]
     depends_on:
       db:
@@ -40,6 +42,8 @@ services:
     env_file:
       - .env
       - backend/.env
+    environment:
+      - DB__HOST=db
     depends_on:
       - migrate
       - db
