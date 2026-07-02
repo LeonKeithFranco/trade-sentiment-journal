@@ -59,8 +59,7 @@ services:
     env_file:
       - frontend/.env
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
 
 volumes:
   pg_data:
