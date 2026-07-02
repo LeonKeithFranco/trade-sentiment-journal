@@ -8,9 +8,8 @@ COPY --from=uv /uv /usr/local/bin/uv
 WORKDIR /app
 
 COPY pyproject.toml uv.lock .python-version ./
-COPY backend/pyproject.toml backend/pyproject.toml
-COPY frontend/pyproject.toml frontend/pyproject.toml
-COPY dl/pyproject.toml dl/pyproject.toml
+COPY backend/ backend/
+COPY dl/ dl/
 
 RUN uv sync --frozen --no-dev --package backend
 
