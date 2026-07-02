@@ -11,15 +11,36 @@ from app.domains.analytics.schemas import (
 
 
 class AnalyticService:
+    """Service layer for computing sentiment-vs-performance analytics.
+
+    Attributes:
+        analytic_repo: The repository used for database access.
+    """
+
     def __init__(
         self,
         analytic_repo: AnalyticRepoDependency,
     ) -> None:
+        """Initialize the service with an injected analytic repository.
+
+        Args:
+            analytic_repo: The AnalyticRepository instance, provided by
+                FastAPI's dependency injection.
+        """
         self.analytic_repo: AnalyticRepository = analytic_repo
 
     async def get_sentiment_vs_returns(
         self, user_id: int
     ) -> list[SentimentVsReturnResponse]:
+        """Compute a user's closed-trade profit and loss grouped by sentiment.
+
+        Args:
+            user_id: The ID of the user whose trades to aggregate.
+
+        Returns:
+            list[SentimentVsReturnResponse]: One entry per sentiment value,
+                with count, average, and total profit and loss.
+        """
         results = await self.analytic_repo.get_sentiment_vs_returns(user_id)
 
         return [
@@ -35,6 +56,16 @@ class AnalyticService:
     async def get_confidence_breakdown(
         self, user_id: int
     ) -> list[ConfidenceBreakdownResponse]:
+        """Compute a user's closed-trade profit and loss grouped by confidence bucket.
+
+        Args:
+            user_id: The ID of the user whose trades to aggregate.
+
+        Returns:
+            list[ConfidenceBreakdownResponse]: One entry per confidence
+                bucket (low, medium, high), with count, average, and total
+                profit and loss.
+        """
         results = await self.analytic_repo.get_confidence_breakdown(user_id)
 
         return [
