@@ -45,8 +45,10 @@ services:
     environment:
       - DB__HOST=db
     depends_on:
-      - migrate
-      - db
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   frontend:
     build:
@@ -57,7 +59,8 @@ services:
     env_file:
       - frontend/.env
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
 volumes:
   pg_data:
