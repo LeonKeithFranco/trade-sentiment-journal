@@ -19,16 +19,6 @@ services:
       retries: 5
       start_period: 30s
 
-  backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-    ports:
-      - "8000:8000"
-    environment:
-      - APP_NAME=Trade Sentiment Journal
-      - APP_DEBUG=false
-
   migrate:
     build:
       context: .
@@ -39,6 +29,19 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=Trade Sentiment Journal
+      - APP_DEBUG=false
+    depends_on:
+      - migrate
+      - db
 
   frontend:
     build:
