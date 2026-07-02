@@ -36,9 +36,8 @@ services:
       dockerfile: backend/Dockerfile
     ports:
       - "8000:8000"
-    environment:
-      - APP__NAME=Trade Sentiment Journal
-      - APP__DEBUG=false
+    env_file:
+      - backend/.env
     depends_on:
       - migrate
       - db
@@ -49,10 +48,8 @@ services:
       dockerfile: frontend/Dockerfile
     ports:
       - "8501:8501"
-    environment:
-      - APP__NAME=Trade Sentiment Journal
-      - API__BASE_URL=http://backend:8000
-      - API__TIMEOUT=60.0
+    env_file:
+      - frontend/.env
     depends_on:
       - backend
 
