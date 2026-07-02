@@ -6,16 +6,37 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class _AppSettings(BaseModel):
+    """General frontend application settings.
+
+    Attributes:
+        name: The display name of the application.
+        debug: Whether to enable debug mode.
+    """
+
     name: str = "App Name"
     debug: bool = True
 
 
 class _APISettings(BaseModel):
+    """Settings for connecting to the backend API.
+
+    Attributes:
+        base_url: The base URL of the backend API.
+        time_out: The request timeout in seconds.
+    """
+
     base_url: str
     time_out: float = 30.0
 
 
 class _Settings(BaseSettings):
+    """Frontend application settings loaded from environment variables or .env.
+
+    Attributes:
+        app: General application settings.
+        api: Backend API connection settings.
+    """
+
     model_config = SettingsConfigDict(
         env_file=[
             Path(__file__).parent.parent.parent.parent / ".env",
@@ -34,4 +55,9 @@ class _Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> _Settings:
+    """Return the cached application settings singleton.
+
+    Returns:
+        _Settings: The frontend settings instance.
+    """
     return _Settings()
