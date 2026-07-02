@@ -10,6 +10,16 @@ DATASET_NAME = "lmassaron/FinancialPhraseBank"
 
 
 def get_dataset() -> DatasetDict:
+    """Load the Financial PhraseBank dataset, preprocessing and caching it on first use.
+
+    If a cached, preprocessed copy exists on disk, it is loaded directly.
+    Otherwise, the raw dataset is downloaded, its sentences are preprocessed,
+    and the result is saved to disk for subsequent calls.
+
+    Returns:
+        DatasetDict: The preprocessed Financial PhraseBank dataset, split
+            into its train/validation/test partitions.
+    """
     if constants.FINANCIAL_PHRASE_BANK_FOLDER_PATH.exists():
         full_dataset = load_from_disk(constants.FINANCIAL_PHRASE_BANK_FOLDER_PATH)
     else:

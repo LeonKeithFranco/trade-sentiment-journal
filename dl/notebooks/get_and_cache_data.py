@@ -36,6 +36,11 @@ def _(constants):
 @app.cell
 def _(full_dataset):
     def get_train_vocab() -> set[str]:
+        """Collect the set of unique tokens appearing in the training split.
+
+        Returns:
+            set[str]: The distinct tokens found in the training sentences.
+        """
         train_vocab = set()
 
         for data in full_dataset["train"]:
@@ -50,6 +55,12 @@ def _(full_dataset):
 @app.cell
 def _(glove_file_contents):
     def get_glove_words() -> set[str]:
+        """Collect the set of words that have a pre-trained GloVe embedding.
+
+        Returns:
+            set[str]: The distinct words present in the GloVe embeddings
+                file.
+        """
         glove_words = set()
 
         for line in glove_file_contents:
@@ -63,6 +74,16 @@ def _(glove_file_contents):
 @app.cell
 def _(constants, get_glove_words, get_train_vocab, json):
     def get_vocab_mapping() -> dict[str, int]:
+        """Build and persist the token-to-vocabulary-index mapping.
+
+        Restricts the vocabulary to tokens that appear in both the training
+        data and the GloVe embeddings, reserving indices 0-2 for the
+        "<PAD>", "<UNK>", and "<NUM>" special tokens. Saves the resulting
+        mapping to disk as JSON.
+
+        Returns:
+            dict[str, int]: The token-to-index mapping.
+        """
         vocab = get_train_vocab() & get_glove_words()
 
         vocab_mapping = {
@@ -96,6 +117,17 @@ def _(NDArray, constants, glove_file_contents, np, random, vocab_mapping):
     EXPECTED_GLOVE_EMBEDDING_LENGTH = 100
 
     def get_matrix_embeddings() -> NDArray[np.float32]:
+        """Build and persist the embedding matrix for the model's vocabulary.
+
+        Assembles a matrix with one row per vocabulary index: a zero vector
+        for the padding token, random vectors for the unknown and number
+        special tokens, and the corresponding GloVe vector for every other
+        word. Saves the resulting matrix to disk as a numpy array.
+
+        Returns:
+            NDArray[np.float32]: The embedding matrix, with one row per
+                vocabulary entry.
+        """
         random.seed(42)
 
         vectors = [[] for _ in range(len(vocab_mapping))]

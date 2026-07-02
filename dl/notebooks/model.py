@@ -48,7 +48,21 @@ def _(get_dataset):
 @app.cell
 def _(datasets, map_sentence, torch):
     class SentenceDataset(torch.utils.data.Dataset):
+        """A PyTorch Dataset wrapping mapped sentences and their sentiment labels.
+
+        Attributes:
+            mapped_sentences: The tokenized sentences, converted to
+                vocabulary-index tensors.
+            labels: The sentiment class label for each sentence.
+        """
+
         def __init__(self, dataset: datasets.arrow_dataset.Dataset) -> None:
+            """Convert a raw dataset split into tensors of mapped sentences and labels.
+
+            Args:
+                dataset: A dataset split with "sentence" (preprocessed text)
+                    and "label" (integer class) columns.
+            """
             self.mapped_sentences: list[torch.Tensor] = [
                 torch.tensor(map_sentence(data["sentence"]), dtype=torch.long)
                 for data in dataset
@@ -58,9 +72,22 @@ def _(datasets, map_sentence, torch):
             ]
 
         def __len__(self) -> int:
+            """Return the number of examples in the dataset.
+
+            Returns:
+                int: The number of examples.
+            """
             return len(self.labels)
 
         def __getitem__(self, i: int) -> tuple[torch.Tensor, torch.Tensor]:
+            """Return the mapped sentence and label at a given index.
+
+            Args:
+                i: The index of the example to retrieve.
+
+            Returns:
+                tuple: A tuple of (mapped_sentence, label) tensors.
+            """
             return self.mapped_sentences[i], self.labels[i]
 
     return (SentenceDataset,)
@@ -79,6 +106,19 @@ def _(torch):
     def collate(
         batch: list[tuple[torch.Tensor, torch.Tensor]],
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Pad a batch of variable-length sequences for use with a DataLoader.
+
+        Args:
+            batch: A list of (mapped_sentence, label) tuples of varying
+                sequence lengths.
+
+        Returns:
+            tuple: A tuple of (padded_sequences, labels, true_lengths),
+                where padded_sequences is a single tensor with all
+                sequences padded to the batch's max length, labels is a
+                stacked tensor of the batch's labels, and true_lengths
+                records each sequence's original length before padding.
+        """
         max_length = max(len(data) for data, _ in batch)
 
         padded_batch = []
@@ -133,6 +173,18 @@ def _(DataLoader, EpochResults, Optimizer, device, nn):
         criterion: nn.CrossEntropyLoss,
         optimizer: Optimizer,
     ) -> EpochResults:
+        """Run one training epoch, updating the model's weights.
+
+        Args:
+            model: The model to train.
+            dataloader: The DataLoader providing training batches.
+            criterion: The loss function to optimize.
+            optimizer: The optimizer used to update the model's weights.
+
+        Returns:
+            EpochResults: The average loss and per-example predictions and
+                labels for the epoch.
+        """
         model.train()
 
         results = EpochResults()
@@ -164,6 +216,17 @@ def _(DataLoader, EpochResults, device, nn, torch):
     def validation_epoch(
         model: nn.Module, dataloader: DataLoader, criterion: nn.CrossEntropyLoss
     ) -> EpochResults:
+        """Run one evaluation epoch without updating the model's weights.
+
+        Args:
+            model: The model to evaluate.
+            dataloader: The DataLoader providing evaluation batches.
+            criterion: The loss function to compute.
+
+        Returns:
+            EpochResults: The average loss and per-example predictions and
+                labels for the epoch.
+        """
         model.eval()
 
         results = EpochResults()
@@ -191,6 +254,14 @@ def _(DataLoader, EpochResults, device, nn, torch):
 @app.cell
 def _(classification_report, confusion_matrix, constants):
     def print_metrics(predictions: list[int], labels: list[int], split: str) -> None:
+        """Print a classification report and confusion matrix for a set of predictions.
+
+        Args:
+            predictions: The model's predicted class for each example.
+            labels: The true class for each example.
+            split: A label for the dataset split being reported (e.g.
+                "Train", "Validation", "Test"), used in the printed headers.
+        """
         print(f"===== {split} Classification Report =====")
         print(
             classification_report(
@@ -212,6 +283,15 @@ def _(classification_report, confusion_matrix, constants):
 @app.cell
 def _(constants, device, torch, train_dataset):
     def compute_class_weights() -> torch.Tensor:
+        """Compute inverse-frequency class weights for the training set's loss function.
+
+        Uses Laplace-smoothed counts (starting from 1 per class) to avoid
+        division by zero for absent classes.
+
+        Returns:
+            torch.Tensor: The normalized per-class weights, moved to the
+                active device.
+        """
         num_classes = len(constants.CLASSES)
         counts = torch.ones(num_classes)
 
@@ -270,6 +350,20 @@ def _(
         criterion: nn.CrossEntropyLoss,
         num_epochs=16,
     ) -> None:
+        """Train a model for a fixed number of epochs, saving the best checkpoint.
+
+        Runs a training and validation epoch per iteration, printing loss
+        and classification metrics for both after every epoch. Tracks the
+        lowest validation loss seen and persists the corresponding model
+        weights to disk once training completes.
+
+        Args:
+            model: The model to train.
+            optimizer: The optimizer used to update the model's weights.
+            scheduler: The learning rate scheduler, stepped once per epoch.
+            criterion: The loss function to optimize.
+            num_epochs: The number of epochs to train for. Defaults to 16.
+        """
         model.to(device)
 
         best_val_loss = float("inf")
