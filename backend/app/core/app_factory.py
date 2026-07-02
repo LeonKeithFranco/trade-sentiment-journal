@@ -9,6 +9,15 @@ from app.routes import routers
 
 
 def create_app() -> FastAPI:
+    """Create and configure the FastAPI application instance.
+
+
+    Attaches the applications exception handlers, registers all domain routers, and adds
+    a health-check endpoint that verifies the database connectivity.
+
+    Returns:
+        FastAPI: The fully configured application instance.
+    """
     app = FastAPI(lifespan=lifespan)
 
     attach_exception_handlers(app)
