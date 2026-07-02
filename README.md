@@ -69,6 +69,8 @@ Session state in Streamlit is tied to the browser tab. Close the tab clears it; 
 
 ## API
 
+`GET /health` is a basic liveness check, registered directly on the app rather than under any domain.
+
 ### Auth
  
 | Endpoint | Method | Description |
@@ -76,6 +78,7 @@ Session state in Streamlit is tied to the browser tab. Close the tab clears it; 
 | `/auth/register` | POST | Create a user account |
 | `/auth/login` | POST | Exchange email/password for an access + refresh token pair |
 | `/auth/refresh` | POST | Exchange a refresh token for a new token pair |
+| `/auth/me` | GET | Fetch the current authenticated user |
 
 ### Trades
  
@@ -83,6 +86,9 @@ Session state in Streamlit is tied to the browser tab. Close the tab clears it; 
 |---|---|---|
 | `/trades` | POST | Log a trade (ticker, direction, size, entry price, and optionally exit price/closed_at for a closed trade) |
 | `/trades` | GET | List the current user's trades |
+| `/trades/{trade_public_id}` | GET | Fetch a single trade |
+| `/trades/{trade_public_id}` | PATCH | Update a trade (e.g. close an open trade by setting exit_price and closed_at) |
+| `/trades/{trade_public_id}` | DELETE | Delete a trade |
  
 P&L is computed automatically on insert/update via a SQLAlchemy event listener, direction-aware (long vs. short), and only populated once a trade is closed.
 
@@ -92,6 +98,9 @@ P&L is computed automatically on insert/update via a SQLAlchemy event listener, 
 |---|---|---|
 | `/journal-entries` | POST | Create a journal entry tied to a trade. Triggers background sentiment analysis. |
 | `/journal-entries` | GET | List the current user's journal entries |
+| `/journal-entries/{journal_entry_public_id}` | GET | Fetch a single journal entry |
+| `/journal-entries/{journal_entry_public_id}` | PATCH | Update a journal entry |
+| `/journal-entries/{journal_entry_public_id}` | DELETE | Delete a journal entry |
 
 ### NLP
  
@@ -166,13 +175,14 @@ Reported on the held-out test set, evaluated once, after the model was frozen:
  
 **Known limitations (v1):**
  
-- The Streamlit frontend has no trade-editing flow, even though the backend supports it (`PATCH /trades/{trade_public_id}`). Trades can be created (open or already closed) but not updated afterward through the UI, so a trade logged as open through the frontend has no way to be closed there once created
+- The Streamlit frontend has no edit or delete flow for trades or journal entries, even though the backend supports both (`PATCH`/`DELETE` on `/trades/{trade_public_id}` and `/journal-entries/{journal_entry_public_id}`). Both can only be created and listed through the UI, so a trade logged as open through the frontend has no way to be closed there once created, and neither trades nor journal entries can be corrected or removed without going around the frontend
 - No CI/CD pipeline. A Dockerized deployment exists and has been verified to boot end-to-end via Podman Compose, but there's no GitHub Actions workflow and no live deployment
 - No structured logging. Background task failures currently go to stdout via `print`, which is workable locally but not something you'd want in a real deployment
 - Model artifacts are not part of the repository or the CI story; anyone building the Docker image needs the trained weights locally first
 
 **v2 extensions:**
  
+- Edit and delete flows in the Streamlit frontend for trades and journal entries
 - Trade tags and watchlists
 - CI via GitHub Actions, and a live deployment (Fly.io or similar)
 - Project-wide structured logging, starting with the background sentiment task
