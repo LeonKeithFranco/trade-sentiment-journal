@@ -30,7 +30,7 @@ class AnalyticRepository(Repository):
         """Initialize the repository with a database session.
 
         Args:
-            db: An async SQLAlchemy session, provided by the FastAPI's dependency
+            db: An async SQLAlchemy session, provided by FastAPI's dependency
             injection via get_db.
         """
         super().__init__(db)
@@ -80,7 +80,7 @@ class AnalyticRepository(Repository):
             user_id: The ID of the user whose trades to aggregate.
 
         Returns:
-            list[RowMapping]: One row per confdience bucket, each containing count,
+            list[RowMapping]: One row per confidence bucket, each containing count,
             avg_pnl, and total_pnl.
         """
         return await self._aggregate_helper(user_id, SentimentAnalysis._sentiment)

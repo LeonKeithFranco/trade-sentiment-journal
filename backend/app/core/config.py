@@ -48,7 +48,7 @@ class _AppSettings(BaseModel):
 
     Attributes:
         name: The display name of the application.
-        debug: Wether to enable debug mode.
+        debug: Whether to enable debug mode.
     """
 
     name: str = "App Name"
@@ -60,8 +60,8 @@ class _SecuritySettings(BaseModel):
 
     Attributes:
         pepper_secret: The secret pepper appended to passwords before hashing.
-        token_secret: The secret key used to sign JTW tokens.
-        access_token_expire_minutes: The number of minutes before and acces token expires.
+        token_secret: The secret key used to sign JWT tokens.
+        access_token_expire_minutes: The number of minutes before an access token expires.
         refresh_token_expire_days: The number of days before a refresh token expires.
     """
 
@@ -80,7 +80,7 @@ class _SecuritySettings(BaseModel):
 
 
 class _Settings(BaseSettings):
-    """Backend application settings loaded from environment variables of .env.
+    """Backend application settings loaded from environment variables or .env.
 
     Attributes:
         db: Database connection settings.

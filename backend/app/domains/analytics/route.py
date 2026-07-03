@@ -39,6 +39,6 @@ async def get_confidence_breakdown(
 
     Returns:
         list[ConfidenceBreakdownResponse]: One entry per confidence bucket (low, medium,
-        high), with count, average, and total profict and loss.
+        high), with count, average, and total profit and loss.
     """
     return await analytic_service.get_confidence_breakdown(current_user.id)

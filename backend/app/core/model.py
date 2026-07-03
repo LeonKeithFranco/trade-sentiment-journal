@@ -31,7 +31,7 @@ def _inference_runner(model: nn.Module, input_: list[int]) -> tuple[str, float]:
     """Run a single forward pass of the sentiment model on a tokenized sequence.
 
     Wraps the token sequence as a batch of one, runs it through the model, and converts
-    the resultings logits into a predicted class label and confidence score.
+    the resulting logits into a predicted class label and confidence score.
 
     Args:
         model: The sentiment classification model to run inference with.
@@ -61,7 +61,7 @@ def _inference_runner(model: nn.Module, input_: list[int]) -> tuple[str, float]:
 async def model_inference(input_: list[int]) -> tuple[str, float]:
     """Run sentiment inference on a tokenized sequence without blocking the event loop.
 
-    Delegates to the synchronouce inference runner in a separate thread.
+    Delegates to the synchronous inference runner in a separate thread.
 
     Args:
         input_: The tokenized input sequence, as a list of vocabulary indices.

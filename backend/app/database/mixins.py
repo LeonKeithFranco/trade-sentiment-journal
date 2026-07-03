@@ -12,7 +12,7 @@ class PublicIdMixin:
     externally.
 
     Attributes:
-        publid_id: A randomly generated, unique UUID for externam references.
+        public_id: A randomly generated, unique UUID for external references.
     """
 
     public_id: Mapped[uuid.UUID] = mapped_column(
@@ -26,7 +26,7 @@ class TimestampMixin:
 
     Attributes:
         created_on: The UTC timestamp when the row was inserted, set by the database.
-        updated_on: The UTC timestamp when the raw was last updated, set by the database
+        updated_on: The UTC timestamp when the row was last updated, set by the database
             and refreshed automatically on update.
     """
 

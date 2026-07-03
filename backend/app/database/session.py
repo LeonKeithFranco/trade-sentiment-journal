@@ -27,7 +27,7 @@ AsyncSessionFactory = async_sessionmaker(
 async def get_db() -> AsyncIterator[AsyncSession]:
     """Yield an async SQLAlchemy session for the duration of a request.
 
-    Used as a FastAPI dependency. The session is automatically clased when the request
+    Used as a FastAPI dependency. The session is automatically closed when the request
     completes.
 
     Yields:

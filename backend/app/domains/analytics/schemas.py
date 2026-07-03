@@ -10,7 +10,7 @@ class AnalyticBase(BaseModel):
 
     Attributes:
         entry_count: The number of trades in this group.
-        average_pnl: The average profict and loss accross trades in this group.
+        average_pnl: The average profit and loss across trades in this group.
         total_pnl: The total profit and loss across trades in this group.
     """
 
@@ -23,14 +23,14 @@ class SentimentVsReturnResponse(AnalyticBase):
     """Pydantic response model for the GET /analytics/sentiment-vs-returns endpoint.
 
     Attributes:
-        sentiement: The journal sentiment value this groups stats corresponds to.
+        sentiment: The journal sentiment value this group's stats correspond to.
     """
 
     sentiment: SentimentEnum
 
 
 class ConfidenceBreakdownResponse(AnalyticBase):
-    """Pydantic reponse model for the GET /analytics/confidence-breakdown endpoint.
+    """Pydantic response model for the GET /analytics/confidence-breakdown endpoint.
 
     Attributes:
         confidence_band: The sentiment confidence bucket ("low", "medium", or "high") this
