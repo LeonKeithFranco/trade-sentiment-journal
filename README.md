@@ -15,11 +15,6 @@ Traders keep journals but rarely go back and check whether what they _felt_ abou
 - Streamlit + Plotly
 - Podman Compose
 
-## Repository layout
-
-- `trade-sentiment-journal/`: the application, a uv workspace containing `backend/`, `dl/` and `frontend/`, plus `podman-compose.yaml`. All paths and commands below are relative to this folder unless stated otherwise.
-- `ui-tests/`: a Playwright project scaffold for future end-to-end UI tests. It contains configuration only; no tests have been written yet.
-
 ## Architecture
 
 The project is split into three uv workspace members:
@@ -59,9 +54,9 @@ Both notebooks place their outputs in `dl/data/`. Once all three artifacts exist
 
 ### Podman Compose
 
-1. Clone the repo and `cd trade-sentiment-journal`
+1. Clone the repo
 2. Ensure `dl/data/` contains the three model artifacts as specified above
-3. Create `.env` files in `trade-sentiment-journal/`, `backend/`, and `frontend/` based off of the corresponding `.env.template`, filling in with real values. Generate your own values for `SECURITY__PEPPER_SECRET` and `SECURITY__TOKEN_SECRET` rather than reusing the template's (e.g. `python -c "import secrets; print(secrets.token_urlsafe(64))"`). For Compose, set `API__BASE_URL=http://backend:8000` in `frontend/.env`; the template's `127.0.0.1` only works when running the frontend outside a container
+3. Create `.env` files at the root, `backend/`, and `frontend/` based off of the corresponding `.env.template`, filling in with real values. Generate your own values for `SECURITY__PEPPER_SECRET` and `SECURITY__TOKEN_SECRET` rather than reusing the template's (e.g. `python -c "import secrets; print(secrets.token_urlsafe(64))"`). For Compose, set `API__BASE_URL=http://backend:8000` in `frontend/.env`; the template's `127.0.0.1` only works when running the frontend outside a container
 4. Build and run the containers: `podman-compose up --build`
 5. Open the frontend at `http://localhost:8501`. The backend is at `http://localhost:8000`, with interactive docs at `/docs`
 
@@ -165,7 +160,7 @@ Reported on the held-out test set, evaluated once, after the model was frozen:
 
 ### Running tests
 
-The tests need the model artifacts in `dl/data/` (the DL tests check token indices against `vocab_mapping.json`, and the backend loads the model at startup), the `.env` files in `trade-sentiment-journal/` and `backend/` (settings are loaded at import), and Podman or Docker running for `testcontainers`.
+The tests need the model artifacts in `dl/data/` (the DL tests check token indices against `vocab_mapping.json`, and the backend loads the model at startup), the `.env` files at the root and in `backend/` (settings are loaded at import), and Podman or Docker running for `testcontainers`.
 
 - All backend tests: `cd backend && uv run pytest`
 - All dl tests: `cd dl && uv run pytest`
