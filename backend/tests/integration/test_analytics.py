@@ -59,6 +59,7 @@ def seed_db(
         entry_pos.entry = "I am very bullish about this obviously winning trade."
         entry_pos.user_id = user.id
         entry_pos.trade_id = trade_win.id
+        entry_pos.created_on = datetime(2026, 1, 1, tzinfo=UTC)
 
         entry_neg = JournalEntry()
         entry_neg.title = "Loss Entry"
@@ -67,6 +68,7 @@ def seed_db(
         )
         entry_neg.user_id = user.id
         entry_neg.trade_id = trade_loss.id
+        entry_neg.created_on = datetime(2026, 1, 3, tzinfo=UTC)
 
         session.add_all((entry_pos, entry_neg))
         session.flush()
