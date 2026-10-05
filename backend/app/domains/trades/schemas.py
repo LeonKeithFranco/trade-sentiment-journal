@@ -206,6 +206,26 @@ class TradeUpdateRequest(BaseModel):
         """
         return v.astimezone(UTC) if v is not None else None
 
+    @field_validator("ticker", "direction", "position_size", "entry_price", "opened_at")
+    @classmethod
+    def reject_explicitly_set_null(cls, v):
+        """Reject an explicit null for fields the database requires.
+
+        Only runs on values present in the request; omitted fields keep their
+        default and skip validation, so leaving a field out still means
+        "unchanged".
+
+        Raises:
+            ValueError: If the field was sent as null.
+        """
+        if v is None:
+            raise ValueError(
+                "should not be explicitly set to null; "
+                "omit the field to leave it unchanged"
+            )
+
+        return v
+
 
 class TradeResponse(TradeBase):
     """Pydantic response model for trade-related endpoints.
