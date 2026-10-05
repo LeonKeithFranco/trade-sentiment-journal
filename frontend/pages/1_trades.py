@@ -74,7 +74,6 @@ with st.form("trade_form"):
             case _:
                 st.error(response.json())
 
-
 with st.spinner("Loading..."):
     trades = get_all_trades()
 
@@ -125,6 +124,7 @@ if open_trades:
                     )
                 case _:
                     st.error(response.json())
+
 
 st.divider()
 
