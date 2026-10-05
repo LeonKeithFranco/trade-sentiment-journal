@@ -78,6 +78,54 @@ with st.form("trade_form"):
 with st.spinner("Loading..."):
     trades = get_all_trades()
 
+open_trades = [trade for trade in trades if trade["exit_price"] is None]
+
+if open_trades:
+    with st.form("close_trade_form"):
+        st.subheader("Close Trade")
+
+        close_options = {
+            f"{trade['ticker']}: {trade['direction']} - "
+            f"{datetime.fromisoformat(trade['opened_at']).strftime('%b %d, %Y')}": trade[
+                "public_id"
+            ]
+            for trade in open_trades
+        }
+        trade_to_close = st.selectbox("Open Trade", options=close_options)
+        close_exit_price = st.number_input("Exit Price", min_value=0.0, step=0.1)
+        now = datetime.now(UTC)
+        close_date = st.date_input("Closed On", value=now.date())
+        close_time = st.time_input("Closed At (UTC)", value=now.time())
+
+        if st.form_submit_button("Close Trade"):
+            response = make_api_request(
+                "PATCH",
+                f"/trades/{close_options[trade_to_close]}",
+                json={
+                    "exit_price": close_exit_price,
+                    "closed_at": datetime.combine(
+                        close_date, close_time, tzinfo=UTC
+                    ).isoformat(),
+                },
+            )
+
+            match response.status_code:
+                case HTTPStatus.OK:
+                    st.success("Trade closed.")
+                    st.session_state.pop("trade_options", None)
+                    trades = get_all_trades()
+                case HTTPStatus.UNPROCESSABLE_ENTITY:
+                    detail = response.json()["detail"]
+                    st.error(
+                        convert_pydantic_error_to_human_readable_message(
+                            detail[0], "Unable to close trade."
+                        )
+                        if isinstance(detail, list)
+                        else detail
+                    )
+                case _:
+                    st.error(response.json())
+
 st.divider()
 
 st.header("All Trades")
