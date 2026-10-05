@@ -74,30 +74,27 @@ with st.form("trade_form"):
             case _:
                 st.error(response.json())
 
-st.divider()
-
-st.header("All Trades")
 
 with st.spinner("Loading..."):
     trades = get_all_trades()
 
-    if not trades:
-        st.info("There are no trades yet.")
-        st.stop()
+st.divider()
 
-    df_trade = pd.DataFrame(trades)
-    df_trade = df_trade.drop(["public_id", "created_on", "updated_on"], axis=1)
+st.header("All Trades")
 
-    df_trade["opened_at"] = pd.to_datetime(df_trade["opened_at"]).dt.strftime(
-        "%b %d, %Y"
-    )
-    df_trade["closed_at"] = pd.to_datetime(df_trade["closed_at"]).dt.strftime(
-        "%b %d, %Y"
-    )
+if not trades:
+    st.info("There are no trades yet.")
+    st.stop()
 
-    df_trade = df_trade.fillna("-")
-    df_trade = df_trade.rename(
-        columns={k: k.replace("_", " ").title() for k in trades[0].keys()}
-    )
+df_trade = pd.DataFrame(trades)
+df_trade = df_trade.drop(["public_id", "created_on", "updated_on"], axis=1)
 
-    st.dataframe(df_trade, width="stretch", hide_index=True)
+df_trade["opened_at"] = pd.to_datetime(df_trade["opened_at"]).dt.strftime("%b %d, %Y")
+df_trade["closed_at"] = pd.to_datetime(df_trade["closed_at"]).dt.strftime("%b %d, %Y")
+
+df_trade = df_trade.fillna("-")
+df_trade = df_trade.rename(
+    columns={k: k.replace("_", " ").title() for k in trades[0].keys()}
+)
+
+st.dataframe(df_trade, width="stretch", hide_index=True)
