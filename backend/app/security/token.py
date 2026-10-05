@@ -1,3 +1,4 @@
+import hashlib
 import secrets
 import uuid
 from datetime import UTC, datetime, timedelta
@@ -85,3 +86,7 @@ def create_refresh_token() -> tuple[str, datetime]:
     )
 
     return token, expire
+
+
+def hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()

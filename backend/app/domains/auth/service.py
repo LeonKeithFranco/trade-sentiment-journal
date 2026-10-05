@@ -28,6 +28,7 @@ from app.security import (
     run_dummy_password_verification,
     verify_password,
 )
+from app.security.token import hash_token
 
 
 class AuthService:
@@ -70,11 +71,12 @@ class AuthService:
         access_token = create_access_token(user.public_id)
 
         refresh_token_info = create_refresh_token()
-        refresh_token_record = await self.refresh_token_repo.insert_refresh_token(
-            user.id, *refresh_token_info
+        hashed_token = hash_token(refresh_token_info[0])
+        await self.refresh_token_repo.insert_refresh_token(
+            user.id, hashed_token, refresh_token_info[1]
         )
 
-        return access_token, refresh_token_record.token
+        return access_token, hashed_token
 
     async def register(self, user_register_info: UserRegisterRequest) -> UserResponse:
         """Register a new user account.
@@ -160,8 +162,10 @@ class AuthService:
             UserInvalidCredentialsError: If the refresh token is invalid,
                 revoked, or expired.
         """
+        hashed_token = hash_token(refresh_info.refresh_token)
+
         refresh_token_record = await self.refresh_token_repo.get_refresh_token(
-            refresh_info.refresh_token
+            hashed_token
         )
 
         if refresh_token_record is None:
@@ -177,7 +181,7 @@ class AuthService:
             refresh_token_record.user
         )
 
-        await self.refresh_token_repo.revoke_refresh_token(refresh_info.refresh_token)
+        await self.refresh_token_repo.revoke_refresh_token(hashed_token)
 
         await self.refresh_token_repo.commit()
 
