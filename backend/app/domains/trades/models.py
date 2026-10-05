@@ -93,16 +93,16 @@ class Trade(PublicIdMixin, TimestampMixin, Base):
         self._direction = direction.value
 
     position_size: Mapped[Decimal] = mapped_column(
-        Numeric(12, 2),
+        Numeric(16, 6),
     )
     entry_price: Mapped[Decimal] = mapped_column(
-        Numeric(12, 2),
+        Numeric(16, 6),
     )
     exit_price: Mapped[Decimal | None] = mapped_column(
-        Numeric(12, 2),
+        Numeric(16, 6),
     )
     profit_and_loss: Mapped[Decimal | None] = mapped_column(
-        Numeric(12, 2),
+        Numeric(16, 6),
     )
 
     opened_at: Mapped[datetime] = mapped_column(
