@@ -58,11 +58,14 @@ class User(PublicIdMixin, TimestampMixin, Base):
 
 
 class RefreshToken(Base):
-    """ORM model representing a JWT refresh token issued to a user.
+    """ORM model representing a refresh token issued to a user.
+
+    Only a SHA-256 hash of the token is stored; the raw token is returned to
+    the client once and never persisted.
 
     Attributes:
         id: Auto-incremented primary key inherited from Base.
-        token: The unique refresh token string.
+        token: The SHA-256 hex digest of the refresh token, unique per token.
         expires_on: The UTC timestamp after which the token is no longer valid.
         revoked: Whether the token has been explicitly revoked before expiry.
         user_id: The ID of the User this token was issued to.
