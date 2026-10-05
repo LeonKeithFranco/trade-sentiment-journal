@@ -2,6 +2,7 @@ import streamlit as st
 
 
 def clear_session() -> None:
+    """Clear the current user's tokens and user-scoped session state."""
     st.session_state["access_token"] = None
     st.session_state["refresh_token"] = None
     if "trade_options" in st.session_state:
