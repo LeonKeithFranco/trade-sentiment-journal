@@ -22,7 +22,7 @@ class SentimentAnalysis(PublicIdMixin, TimestampMixin, Base):
         updated_on: The UTC timestamp when the row was last updated.
         sentiment: The predicted sentiment classification.
         confidence: The model's confidence in the predicted sentiment,
-            strictly between 0.0 and 1.0.
+            greater than 0.0 and at most 1.0.
         journal_entry_id: The ID of the JournalEntry this analysis was
             generated from.
         journal_entry: The associated JournalEntry record.
