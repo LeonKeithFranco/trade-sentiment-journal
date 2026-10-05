@@ -129,6 +129,7 @@ class Trade(PublicIdMixin, TimestampMixin, Base):
         Does nothing if the trade has not been closed (exit_price is None).
         """
         if self.exit_price is None:
+            self.profit_and_loss = None
             return
 
         self.profit_and_loss = (
