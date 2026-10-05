@@ -126,7 +126,8 @@ class Trade(PublicIdMixin, TimestampMixin, Base):
     def _update_pnl(self) -> None:
         """Recompute profit_and_loss from the entry price, exit price, position size, and direction.
 
-        Does nothing if the trade has not been closed (exit_price is None).
+        Sets profit_and_loss to None if the trade is open (exit_price is None),
+        such as after a closed trade is re-opened.
         """
         if self.exit_price is None:
             self.profit_and_loss = None

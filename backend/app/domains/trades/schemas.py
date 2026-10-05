@@ -127,19 +127,21 @@ class TradeCreateRequest(TradeBase):
 class TradeUpdateRequest(BaseModel):
     """Pydantic request model for the PATCH /trades/{id} endpoint.
 
-    All fields are optional; only the fields provided are updated.
+    All fields are optional; only the fields provided are updated, and an
+    omitted field is left unchanged. ticker, direction, position_size,
+    entry_price and opened_at cannot be set to null. exit_price and
+    closed_at can be set to null together to re-open a closed trade.
 
     Attributes:
-        ticker: The trade's new ticker symbol, or None to leave unchanged.
-        direction: The trade's new direction, or None to leave unchanged.
-        position_size: The trade's new position size, or None to leave
-            unchanged.
-        entry_price: The trade's new entry price, or None to leave unchanged.
-        exit_price: The trade's new exit price, or None to leave unchanged.
-        opened_at: The trade's new opened_at timestamp, or None to leave
-            unchanged.
-        closed_at: The trade's new closed_at timestamp, or None to leave
-            unchanged.
+        ticker: The trade's new ticker symbol.
+        direction: The trade's new direction.
+        position_size: The trade's new position size.
+        entry_price: The trade's new entry price.
+        exit_price: The trade's new exit price, or None to re-open the
+            trade.
+        opened_at: The trade's new opened_at timestamp.
+        closed_at: The trade's new closed_at timestamp, or None to re-open
+            the trade.
     """
 
     ticker: str | None = Field(
@@ -214,6 +216,12 @@ class TradeUpdateRequest(BaseModel):
         Only runs on values present in the request; omitted fields keep their
         default and skip validation, so leaving a field out still means
         "unchanged".
+
+        Args:
+            v: The value sent for the field.
+
+        Returns:
+            The value, unchanged.
 
         Raises:
             ValueError: If the field was sent as null.
