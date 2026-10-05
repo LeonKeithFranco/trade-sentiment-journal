@@ -76,7 +76,7 @@ class AuthService:
             user.id, hashed_token, refresh_token_info[1]
         )
 
-        return access_token, hashed_token
+        return access_token, refresh_token_info[0]
 
     async def register(self, user_register_info: UserRegisterRequest) -> UserResponse:
         """Register a new user account.
