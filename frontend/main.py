@@ -6,6 +6,7 @@ from src.core.api import (
     make_api_request,
 )
 from src.core.config import get_settings
+from src.core.utils import clear_session
 
 _app_settings = get_settings().app
 
@@ -30,9 +31,7 @@ def _blank_fields_message(**kwargs) -> str | None:
 
 
 def _handle_logout() -> None:
-    st.session_state["access_token"] = None
-    st.session_state["refresh_token"] = None
-    del st.session_state["trade_options"]
+    clear_session()
 
 
 @st.fragment
