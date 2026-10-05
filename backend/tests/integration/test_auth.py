@@ -3,6 +3,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from app.security import hash_token
 from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import Response
@@ -334,7 +335,7 @@ class TestRefresh:
                 text(
                     "UPDATE refresh_tokens SET expires_on = :expiration WHERE token = :refresh_token"
                 ),
-                {"expiration": expiration, "refresh_token": refresh_token},
+                {"expiration": expiration, "refresh_token": hash_token(refresh_token)},
             )
 
         response = client.post(
