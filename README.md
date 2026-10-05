@@ -26,10 +26,10 @@ The project is split into three uv workspace members:
 ### Data flow
 
 1. User registers/logs in and the backend then issues an access token and refresh token
-2. User logs a trade (ticker, direction, size, entry/exit price, opened/closed time)
+2. User logs a trade (ticker, direction, size, entry/exit price, opened/closed time), either already closed or as an open trade that's closed later from the Trades page
 3. User writes a journal entry tied to that trade
 4. In the background, the entry's text is run through the sentiment model. The result (sentiment + confidence) is stored and linked to the entry
-5. Once closed trades have associated sentiment, the analytics endpoints group P&L by sentiment and by confidence. This lets the user see whether their stated sentiment tracked their actual outcomes.
+5. Once closed trades have associated sentiment, the analytics endpoints group P&L by sentiment and by confidence. Only entries written before their trade closed are counted, so the analytics reflect what the user felt while the outcome was still unknown rather than their reaction to it. This lets the user see whether their stated sentiment tracked their actual outcomes.
 
 ## Running locally
 
@@ -57,14 +57,14 @@ Both notebooks place their outputs in `dl/data/`. Once all three artifacts exist
 1. Clone the repo
 2. Ensure `dl/data/` contains the three model artifacts as specified above
 3. Create `.env` files at the root, `backend/`, and `frontend/` based off of the corresponding `.env.template`, filling in with real values. Generate your own values for `SECURITY__PEPPER_SECRET` and `SECURITY__TOKEN_SECRET` rather than reusing the template's (e.g. `python -c "import secrets; print(secrets.token_urlsafe(64))"`). For Compose, set `API__BASE_URL=http://backend:8000` in `frontend/.env`; the template's `127.0.0.1` only works when running the frontend outside a container
-4. Build and run the containers: `podman-compose up --build`
+4. Build and run the containers: `podman-compose up --build`. A one-off `migrate` service applies the Alembic migrations before the backend starts
 5. Open the frontend at `http://localhost:8501`. The backend is at `http://localhost:8000`, with interactive docs at `/docs`
 
 ## Auth flow
 
-Registration and login are standard email/password combination against a FastAPI backend using `pwdlib` (Argon2) for hashing. On login, the backend issues a short-lived access token (15 min) and a longer-lived refresh token (7 days). The access token is a JWT, while the refresh token is a random URL-safe string stored in the database in plaintext. The frontend stores both in Streamlit's session state.
+Registration and login are standard email/password combination against a FastAPI backend using `pwdlib` (Argon2) for hashing. On login, the backend issues a short-lived access token (15 min) and a longer-lived refresh token (7 days). The access token is a JWT, while the refresh token is a random URL-safe string; only its SHA-256 hash is stored in the database, so a leaked database doesn't yield usable refresh tokens. Exchanging a refresh token revokes it and issues a new pair. The frontend stores both tokens in Streamlit's session state.
 
-Every authenticated request carries the access token as a Bearer header. If a request returns 401, the frontend calls `POST /auth/refresh` with the stored refresh token and retries the original request with the new access token. If the refresh fails (e.g. the refresh token has expired), the stored tokens aren't cleared: the Analytics page shows the 401 error, while the Trades and Journal pages fail to render, until the user logs out and logs back in.
+Every authenticated request carries the access token as a Bearer header. If a request returns 401, the frontend calls `POST /auth/refresh` with the stored refresh token and retries the original request with the new access token. If the refresh fails (e.g. the refresh token has expired), the frontend clears the session and shows "Your session has expired. Please log in again." Logging out clears the same session state, including the cached list of the user's trades.
 
 Session state in Streamlit is tied to the browser tab. Closing the tab clears it; if this were to be made into a production-ready app, persistent cookies would be used instead.
 
@@ -89,9 +89,9 @@ Session state in Streamlit is tied to the browser tab. Closing the tab clears it
 | `/trades`                   | GET    | List the current user's trades                                                                             |
 | `/trades/{trade_public_id}` | GET    | Fetch a single trade                                                                                       |
 | `/trades/{trade_public_id}` | PATCH  | Update a trade (e.g. close an open trade by setting exit_price and closed_at)                              |
-| `/trades/{trade_public_id}` | DELETE | Delete a trade                                                                                             |
+| `/trades/{trade_public_id}` | DELETE | Delete a trade, along with its journal entries and their sentiment                                         |
 
-P&L is computed automatically on insert/update via a SQLAlchemy event listener, direction-aware (long vs. short), and only populated once a trade is closed.
+P&L is computed automatically on insert/update via a SQLAlchemy event listener, direction-aware (long vs. short), and only populated once a trade is closed. Setting `exit_price` and `closed_at` back to null re-opens a trade and clears its P&L. On `PATCH`, omitted fields are left unchanged; sending null for a required field (`ticker`, `direction`, `position_size`, `entry_price`, `opened_at`) returns 422. Position sizes, prices and P&L are stored with 6 decimal places, so fractional shares and sub-cent prices are kept exactly.
 
 ### Journal Entries
 
@@ -118,7 +118,7 @@ This is the same inference path used internally by the background task on journa
 | `/analytics/sentiment-vs-returns` | GET    | Average/total P&L and entry count, grouped by journal entry sentiment, across the user's closed trades |
 | `/analytics/confidence-breakdown` | GET    | Same aggregates, grouped by model confidence band (low <0.5, medium <0.75, high ≥0.75)                 |
 
-Both return only the groups that have data, so an empty list if there's no closed-trade data yet. The frontend fills in any missing groups with zero values and always draws both charts.
+Both only count journal entries written before their trade's `closed_at`. An entry written after a trade closed is a reaction to the outcome, so including it would make sentiment look more predictive than it is. Both return only the groups that have data, so an empty list if there's no qualifying data yet. The frontend fills in any missing groups with zero values and always draws both charts.
 
 **Error responses** (auth-protected endpoints): 401 for missing/invalid/expired tokens, 422 for validation failures, 404 for ownership mismatches or missing resources. Registering an email that already exists returns 409, and 503 means the database can't be reached.
 
@@ -178,7 +178,8 @@ The tests need the model artifacts in `dl/data/` (the DL tests check token indic
 
 **Known limitations (v1):**
 
-- The Streamlit frontend has no edit or delete flow for trades or journal entries, even though the backend supports both (`PATCH`/`DELETE` on `/trades/{trade_public_id}` and `/journal-entries/{journal_entry_public_id}`). Both can only be created and listed through the UI, so a trade logged as open through the frontend has no way to be closed there once created, and neither trades nor journal entries can be corrected or removed without going around the frontend
+- Apart from closing an open trade, the Streamlit frontend has no edit or delete flow for trades or journal entries, even though the backend supports both (`PATCH`/`DELETE` on `/trades/{trade_public_id}` and `/journal-entries/{journal_entry_public_id}`). Trades can be created, closed and listed through the UI and journal entries created and listed, but neither can be corrected or removed without going around the frontend
+- Because analytics only count entries written before a trade closed, a trade logged after it already closed contributes nothing to them. To build up analytics data through the frontend, log the trade as open, journal it, then close it from the Trades page
 - No CI/CD pipeline. A Dockerized deployment exists and has been verified to boot end-to-end via Podman Compose, but there's no GitHub Actions workflow and no live deployment
 - No structured logging. Background task failures currently go to stdout via `print`, which is workable locally but not something you'd want in a real deployment
 - Model artifacts are not part of the repository or the CI story; anyone building the Docker image needs the trained weights locally first
