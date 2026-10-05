@@ -35,7 +35,7 @@ class SentimentAnalysis(PublicIdMixin, TimestampMixin, Base):
             "sentiment in ('negative','neutral','positive')", name="check_sentiment"
         ),
         CheckConstraint(
-            "confidence > 0.0 AND confidence < 1.0", name="check_confidence_range"
+            "confidence > 0.0 AND confidence <= 1.0", name="check_confidence_range"
         ),
     )
 
