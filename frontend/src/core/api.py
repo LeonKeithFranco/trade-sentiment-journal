@@ -5,6 +5,7 @@ import httpx
 import streamlit as st
 
 from src.core.config import get_settings
+from src.core.utils import clear_session
 
 _API_SETTINGS = get_settings().api
 
@@ -119,6 +120,15 @@ def make_api_request(
 
                 with _APIClient(token=st.session_state["access_token"]) as client:
                     response = client.request(method, endpoint, **kwargs)
+
+        if (
+            response.status_code == HTTPStatus.UNAUTHORIZED
+            and st.session_state["access_token"] is not None
+        ):
+            clear_session()
+
+            st.error("Your session has expired. Please log in again.")
+            st.stop()
 
         return response
 
