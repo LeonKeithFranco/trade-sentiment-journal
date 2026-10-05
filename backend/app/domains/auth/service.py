@@ -25,10 +25,10 @@ from app.security import (
     create_access_token,
     create_refresh_token,
     hash_password,
+    hash_token,
     run_dummy_password_verification,
     verify_password,
 )
-from app.security.token import hash_token
 
 
 class AuthService:
