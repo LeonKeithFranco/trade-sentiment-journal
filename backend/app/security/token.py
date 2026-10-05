@@ -89,4 +89,12 @@ def create_refresh_token() -> tuple[str, datetime]:
 
 
 def hash_token(token: str) -> str:
+    """Hash a refresh token for storage and lookup.
+
+    Args:
+        token: The raw refresh token issued to the client.
+
+    Returns:
+        str: The token's SHA-256 digest as a hex string.
+    """
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
