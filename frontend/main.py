@@ -32,6 +32,7 @@ def _blank_fields_message(**kwargs) -> str | None:
 def _handle_logout() -> None:
     st.session_state["access_token"] = None
     st.session_state["refresh_token"] = None
+    del st.session_state["trade_options"]
 
 
 @st.fragment
