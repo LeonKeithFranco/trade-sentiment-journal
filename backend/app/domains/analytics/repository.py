@@ -62,7 +62,11 @@ class AnalyticRepository(Repository):
             .select_from(SentimentAnalysis)
             .join(SentimentAnalysis.journal_entry)
             .join(JournalEntry.trade)
-            .where(Trade.user_id == user_id, Trade.closed_at.is_not(None))
+            .where(
+                Trade.user_id == user_id,
+                Trade.closed_at.is_not(None),
+                JournalEntry.created_on < Trade.closed_at,
+            )
             .group_by(group_by_expr)
             .order_by(group_by_expr)
         )
