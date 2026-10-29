@@ -7,30 +7,31 @@ requires-python = ">=3.12"
 dependencies = []
 
 [tool.uv.workspace]
-members = [
-    "backend",
-    "frontend",
-    "dl",
-]
+members = ["backend", "frontend", "dl"]
 
 [tool.ty.environment]
 root = ["./dl", "./backend", "./frontend"]
 
 [dependency-groups]
 dev = [
-    "pytest>=9.0.3",
-    "pytest-env>=1.6.0",
-    "pytest-mock>=3.15.1",
-    "ruff>=0.15.13",
-    "ty>=0.0.37",
-    "typos>=1.46.2",
+  "pytest>=9.0.3",
+  "pytest-env>=1.6.0",
+  "pytest-mock>=3.15.1",
+  "ruff>=0.15.13",
+  "ty>=0.0.37",
+  "typos>=1.46.2",
 ]
 
 [tool.typos.files]
-extend-exclude = [
-    "uv.lock",
-]
+extend-exclude = ["uv.lock"]
 
 [tool.typos.default.extend-words]
 # crate = "crate" # suppressing false positive
 # teh = "the" # force correction
+
+
+[tool.pytest.ini_options]
+pythonpath = ["backend"]
+
+[tool.pytest_env]
+TESTCONTAINERS_RYUK_DISABLED = "true"

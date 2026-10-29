@@ -4,26 +4,17 @@ version = "0.1.0"
 description = "Backend workspace for the project."
 requires-python = ">=3.12"
 dependencies = [
-    "alembic>=1.18.4",
-    "asyncpg>=0.31.0",
-    "fastapi[standard]>=0.136.1",
-    "pwdlib[argon2]>=0.3.0",
-    "pyjwt>=2.13.0",
-    "sqlalchemy>=2.0.49",
-    "dl",
+  "alembic>=1.18.4",
+  "asyncpg>=0.31.0",
+  "fastapi[standard]>=0.136.1",
+  "pwdlib[argon2]>=0.3.0",
+  "pyjwt>=2.13.0",
+  "sqlalchemy>=2.0.49",
+  "dl",
 ]
 
 [dependency-groups]
-dev = [
-    "psycopg2-binary>=2.9.12",
-    "testcontainers>=4.14.2",
-]
+dev = ["psycopg2-binary>=2.9.12", "testcontainers>=4.14.2"]
 
 [tool.uv.sources]
 dl = { workspace = true }
-
-[tool.pytest.ini_options]
-pythonpath = ["."]
-
-[tool.pytest_env]
-TESTCONTAINERS_RYUK_DISABLED = "true"

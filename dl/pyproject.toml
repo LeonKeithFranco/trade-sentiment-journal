@@ -4,12 +4,12 @@ version = "0.1.0"
 description = "Workspace for building the deep learning model."
 requires-python = ">=3.12"
 dependencies = [
-    "datasets>=4.8.5",
-    "httpx>=0.28.1",
-    "nltk>=3.9.4",
-    "pandas>=3.0.3",
-    "scikit-learn>=1.9.0",
-    "torch>=2.12.0",
+  "datasets>=4.8.5",
+  "httpx>=0.28.1",
+  "nltk>=3.9.4",
+  "pandas>=3.0.3",
+  "scikit-learn>=1.9.0",
+  "torch>=2.12.0",
 ]
 
 [build-system]
@@ -20,9 +20,7 @@ build-backend = "hatchling.build"
 packages = ["dl"]
 
 [dependency-groups]
-dev = [
-    "marimo>=0.23.8",
-]
+dev = ["marimo>=0.23.8"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
