@@ -91,10 +91,10 @@ class TestCreateTrade:
 
         assert data["ticker"] == payload["ticker"]
         assert data["direction"] == payload["direction"]
-        assert data["position_size"] == f"{payload['position_size']:.2f}"
-        assert data["entry_price"] == f"{payload['entry_price']:.2f}"
+        assert data["position_size"] == f"{payload['position_size']:.6f}"
+        assert data["entry_price"] == f"{payload['entry_price']:.6f}"
         assert data["exit_price"] == (
-            f"{payload['exit_price']:.2f}"
+            f"{payload['exit_price']:.6f}"
             if payload["exit_price"] is not None
             else None
         )
@@ -102,7 +102,7 @@ class TestCreateTrade:
         assert data["closed_at"] == (
             payload["closed_at"] if payload["closed_at"] is not None else None
         )
-        assert data["profit_and_loss"] == (f"{pnl:.2f}" if pnl is not None else None)
+        assert data["profit_and_loss"] == (f"{pnl:.6f}" if pnl is not None else None)
         assert "public_id" in data
         assert "created_on" in data
         assert "updated_on" in data
@@ -333,7 +333,7 @@ class TestCreateTrade:
 
             assert trade is not None
             assert trade.profit_and_loss is not None
-            assert str(trade.profit_and_loss) == f"{pnl:.2f}"
+            assert str(trade.profit_and_loss) == f"{pnl:.6f}"
 
 
 class TestGetTrade:
@@ -770,14 +770,14 @@ class TestUpdateTrade:
         assert update_data["position_size"] == create_data["position_size"]
         assert update_data["entry_price"] == create_data["entry_price"]
         assert (update_data["exit_price"] != create_data["exit_price"]) and (
-            update_data["exit_price"] == str(update_payload["exit_price"])
+            update_data["exit_price"] == f"{update_payload['exit_price']:.6f}"
         )
         assert update_data["opened_at"] == create_data["opened_at"]
         assert (update_data["closed_at"] != create_data["closed_at"]) and (
             update_data["closed_at"] == update_payload["closed_at"]
         )
         assert (update_data["profit_and_loss"] != create_data["profit_and_loss"]) and (
-            update_data["profit_and_loss"] == "16.78"
+            update_data["profit_and_loss"] == "16.783200"
         )
         assert update_data["public_id"] == create_data["public_id"]
         assert update_data["created_on"] == create_data["created_on"]
@@ -873,7 +873,7 @@ class TestUpdateTrade:
         )
 
         assert update_response.status_code == status.HTTP_200_OK
-        assert update_response.json()["profit_and_loss"] == f"{pnl:.2f}"
+        assert update_response.json()["profit_and_loss"] == f"{pnl:.6f}"
 
     @pytest.mark.parametrize(
         "update_payload",
