@@ -6,22 +6,62 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
+    import io
     import json
     import random
+    import zipfile
 
+    import httpx
     import numpy as np
     from dl.get_dataset import get_dataset
     from numpy.typing import NDArray
 
     from dl import constants
 
-    return NDArray, constants, get_dataset, json, np, random
+    return (
+        NDArray,
+        constants,
+        get_dataset,
+        httpx,
+        io,
+        json,
+        np,
+        random,
+        zipfile,
+    )
 
 
 @app.cell
-def _(get_dataset):
-    full_dataset = get_dataset()
-    return (full_dataset,)
+def _(constants, httpx, io, zipfile):
+    def get_embeddings():
+        CHUNK_SIZE = 1 << 20
+
+        if not constants.GLOVE_EMBEDDINGS_FILE_PATH.exists():
+            buf = io.BytesIO()
+
+            with (
+                httpx.Client(follow_redirects=True, timeout=60.0) as client,
+                client.stream(
+                    "GET", constants.GLOVE_EMBEDDINGS_ZIP_DOWNLOAD_LINK
+                ) as resp,
+            ):
+                resp.raise_for_status()
+
+                for chunk in resp.iter_bytes(chunk_size=CHUNK_SIZE):
+                    buf.write(chunk)
+
+            buf.seek(0)
+
+            with (
+                zipfile.ZipFile(buf) as zf,
+                zf.open(constants.GLOVE_EMBEDDINGS_ZIP_TARGET_MEMBER_FILE) as src,
+                open(constants.GLOVE_EMBEDDINGS_FILE_PATH, "wb") as f,
+            ):
+                while chunk := src.read(CHUNK_SIZE):
+                    f.write(chunk)
+
+    get_embeddings()
+    return
 
 
 @app.cell
@@ -31,6 +71,12 @@ def _(constants):
 
     glove_file_contents[0:5]
     return (glove_file_contents,)
+
+
+@app.cell
+def _(get_dataset):
+    full_dataset = get_dataset()
+    return (full_dataset,)
 
 
 @app.cell
