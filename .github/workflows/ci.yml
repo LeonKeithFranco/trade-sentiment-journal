@@ -5,7 +5,19 @@ on:
     branches: [main]
 
 jobs:
-  greet:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "hi"
+      - name: checkout repo
+        uses: actions/checkout@v4
+
+      - name: install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: set up python
+        run: uv python install
+
+      - name: install dependencies
+        run: uv sync --all-packages --locked
