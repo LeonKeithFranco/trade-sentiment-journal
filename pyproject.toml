@@ -35,3 +35,6 @@ pythonpath = ["backend"]
 
 [tool.pytest_env]
 TESTCONTAINERS_RYUK_DISABLED = "true"
+
+[tool.ruff]
+extend-exclude = ["backend/alembic/"]
