@@ -35,3 +35,10 @@ pythonpath = ["backend"]
 
 [tool.pytest_env]
 TESTCONTAINERS_RYUK_DISABLED = "true"
+
+[tool.ruff]
+# alembic files are auto-generated and only sometimes need editing
+# since they are auto-generated ruff shouldn't try to format them
+# in case the formatting changes what should be expected of alembic
+# files
+extend-exclude = ["backend/alembic/"]
