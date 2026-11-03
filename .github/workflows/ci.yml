@@ -1,4 +1,4 @@
-name: hello
+name: ci
 
 on:
   pull_request:
