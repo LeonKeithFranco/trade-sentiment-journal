@@ -45,10 +45,9 @@ The project is split into three uv workspace members:
 
 The artifacts aren't checked into the repo. To generate from scratch:
 
-1. Download the [GloVe 6B](https://nlp.stanford.edu/projects/glove/) embeddings and place `glove.6B.100d.txt` in `dl/data/`
-2. Go into `dl` directory and sync: `cd dl && uv sync`
-3. Run the data notebook to build the vocabulary mapping and the matched embedding matrix: `uv run notebooks/get_and_cache_data.py`. This also downloads and caches the [Financial PhraseBank](https://huggingface.co/datasets/lmassaron/FinancialPhraseBank) training data on the first run
-4. Run the training notebook to train and produce the model: `uv run notebooks/model.py`
+1. Go into `dl` directory and sync: `cd dl && uv sync`
+2. Run the data notebook to build the vocabulary mapping and the matched embedding matrix: `uv run notebooks/get_and_cache_data.py`. On the first run this downloads the [GloVe 6B](https://nlp.stanford.edu/projects/glove/) embeddings and extracts `glove.6B.100d.txt` into `dl/data/` (skipped if the file already exists), and also downloads and caches the [Financial PhraseBank](https://huggingface.co/datasets/lmassaron/FinancialPhraseBank) training data
+3. Run the training notebook to train and produce the model: `uv run notebooks/model.py`
 
 Both notebooks place their outputs in `dl/data/`. Once all three artifacts exist, the backend will load them.
 
@@ -162,8 +161,13 @@ Reported on the held-out test set, evaluated once, after the model was frozen:
 
 The tests need the model artifacts in `dl/data/` (the DL tests check token indices against `vocab_mapping.json`, and the backend loads the model at startup), the `.env` files at the root and in `backend/` (settings are loaded at import), and Podman or Docker running for `testcontainers`.
 
-- All backend tests: `cd backend && uv run pytest`
-- All dl tests: `cd dl && uv run pytest`
+Run all tests (backend and dl) from the repository root: `uv run pytest`. The pytest configuration lives in the root `pyproject.toml`, so running from a subdirectory won't pick it up.
+
+The tests don't run in CI yet (see below).
+
+### Continuous integration
+
+A GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every pull request to `main` and on every push to `main`. It installs dependencies with `uv sync --all-packages --locked` and then runs three checks: `ruff check` (lint), `ruff format --check` (formatting) and `ty check` (type checking). `backend/alembic/` is excluded from Ruff because those files were auto-generated and then hand-edited. A ruleset on `main` requires a pull request and a passing `test` check before merging, with no bypass.
 
 ## Design decisions
 
@@ -180,7 +184,7 @@ The tests need the model artifacts in `dl/data/` (the DL tests check token indic
 
 - Apart from closing an open trade, the Streamlit frontend has no edit or delete flow for trades or journal entries, even though the backend supports both (`PATCH`/`DELETE` on `/trades/{trade_public_id}` and `/journal-entries/{journal_entry_public_id}`). Trades can be created, closed and listed through the UI and journal entries created and listed, but neither can be corrected or removed without going around the frontend
 - Because analytics only count entries written before a trade closed, a trade logged after it already closed contributes nothing to them. To build up analytics data through the frontend, log the trade as open, journal it, then close it from the Trades page
-- No CI/CD pipeline. A Dockerized deployment exists and has been verified to boot end-to-end via Podman Compose, but there's no GitHub Actions workflow and no live deployment
+- CI only covers lint, formatting and type checks. The tests don't run in CI yet, and there's no CD pipeline. A Dockerized deployment exists and has been verified to boot end-to-end via Podman Compose, but there's no live deployment
 - No structured logging. Background task failures currently go to stdout via `print`, which is workable locally but not something you'd want in a real deployment
 - Model artifacts are not part of the repository or the CI story; anyone building the Docker image needs the trained weights locally first
 
