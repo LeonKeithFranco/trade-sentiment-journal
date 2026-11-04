@@ -53,6 +53,7 @@ class _AppSettings(BaseModel):
 
     name: str = "App Name"
     debug: bool = True
+    cors_origins: list[str] = []
 
 
 class _SecuritySettings(BaseModel):
