@@ -1,6 +1,8 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
+from app.core.config import get_settings
 from app.core.exception_handler import attach_exception_handlers
 from app.core.lifespan import lifespan
 from app.database import DbDependency
@@ -18,6 +20,14 @@ def create_app() -> FastAPI:
         FastAPI: The fully configured application instance.
     """
     app = FastAPI(lifespan=lifespan)
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=get_settings().app.cors_origins,
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "PATCH", "DELETE"],
+        allow_headers=["Authorization", "Content-Type"],
+    )
 
     attach_exception_handlers(app)
 
